@@ -24,7 +24,7 @@ services:
   halfmoon-gateway:
     image: docker.io/halfmoon-labs/halfmoon:latest
     container_name: halfmoon-gateway
-    restart: on-failure
+    restart: unless-stopped
     profiles:
       - gateway
     # Uncomment to access host network; leave commented unless needed.
@@ -40,7 +40,7 @@ services:
   halfmoon-launcher:
     image: docker.io/halfmoon-labs/halfmoon:launcher
     container_name: halfmoon-launcher
-    restart: on-failure
+    restart: unless-stopped
     profiles:
       - launcher
     environment:
