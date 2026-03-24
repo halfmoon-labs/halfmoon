@@ -2155,123 +2155,72 @@ func (m *modelRecordingProvider) GetDefaultModel() string {
 	return "mock-model"
 }
 
-func TestProcessHeartbeat_EmptyModel_UsesDefault(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	prov := &modelRecordingProvider{}
-	cfg := &config.Config{
-		Agents: config.AgentsConfig{
-			Defaults: config.AgentDefaults{
-				Workspace:         tmpDir,
-				ModelName:         "default-model",
-				MaxTokens:         4096,
-				MaxToolIterations: 10,
-			},
+func TestProcessHeartbeat_ModelSelection(t *testing.T) {
+	tests := []struct {
+		name          string
+		heartbeatModel string
+		provider      string
+		wantModel     string
+	}{
+		{
+			name:          "empty model uses default",
+			heartbeatModel: "",
+			wantModel:     "default-model",
 		},
-		Heartbeat: config.HeartbeatConfig{
-			Enabled:  true,
-			Interval: 30,
-			Model:    "", // empty — should use default agent model
+		{
+			name:          "explicit model override",
+			heartbeatModel: "openai/gpt-4o-mini",
+			provider:      "openai",
+			wantModel:     "gpt-4o-mini",
 		},
-	}
-
-	msgBus := bus.NewMessageBus()
-	al := NewAgentLoop(cfg, msgBus, prov)
-
-	response, err := al.ProcessHeartbeat(context.Background(), "test heartbeat", "telegram", "123")
-	if err != nil {
-		t.Fatalf("ProcessHeartbeat() error = %v", err)
-	}
-	if response != "Mock response" {
-		t.Fatalf("ProcessHeartbeat() = %q, want %q", response, "Mock response")
-	}
-	if prov.lastModel != "default-model" {
-		t.Fatalf("model = %q, want %q", prov.lastModel, "default-model")
-	}
-}
-
-func TestProcessHeartbeat_ModelOverride(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	prov := &modelRecordingProvider{}
-	cfg := &config.Config{
-		Agents: config.AgentsConfig{
-			Defaults: config.AgentDefaults{
-				Workspace:         tmpDir,
-				ModelName:         "default-model",
-				Provider:          "openai",
-				MaxTokens:         4096,
-				MaxToolIterations: 10,
-			},
-		},
-		Heartbeat: config.HeartbeatConfig{
-			Enabled:  true,
-			Interval: 30,
-			Model:    "openai/gpt-4o-mini",
+		{
+			name:          "unresolvable model passed through",
+			heartbeatModel: "nonexistent-model",
+			wantModel:     "nonexistent-model",
 		},
 	}
 
-	msgBus := bus.NewMessageBus()
-	al := NewAgentLoop(cfg, msgBus, prov)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
+			if err != nil {
+				t.Fatalf("Failed to create temp dir: %v", err)
+			}
+			defer os.RemoveAll(tmpDir)
 
-	response, err := al.ProcessHeartbeat(context.Background(), "test heartbeat", "telegram", "123")
-	if err != nil {
-		t.Fatalf("ProcessHeartbeat() error = %v", err)
-	}
-	if response != "Mock response" {
-		t.Fatalf("ProcessHeartbeat() = %q, want %q", response, "Mock response")
-	}
-	if prov.lastModel != "gpt-4o-mini" {
-		t.Fatalf("model = %q, want %q", prov.lastModel, "gpt-4o-mini")
-	}
-}
+			prov := &modelRecordingProvider{}
+			cfg := &config.Config{
+				Agents: config.AgentsConfig{
+					Defaults: config.AgentDefaults{
+						Workspace:         tmpDir,
+						ModelName:         "default-model",
+						Provider:          tt.provider,
+						MaxTokens:         4096,
+						MaxToolIterations: 10,
+					},
+				},
+				Heartbeat: config.HeartbeatConfig{
+					Enabled:  true,
+					Interval: 30,
+					Model:    tt.heartbeatModel,
+				},
+			}
 
-func TestProcessHeartbeat_InvalidModel_FallsBack(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
+			msgBus := bus.NewMessageBus()
+			al := NewAgentLoop(cfg, msgBus, prov)
 
-	prov := &modelRecordingProvider{}
-	cfg := &config.Config{
-		Agents: config.AgentsConfig{
-			Defaults: config.AgentDefaults{
-				Workspace:         tmpDir,
-				ModelName:         "default-model",
-				MaxTokens:         4096,
-				MaxToolIterations: 10,
-			},
-		},
-		Heartbeat: config.HeartbeatConfig{
-			Enabled:  true,
-			Interval: 30,
-			Model:    "nonexistent-model", // no provider prefix, no model_list entry
-		},
-	}
-
-	msgBus := bus.NewMessageBus()
-	al := NewAgentLoop(cfg, msgBus, prov)
-
-	response, err := al.ProcessHeartbeat(context.Background(), "test heartbeat", "telegram", "123")
-	if err != nil {
-		t.Fatalf("ProcessHeartbeat() error = %v", err)
-	}
-	if response != "Mock response" {
-		t.Fatalf("ProcessHeartbeat() = %q, want %q", response, "Mock response")
-	}
-	// With no provider prefix and no model_list entry, resolveModelCandidates
-	// still resolves using the default provider, so candidates won't be empty.
-	// The override model is passed through to the provider as-is.
-	if prov.lastModel != "nonexistent-model" {
-		t.Fatalf("model = %q, want %q (override passed through even without model_list match)", prov.lastModel, "nonexistent-model")
+			response, err := al.ProcessHeartbeat(
+				context.Background(), "test heartbeat", "telegram", "123",
+			)
+			if err != nil {
+				t.Fatalf("ProcessHeartbeat() error = %v", err)
+			}
+			if response != "Mock response" {
+				t.Fatalf("response = %q, want %q", response, "Mock response")
+			}
+			if prov.lastModel != tt.wantModel {
+				t.Fatalf("model = %q, want %q", prov.lastModel, tt.wantModel)
+			}
+		})
 	}
 }

@@ -1247,8 +1247,8 @@ func (al *AgentLoop) ProcessHeartbeat(
 		candidates := resolveModelCandidates(cfg, cfg.Agents.Defaults.Provider, hbModel, nil)
 		if len(candidates) > 0 {
 			// Shallow copy is safe: only Model and Candidates are overridden,
-		// and NoHistory=true prevents session writes through the shared Sessions pointer.
-		agentCopy := *agent
+			// and NoHistory=true prevents session writes through the shared Sessions pointer.
+			agentCopy := *agent
 			agentCopy.Model = hbModel
 			agentCopy.Candidates = candidates
 			agent = &agentCopy
