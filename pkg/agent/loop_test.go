@@ -636,8 +636,13 @@ func (m *mockCustomTool) Description() string {
 
 func (m *mockCustomTool) Parameters() map[string]any {
 	return map[string]any{
-		"type":       "object",
-		"properties": map[string]any{},
+		"type": "object",
+		"properties": map[string]any{
+			"task": map[string]any{
+				"type":        "string",
+				"description": "task to execute",
+			},
+		},
 	}
 }
 
