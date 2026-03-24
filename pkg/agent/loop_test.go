@@ -2146,8 +2146,7 @@ func (m *modelRecordingProvider) Chat(
 ) (*providers.LLMResponse, error) {
 	m.lastModel = model
 	return &providers.LLMResponse{
-		Content:   "Mock response",
-		ToolCalls: []providers.ToolCall{},
+		Content: "Mock response",
 	}, nil
 }
 
