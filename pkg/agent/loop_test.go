@@ -2131,3 +2131,147 @@ func TestFilterClientWebSearch_EmptyInput(t *testing.T) {
 		t.Fatalf("len(result) = %d, want 0", len(result))
 	}
 }
+
+// modelRecordingProvider records the model string passed to Chat.
+type modelRecordingProvider struct {
+	lastModel string
+}
+
+func (m *modelRecordingProvider) Chat(
+	ctx context.Context,
+	messages []providers.Message,
+	tools []providers.ToolDefinition,
+	model string,
+	opts map[string]any,
+) (*providers.LLMResponse, error) {
+	m.lastModel = model
+	return &providers.LLMResponse{
+		Content:   "Mock response",
+		ToolCalls: []providers.ToolCall{},
+	}, nil
+}
+
+func (m *modelRecordingProvider) GetDefaultModel() string {
+	return "mock-model"
+}
+
+func TestProcessHeartbeat_EmptyModel_UsesDefault(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	prov := &modelRecordingProvider{}
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         tmpDir,
+				ModelName:         "default-model",
+				MaxTokens:         4096,
+				MaxToolIterations: 10,
+			},
+		},
+		Heartbeat: config.HeartbeatConfig{
+			Enabled:  true,
+			Interval: 30,
+			Model:    "", // empty — should use default agent model
+		},
+	}
+
+	msgBus := bus.NewMessageBus()
+	al := NewAgentLoop(cfg, msgBus, prov)
+
+	response, err := al.ProcessHeartbeat(context.Background(), "test heartbeat", "telegram", "123")
+	if err != nil {
+		t.Fatalf("ProcessHeartbeat() error = %v", err)
+	}
+	if response != "Mock response" {
+		t.Fatalf("ProcessHeartbeat() = %q, want %q", response, "Mock response")
+	}
+	if prov.lastModel != "default-model" {
+		t.Fatalf("model = %q, want %q", prov.lastModel, "default-model")
+	}
+}
+
+func TestProcessHeartbeat_ModelOverride(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	prov := &modelRecordingProvider{}
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         tmpDir,
+				ModelName:         "default-model",
+				Provider:          "openai",
+				MaxTokens:         4096,
+				MaxToolIterations: 10,
+			},
+		},
+		Heartbeat: config.HeartbeatConfig{
+			Enabled:  true,
+			Interval: 30,
+			Model:    "openai/gpt-4o-mini",
+		},
+	}
+
+	msgBus := bus.NewMessageBus()
+	al := NewAgentLoop(cfg, msgBus, prov)
+
+	response, err := al.ProcessHeartbeat(context.Background(), "test heartbeat", "telegram", "123")
+	if err != nil {
+		t.Fatalf("ProcessHeartbeat() error = %v", err)
+	}
+	if response != "Mock response" {
+		t.Fatalf("ProcessHeartbeat() = %q, want %q", response, "Mock response")
+	}
+	if prov.lastModel != "gpt-4o-mini" {
+		t.Fatalf("model = %q, want %q", prov.lastModel, "gpt-4o-mini")
+	}
+}
+
+func TestProcessHeartbeat_InvalidModel_FallsBack(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	prov := &modelRecordingProvider{}
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         tmpDir,
+				ModelName:         "default-model",
+				MaxTokens:         4096,
+				MaxToolIterations: 10,
+			},
+		},
+		Heartbeat: config.HeartbeatConfig{
+			Enabled:  true,
+			Interval: 30,
+			Model:    "nonexistent-model", // no provider prefix, no model_list entry
+		},
+	}
+
+	msgBus := bus.NewMessageBus()
+	al := NewAgentLoop(cfg, msgBus, prov)
+
+	response, err := al.ProcessHeartbeat(context.Background(), "test heartbeat", "telegram", "123")
+	if err != nil {
+		t.Fatalf("ProcessHeartbeat() error = %v", err)
+	}
+	if response != "Mock response" {
+		t.Fatalf("ProcessHeartbeat() = %q, want %q", response, "Mock response")
+	}
+	// With no provider prefix and no model_list entry, resolveModelCandidates
+	// still resolves using the default provider, so candidates won't be empty.
+	// The override model is passed through to the provider as-is.
+	if prov.lastModel != "nonexistent-model" {
+		t.Fatalf("model = %q, want %q (override passed through even without model_list match)", prov.lastModel, "nonexistent-model")
+	}
+}

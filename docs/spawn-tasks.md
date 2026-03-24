@@ -54,7 +54,8 @@ The subagent has access to tools (message, web_search, etc.) and can communicate
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```

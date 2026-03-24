@@ -1240,6 +1240,24 @@ func (al *AgentLoop) ProcessHeartbeat(
 	if agent == nil {
 		return "", fmt.Errorf("no default agent for heartbeat")
 	}
+
+	// Override model if heartbeat-specific model is configured
+	cfg := al.GetConfig()
+	if hbModel := cfg.Heartbeat.Model; hbModel != "" {
+		candidates := resolveModelCandidates(cfg, cfg.Agents.Defaults.Provider, hbModel, nil)
+		if len(candidates) > 0 {
+			// Shallow copy is safe: only Model and Candidates are overridden,
+		// and NoHistory=true prevents session writes through the shared Sessions pointer.
+		agentCopy := *agent
+			agentCopy.Model = hbModel
+			agentCopy.Candidates = candidates
+			agent = &agentCopy
+		} else {
+			logger.WarnCF("heartbeat", "Heartbeat model not resolved, falling back to default agent model",
+				map[string]any{"configured_model": hbModel})
+		}
+	}
+
 	return al.runAgentLoop(ctx, agent, processOptions{
 		SessionKey:      "heartbeat",
 		Channel:         channel,

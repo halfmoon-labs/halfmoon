@@ -920,8 +920,9 @@ func (c *IRCConfig) SetSASLPassword(password string) {
 }
 
 type HeartbeatConfig struct {
-	Enabled  bool `json:"enabled"  env:"HALFMOON_HEARTBEAT_ENABLED"`
-	Interval int  `json:"interval" env:"HALFMOON_HEARTBEAT_INTERVAL"` // minutes, min 5
+	Enabled  bool   `json:"enabled"  env:"HALFMOON_HEARTBEAT_ENABLED"`
+	Interval int    `json:"interval" env:"HALFMOON_HEARTBEAT_INTERVAL"` // minutes, min 5
+	Model    string `json:"model"    env:"HALFMOON_HEARTBEAT_MODEL"`    // optional model override
 }
 
 type DevicesConfig struct {

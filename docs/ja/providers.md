@@ -403,7 +403,8 @@ halfmoon agent -m "こんにちは"
   },
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```

@@ -436,7 +436,8 @@ halfmoon agent -m "Hello"
   },
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```

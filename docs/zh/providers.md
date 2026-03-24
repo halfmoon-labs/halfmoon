@@ -434,7 +434,8 @@ halfmoon agent -m "你好"
   },
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```

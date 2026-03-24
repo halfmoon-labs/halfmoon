@@ -45,7 +45,8 @@ Subagent có quyền truy cập công cụ (message, web_search, v.v.) và có t
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```
@@ -54,6 +55,7 @@ Subagent có quyền truy cập công cụ (message, web_search, v.v.) và có t
 | ---------- | ------- | ---------------------------------- |
 | `enabled`  | `true`  | Enable/disable heartbeat           |
 | `interval` | `30`    | Check interval in minutes (min: 5) |
+| `model`    | `""`    | Optional model override (empty = use default agent's model) |
 
 **Biến môi trường:**
 
