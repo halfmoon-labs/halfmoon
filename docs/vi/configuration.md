@@ -258,7 +258,8 @@ Trả lời HEARTBEAT_OK        Người dùng nhận kết quả trực tiếp
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```
@@ -267,6 +268,7 @@ Trả lời HEARTBEAT_OK        Người dùng nhận kết quả trực tiếp
 | ---------- | -------- | -------------------------------------- |
 | `enabled`  | `true`   | Bật/tắt heartbeat                      |
 | `interval` | `30`     | Khoảng thời gian kiểm tra tính bằng phút (tối thiểu: 5) |
+| `model`    | `""`     | Ghi đè model tùy chọn (trống = sử dụng model mặc định của agent) |
 
 **Biến môi trường:**
 

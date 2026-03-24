@@ -54,7 +54,8 @@ Agent 读取 HEARTBEAT.md
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```
@@ -63,6 +64,7 @@ Agent 读取 HEARTBEAT.md
 | ---------- | ------ | ---------------------------- |
 | `enabled`  | `true` | 启用/禁用心跳                |
 | `interval` | `30`   | 检查间隔，单位分钟 (最小: 5) |
+| `model`    | `""`   | 可选模型覆盖（空 = 使用默认代理模型） |
 
 **环境变量:**
 

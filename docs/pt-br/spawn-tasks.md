@@ -45,7 +45,8 @@ O subagente tem acesso a ferramentas (message, web_search, etc.) e pode se comun
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```
@@ -54,6 +55,7 @@ O subagente tem acesso a ferramentas (message, web_search, etc.) e pode se comun
 | ---------- | ------- | ---------------------------------- |
 | `enabled`  | `true`  | Enable/disable heartbeat           |
 | `interval` | `30`    | Check interval in minutes (min: 5) |
+| `model`    | `""`    | Optional model override (empty = use default agent's model) |
 
 **Variáveis de ambiente:**
 

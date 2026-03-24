@@ -2131,3 +2131,95 @@ func TestFilterClientWebSearch_EmptyInput(t *testing.T) {
 		t.Fatalf("len(result) = %d, want 0", len(result))
 	}
 }
+
+// modelRecordingProvider records the model string passed to Chat.
+type modelRecordingProvider struct {
+	lastModel string
+}
+
+func (m *modelRecordingProvider) Chat(
+	ctx context.Context,
+	messages []providers.Message,
+	tools []providers.ToolDefinition,
+	model string,
+	opts map[string]any,
+) (*providers.LLMResponse, error) {
+	m.lastModel = model
+	return &providers.LLMResponse{
+		Content: "Mock response",
+	}, nil
+}
+
+func (m *modelRecordingProvider) GetDefaultModel() string {
+	return "mock-model"
+}
+
+func TestProcessHeartbeat_ModelSelection(t *testing.T) {
+	tests := []struct {
+		name           string
+		heartbeatModel string
+		provider       string
+		wantModel      string
+	}{
+		{
+			name:           "empty model uses default",
+			heartbeatModel: "",
+			wantModel:      "default-model",
+		},
+		{
+			name:           "explicit model override",
+			heartbeatModel: "openai/gpt-4o-mini",
+			provider:       "openai",
+			wantModel:      "gpt-4o-mini",
+		},
+		{
+			name:           "unresolvable model passed through",
+			heartbeatModel: "nonexistent-model",
+			wantModel:      "nonexistent-model",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir, err := os.MkdirTemp("", "agent-heartbeat-test-*")
+			if err != nil {
+				t.Fatalf("Failed to create temp dir: %v", err)
+			}
+			defer os.RemoveAll(tmpDir)
+
+			prov := &modelRecordingProvider{}
+			cfg := &config.Config{
+				Agents: config.AgentsConfig{
+					Defaults: config.AgentDefaults{
+						Workspace:         tmpDir,
+						ModelName:         "default-model",
+						Provider:          tt.provider,
+						MaxTokens:         4096,
+						MaxToolIterations: 10,
+					},
+				},
+				Heartbeat: config.HeartbeatConfig{
+					Enabled:  true,
+					Interval: 30,
+					Model:    tt.heartbeatModel,
+				},
+			}
+
+			msgBus := bus.NewMessageBus()
+			al := NewAgentLoop(cfg, msgBus, prov)
+
+			response, err := al.ProcessHeartbeat(
+				context.Background(), "test heartbeat", "telegram", "123",
+			)
+			if err != nil {
+				t.Fatalf("ProcessHeartbeat() error = %v", err)
+			}
+			if response != "Mock response" {
+				t.Fatalf("response = %q, want %q", response, "Mock response")
+			}
+			if prov.lastModel != tt.wantModel {
+				t.Fatalf("model = %q, want %q", prov.lastModel, tt.wantModel)
+			}
+		})
+	}
+}

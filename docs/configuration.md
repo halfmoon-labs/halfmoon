@@ -409,20 +409,23 @@ The subagent has access to tools (message, web_search, etc.) and can communicate
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": "gpt-4o-mini"
   }
 }
 ```
 
-| Option     | Default | Description                        |
-| ---------- | ------- | ---------------------------------- |
-| `enabled`  | `true`  | Enable/disable heartbeat           |
-| `interval` | `30`    | Check interval in minutes (min: 5) |
+| Option     | Default | Description                                          |
+| ---------- | ------- | ---------------------------------------------------- |
+| `enabled`  | `true`  | Enable/disable heartbeat                             |
+| `interval` | `30`    | Check interval in minutes (min: 5)                   |
+| `model`    | `""`    | Optional model override (empty = use default agent's model) |
 
 **Environment variables:**
 
 * `HALFMOON_HEARTBEAT_ENABLED=false` to disable
 * `HALFMOON_HEARTBEAT_INTERVAL=60` to change interval
+* `HALFMOON_HEARTBEAT_MODEL=gpt-4o-mini` to use a specific model for heartbeat
 
 ### Providers
 
@@ -726,7 +729,8 @@ This keeps the runtime lightweight while making new OpenAI-compatible backends m
   },
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```

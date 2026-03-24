@@ -97,6 +97,30 @@ func TestProvidersConfig_IsEmpty(t *testing.T) {
 	}
 }
 
+func TestHeartbeatConfig_ModelField(t *testing.T) {
+	t.Run("with model", func(t *testing.T) {
+		data := `{"enabled": true, "interval": 15, "model": "gpt-4o-mini"}`
+		var hb HeartbeatConfig
+		if err := json.Unmarshal([]byte(data), &hb); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		assert.True(t, hb.Enabled)
+		assert.Equal(t, 15, hb.Interval)
+		assert.Equal(t, "gpt-4o-mini", hb.Model)
+	})
+
+	t.Run("without model", func(t *testing.T) {
+		data := `{"enabled": true, "interval": 30}`
+		var hb HeartbeatConfig
+		if err := json.Unmarshal([]byte(data), &hb); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		assert.True(t, hb.Enabled)
+		assert.Equal(t, 30, hb.Interval)
+		assert.Equal(t, "", hb.Model)
+	})
+}
+
 func TestAgentConfig_FullParse(t *testing.T) {
 	jsonData := `{
 		"agents": {

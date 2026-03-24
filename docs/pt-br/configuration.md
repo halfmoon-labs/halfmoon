@@ -258,7 +258,8 @@ Responde HEARTBEAT_OK      Usuário recebe resultado diretamente
 {
   "heartbeat": {
     "enabled": true,
-    "interval": 30
+    "interval": 30,
+    "model": ""
   }
 }
 ```
@@ -267,6 +268,7 @@ Responde HEARTBEAT_OK      Usuário recebe resultado diretamente
 | ---------- | ------ | -------------------------------------- |
 | `enabled`  | `true` | Ativar/desativar heartbeat             |
 | `interval` | `30`   | Intervalo em minutos (mínimo: 5)       |
+| `model`    | `""`   | Modelo opcional (vazio = usa o modelo padrão do agente) |
 
 **Variáveis de ambiente:**
 
