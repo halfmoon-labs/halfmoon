@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 func (h *Handler) effectiveLauncherPublic() bool {

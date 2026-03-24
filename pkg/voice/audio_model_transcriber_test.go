@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
 )
 
 var _ Transcriber = (*AudioModelTranscriber)(nil)

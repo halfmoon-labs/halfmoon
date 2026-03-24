@@ -3,11 +3,11 @@ package agent
 import (
 	"sync"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/routing"
-	"github.com/sipeed/picoclaw/pkg/tools"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/routing"
+	"github.com/halfmoon-labs/halfmoon/pkg/tools"
 )
 
 // AgentRegistry manages multiple agent instances and routes messages to them.

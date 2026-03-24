@@ -6,10 +6,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/routing"
-	"github.com/sipeed/picoclaw/pkg/tools"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/routing"
+	"github.com/halfmoon-labs/halfmoon/pkg/tools"
 )
 
 // SteeringMode controls how queued steering messages are dequeued.

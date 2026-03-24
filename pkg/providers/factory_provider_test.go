@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 package providers
 
@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 func TestExtractProtocol(t *testing.T) {

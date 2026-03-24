@@ -8,14 +8,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/media"
-	"github.com/sipeed/picoclaw/pkg/memory"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/routing"
-	"github.com/sipeed/picoclaw/pkg/session"
-	"github.com/sipeed/picoclaw/pkg/tools"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/media"
+	"github.com/halfmoon-labs/halfmoon/pkg/memory"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/routing"
+	"github.com/halfmoon-labs/halfmoon/pkg/session"
+	"github.com/halfmoon-labs/halfmoon/pkg/tools"
 )
 
 // AgentInstance represents a fully configured agent with its own workspace,
@@ -213,7 +213,7 @@ func resolveAgentWorkspace(agentCfg *config.AgentConfig, defaults *config.AgentD
 	if agentCfg != nil && strings.TrimSpace(agentCfg.Workspace) != "" {
 		return expandHome(strings.TrimSpace(agentCfg.Workspace))
 	}
-	// Use the configured default workspace (respects PICOCLAW_HOME)
+	// Use the configured default workspace (respects HALFMOON_HOME)
 	if agentCfg == nil || agentCfg.Default || agentCfg.ID == "" || routing.NormalizeAgentID(agentCfg.ID) == "main" {
 		return expandHome(defaults.Workspace)
 	}

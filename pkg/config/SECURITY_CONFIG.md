@@ -12,7 +12,7 @@ This refactoring introduces a `.security.yml` file to store all sensitive data (
 ## File Structure
 
 ```
-~/.picoclaw/
+~/.halfmoon/
 ├── config.json          # Main configuration (safe to share)
 └── .security.yml         # Security data (never share)
 ```
@@ -194,16 +194,16 @@ In `config.json`:
 
 Copy the example template:
 ```bash
-cp security.example.yml ~/.picoclaw/.security.yml
+cp security.example.yml ~/.halfmoon/.security.yml
 ```
 
 ### Step 2: Fill in your actual values
 
-Edit `~/.picoclaw/.security.yml` and replace placeholder values with your actual API keys and tokens.
+Edit `~/.halfmoon/.security.yml` and replace placeholder values with your actual API keys and tokens.
 
 ### Step 3: Update config.json
 
-Replace sensitive values in `~/.picoclaw/config.json` with `ref:` references:
+Replace sensitive values in `~/.halfmoon/config.json` with `ref:` references:
 
 **Before:**
 ```json
@@ -233,15 +233,15 @@ Replace sensitive values in `~/.picoclaw/config.json` with `ref:` references:
 
 ### Step 4: Verify
 
-Restart PicoClaw and verify it loads correctly:
+Restart Halfmoon and verify it loads correctly:
 ```bash
-picoclaw --version
+halfmoon --version
 ```
 
 ## Security Best Practices
 
 1. **Never commit `.security.yml`** to version control
-2. **Set file permissions**: `chmod 600 ~/.picoclaw/.security.yml`
+2. **Set file permissions**: `chmod 600 ~/.halfmoon/.security.yml`
 3. **Use different keys** for different environments (dev, staging, production)
 4. **Rotate keys regularly** and update `.security.yml`
 5. **Backup securely**: Encrypt backups containing `.security.yml`
@@ -288,7 +288,7 @@ Returns the path to `.security.yml` relative to the config file.
   "version": 1,
   "agents": {
     "defaults": {
-      "workspace": "~/picoclaw-workspace",
+      "workspace": "~/halfmoon-workspace",
       "model_name": "gpt-5.4"
     }
   },
@@ -521,20 +521,20 @@ You can override any security value using environment variables:
 
 **For models:**
 ```bash
-export PICOCLAW_MODEL_LIST_GPT-5.4_API_KEY="sk-from-env"
+export HALFMOON_MODEL_LIST_GPT-5.4_API_KEY="sk-from-env"
 ```
 
 **For channels:**
 ```bash
-export PICOCLAW_CHANNELS_TELEGRAM_TOKEN="token-from-env"
+export HALFMOON_CHANNELS_TELEGRAM_TOKEN="token-from-env"
 ```
 
 **For web tools:**
 ```bash
-export PICOCLAW_WEB_BRAVE_API_KEY="key-from-env"
+export HALFMOON_WEB_BRAVE_API_KEY="key-from-env"
 ```
 
-Environment variables follow this pattern: `PICOCLAW_<SECTION>_<KEY1>_<KEY2>_<FIELD>` with dots replaced by underscores and converted to uppercase.
+Environment variables follow this pattern: `HALFMOON_<SECTION>_<KEY1>_<KEY2>_<FIELD>` with dots replaced by underscores and converted to uppercase.
 
 ### Multiple API Keys Not Working
 

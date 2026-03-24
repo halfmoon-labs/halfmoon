@@ -1,9 +1,9 @@
 //go:build bedrock
 
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 package bedrock
 
@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sipeed/picoclaw/pkg/providers/protocoltypes"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers/protocoltypes"
 )
 
 func TestConvertMessages_SystemPrompts(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 var execCommand = exec.Command
@@ -20,7 +20,7 @@ func EnsureOnboarded(configPath string) error {
 		return fmt.Errorf("stat config: %w", err)
 	}
 
-	cmd := execCommand(FindPicoclawBinary(), "onboard")
+	cmd := execCommand(FindHalfmoonBinary(), "onboard")
 	cmd.Env = append(os.Environ(), config.EnvConfig+"="+configPath)
 	cmd.Stdin = strings.NewReader("n\n")
 

@@ -6,8 +6,8 @@ import (
 
 	"github.com/mymmrac/telego"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/channels"
+	"github.com/halfmoon-labs/halfmoon/pkg/bus"
+	"github.com/halfmoon-labs/halfmoon/pkg/channels"
 )
 
 func TestHandleMessage_DoesNotConsumeGenericCommandsLocally(t *testing.T) {

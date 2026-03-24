@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 func TestHandleUpdateConfig_PreservesExecAllowRemoteDefaultWhenOmitted(t *testing.T) {
@@ -23,7 +23,7 @@ func TestHandleUpdateConfig_PreservesExecAllowRemoteDefaultWhenOmitted(t *testin
 "version": 1,
 		"agents": {
 			"defaults": {
-				"workspace": "~/.picoclaw/workspace"
+				"workspace": "~/.halfmoon/workspace"
 			}
 		},
 		"model_list": [
@@ -62,7 +62,7 @@ func TestHandleUpdateConfig_DoesNotInheritDefaultModelFields(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPut, "/api/config", bytes.NewBufferString(`{
 		"agents": {
 			"defaults": {
-				"workspace": "~/.picoclaw/workspace"
+				"workspace": "~/.halfmoon/workspace"
 			}
 		},
 		"model_list": [
@@ -150,13 +150,13 @@ func setupPicoEnabledEnv(t *testing.T) (string, func()) {
 
 	tmp := t.TempDir()
 	oldHome := os.Getenv("HOME")
-	oldPicoHome := os.Getenv("PICOCLAW_HOME")
+	oldPicoHome := os.Getenv("HALFMOON_HOME")
 
 	if err := os.Setenv("HOME", tmp); err != nil {
 		t.Fatalf("set HOME: %v", err)
 	}
-	if err := os.Setenv("PICOCLAW_HOME", filepath.Join(tmp, ".picoclaw")); err != nil {
-		t.Fatalf("set PICOCLAW_HOME: %v", err)
+	if err := os.Setenv("HALFMOON_HOME", filepath.Join(tmp, ".halfmoon")); err != nil {
+		t.Fatalf("set HALFMOON_HOME: %v", err)
 	}
 
 	cfg := config.DefaultConfig()
@@ -183,9 +183,9 @@ func setupPicoEnabledEnv(t *testing.T) (string, func()) {
 	cleanup := func() {
 		_ = os.Setenv("HOME", oldHome)
 		if oldPicoHome == "" {
-			_ = os.Unsetenv("PICOCLAW_HOME")
+			_ = os.Unsetenv("HALFMOON_HOME")
 		} else {
-			_ = os.Setenv("PICOCLAW_HOME", oldPicoHome)
+			_ = os.Setenv("HALFMOON_HOME", oldPicoHome)
 		}
 	}
 	return configPath, cleanup
@@ -204,7 +204,7 @@ func TestHandleUpdateConfig_SucceedsWhenPicoTokenInSecurityOnly(t *testing.T) {
 		"version": 1,
 		"agents": {
 			"defaults": {
-				"workspace": "~/.picoclaw/workspace",
+				"workspace": "~/.halfmoon/workspace",
 				"model_name": "custom-default"
 			}
 		},

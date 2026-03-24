@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/constants"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/constants"
 )
 
 type ExecTool struct {

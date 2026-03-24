@@ -1,6 +1,6 @@
-# PicoClaw Channel System: Complete Development Guide
+# Halfmoon Channel System: Complete Development Guide
 
-> **Scope**: `pkg/channels/`, `pkg/bus/`, `pkg/media/`, `pkg/identity/`, `cmd/picoclaw/internal/gateway/`
+> **Scope**: `pkg/channels/`, `pkg/bus/`, `pkg/media/`, `pkg/identity/`, `cmd/halfmoon/internal/gateway/`
 
 ---
 
@@ -336,7 +336,7 @@ func init() {
 **3h. Import sub-package in Gateway**
 
 ```go
-// cmd/picoclaw/internal/gateway/helpers.go
+// cmd/halfmoon/internal/gateway/helpers.go
 import (
     _ "github.com/sipeed/picoclaw/pkg/channels/telegram"   // Triggers init() registration
     _ "github.com/sipeed/picoclaw/pkg/channels/discord"
@@ -810,7 +810,7 @@ if m.config.Channels.Matrix.Enabled && m.config.Channels.Matrix.Token != "" {
 #### Add blank import in Gateway
 
 ```go
-// cmd/picoclaw/internal/gateway/helpers.go
+// cmd/halfmoon/internal/gateway/helpers.go
 import (
     _ "github.com/sipeed/picoclaw/pkg/channels/matrix"
 )
@@ -1373,7 +1373,7 @@ agentLoop.Stop()               // Stop Agent
 
 3. **WeCom has two factories**: `"wecom"` (Bot mode, webhook only) and `"wecom_app"` (App mode, supports MediaSender) are registered separately. Both implement `WebhookHandler` and `HealthChecker`.
 
-4. **Pico Protocol**: `pkg/channels/pico/` implements a custom PicoClaw native protocol channel that receives messages via WebSocket webhook (`/pico/ws`).
+4. **Pico Protocol**: `pkg/channels/pico/` implements a custom Halfmoon native protocol channel that receives messages via WebSocket webhook (`/pico/ws`).
 
 5. **WhatsApp has two modes**: `"whatsapp"` (Bridge mode, communicates via external bridge URL) and `"whatsapp_native"` (native whatsmeow mode, connects directly to WhatsApp). Manager selects which to initialize based on `WhatsAppConfig.UseNative`.
 

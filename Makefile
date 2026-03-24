@@ -1,7 +1,7 @@
 .PHONY: all build install uninstall clean help test
 
 # Build variables
-BINARY_NAME=picoclaw
+BINARY_NAME=halfmoon
 BUILD_DIR=build
 CMD_DIR=cmd/$(BINARY_NAME)
 MAIN_GO=$(CMD_DIR)/main.go
@@ -11,7 +11,7 @@ VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 GIT_COMMIT=$(shell git rev-parse --short=8 HEAD 2>/dev/null || echo "dev")
 BUILD_TIME=$(shell date +%FT%T%z)
 GO_VERSION=$(shell $(GO) version | awk '{print $$3}')
-CONFIG_PKG=github.com/sipeed/picoclaw/pkg/config
+CONFIG_PKG=github.com/halfmoon-labs/halfmoon/pkg/config
 LDFLAGS=-X $(CONFIG_PKG).Version=$(VERSION) -X $(CONFIG_PKG).GitCommit=$(GIT_COMMIT) -X $(CONFIG_PKG).BuildTime=$(BUILD_TIME) -X $(CONFIG_PKG).GoVersion=$(GO_VERSION) -s -w
 
 # Go variables
@@ -51,8 +51,8 @@ INSTALL_MAN_DIR=$(INSTALL_PREFIX)/share/man/man1
 INSTALL_TMP_SUFFIX=.new
 
 # Workspace and Skills
-PICOCLAW_HOME?=$(HOME)/.picoclaw
-WORKSPACE_DIR?=$(PICOCLAW_HOME)/workspace
+HALFMOON_HOME?=$(HOME)/.halfmoon
+WORKSPACE_DIR?=$(HALFMOON_HOME)/workspace
 WORKSPACE_SKILLS_DIR=$(WORKSPACE_DIR)/skills
 BUILTIN_SKILLS_DIR=$(CURDIR)/skills
 
@@ -105,7 +105,7 @@ generate:
 	@$(GO) generate ./...
 	@echo "Run generate complete"
 
-## build: Build the picoclaw binary for current platform
+## build: Build the halfmoon binary for current platform
 build: generate
 	@echo "Building $(BINARY_NAME) for $(PLATFORM)/$(ARCH)..."
 	@mkdir -p $(BUILD_DIR)
@@ -113,17 +113,17 @@ build: generate
 	@echo "Build complete: $(BINARY_PATH)"
 	@ln -sf $(BINARY_NAME)-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/$(BINARY_NAME)
 
-## build-launcher: Build the picoclaw-launcher (web console) binary
+## build-launcher: Build the halfmoon-launcher (web console) binary
 build-launcher:
-	@echo "Building picoclaw-launcher for $(PLATFORM)/$(ARCH)..."
+	@echo "Building halfmoon-launcher for $(PLATFORM)/$(ARCH)..."
 	@mkdir -p $(BUILD_DIR)
 	@if [ ! -f web/backend/dist/index.html ]; then \
 		echo "Building frontend..."; \
 		cd web/frontend && pnpm install && pnpm build:backend; \
 	fi
-	@$(WEB_GO) build $(GOFLAGS) -o $(BUILD_DIR)/picoclaw-launcher-$(PLATFORM)-$(ARCH) ./web/backend
-	@ln -sf picoclaw-launcher-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/picoclaw-launcher
-	@echo "Build complete: $(BUILD_DIR)/picoclaw-launcher"
+	@$(WEB_GO) build $(GOFLAGS) -o $(BUILD_DIR)/halfmoon-launcher-$(PLATFORM)-$(ARCH) ./web/backend
+	@ln -sf halfmoon-launcher-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/halfmoon-launcher
+	@echo "Build complete: $(BUILD_DIR)/halfmoon-launcher"
 
 ## build-whatsapp-native: Build with WhatsApp native (whatsmeow) support; larger binary
 build-whatsapp-native: generate
@@ -169,7 +169,7 @@ build-linux-mipsle: generate
 build-pi-zero: build-linux-arm build-linux-arm64
 	@echo "Pi Zero 2 W builds: $(BUILD_DIR)/$(BINARY_NAME)-linux-arm (32-bit), $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64 (64-bit)"
 
-## build-all: Build picoclaw for all platforms
+## build-all: Build halfmoon for all platforms
 build-all: generate
 	@echo "Building for multiple platforms..."
 	@mkdir -p $(BUILD_DIR)
@@ -187,7 +187,7 @@ build-all: generate
 	GOOS=netbsd GOARCH=arm64 $(GO) build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
 
-## install: Install picoclaw to system and copy builtin skills
+## install: Install halfmoon to system and copy builtin skills
 install: build
 	@echo "Installing $(BINARY_NAME)..."
 	@mkdir -p $(INSTALL_BIN_DIR)
@@ -198,7 +198,7 @@ install: build
 	@echo "Installed binary to $(INSTALL_BIN_DIR)/$(BINARY_NAME)"
 	@echo "Installation complete!"
 
-## uninstall: Remove picoclaw from system
+## uninstall: Remove halfmoon from system
 uninstall:
 	@echo "Uninstalling $(BINARY_NAME)..."
 	@rm -f $(INSTALL_BIN_DIR)/$(BINARY_NAME)
@@ -206,11 +206,11 @@ uninstall:
 	@echo "Note: Only the executable file has been deleted."
 	@echo "If you need to delete all configurations (config.json, workspace, etc.), run 'make uninstall-all'"
 
-## uninstall-all: Remove picoclaw and all data
+## uninstall-all: Remove halfmoon and all data
 uninstall-all:
 	@echo "Removing workspace and skills..."
-	@rm -rf $(PICOCLAW_HOME)
-	@echo "Removed workspace: $(PICOCLAW_HOME)"
+	@rm -rf $(HALFMOON_HOME)
+	@echo "Removed workspace: $(HALFMOON_HOME)"
 	@echo "Complete uninstallation done!"
 
 ## clean: Remove build artifacts
@@ -222,12 +222,12 @@ clean:
 ## vet: Run go vet for static analysis
 vet: generate
 	@packages="$$(go list ./...)" && \
-		$(GO) vet $$(printf '%s\n' "$$packages" | grep -v '^github.com/sipeed/picoclaw/web/')
+		$(GO) vet $$(printf '%s\n' "$$packages" | grep -v '^github.com/halfmoon-labs/halfmoon/web/')
 	@cd web/backend && $(WEB_GO) vet ./...
 
 ## test: Test Go code
 test: generate
-	@$(GO) test $$(go list ./... | grep -v github.com/sipeed/picoclaw/web/)
+	@$(GO) test $$(go list ./... | grep -v github.com/halfmoon-labs/halfmoon/web/)
 	@cd web && make test
 
 ## fmt: Format Go code
@@ -255,19 +255,19 @@ update-deps:
 ## check: Run vet, fmt, and verify dependencies
 check: deps fmt vet test
 
-## run: Build and run picoclaw
+## run: Build and run halfmoon
 run: build
 	@$(BUILD_DIR)/$(BINARY_NAME) $(ARGS)
 
 ## docker-build: Build Docker image (minimal Alpine-based)
 docker-build:
 	@echo "Building minimal Docker image (Alpine-based)..."
-	docker compose -f docker/docker-compose.yml build picoclaw-agent picoclaw-gateway
+	docker compose -f docker/docker-compose.yml build halfmoon-agent halfmoon-gateway
 
 ## docker-build-full: Build Docker image with full MCP support (Node.js 24)
 docker-build-full:
 	@echo "Building full-featured Docker image (Node.js 24)..."
-	docker compose -f docker/docker-compose.full.yml build picoclaw-agent picoclaw-gateway
+	docker compose -f docker/docker-compose.full.yml build halfmoon-agent halfmoon-gateway
 
 ## docker-test: Test MCP tools in Docker container
 docker-test:
@@ -275,30 +275,30 @@ docker-test:
 	@chmod +x scripts/test-docker-mcp.sh
 	@./scripts/test-docker-mcp.sh
 
-## docker-run: Run picoclaw gateway in Docker (Alpine-based)
+## docker-run: Run halfmoon gateway in Docker (Alpine-based)
 docker-run:
 	docker compose -f docker/docker-compose.yml --profile gateway up
 
-## docker-run-full: Run picoclaw gateway in Docker (full-featured)
+## docker-run-full: Run halfmoon gateway in Docker (full-featured)
 docker-run-full:
 	docker compose -f docker/docker-compose.full.yml --profile gateway up
 
-## docker-run-agent: Run picoclaw agent in Docker (interactive, Alpine-based)
+## docker-run-agent: Run halfmoon agent in Docker (interactive, Alpine-based)
 docker-run-agent:
-	docker compose -f docker/docker-compose.yml run --rm picoclaw-agent
+	docker compose -f docker/docker-compose.yml run --rm halfmoon-agent
 
-## docker-run-agent-full: Run picoclaw agent in Docker (interactive, full-featured)
+## docker-run-agent-full: Run halfmoon agent in Docker (interactive, full-featured)
 docker-run-agent-full:
-	docker compose -f docker/docker-compose.full.yml run --rm picoclaw-agent
+	docker compose -f docker/docker-compose.full.yml run --rm halfmoon-agent
 
 ## docker-clean: Clean Docker images and volumes
 docker-clean:
 	docker compose -f docker/docker-compose.yml down -v
 	docker compose -f docker/docker-compose.full.yml down -v
-	docker rmi picoclaw:latest picoclaw:full 2>/dev/null || true
+	docker rmi halfmoon:latest halfmoon:full 2>/dev/null || true
 
 
-## build-macos-app: Build PicoClaw macOS .app bundle (no terminal window)
+## build-macos-app: Build HalfMoon macOS .app bundle (no terminal window)
 build-macos-app:
 	@echo "Building macOS .app bundle..."
 	@if [ "$(UNAME_S)" != "Darwin" ]; then \
@@ -307,11 +307,11 @@ build-macos-app:
 	fi
 	@cd web && $(MAKE) build && cd ..
 	@./scripts/build-macos-app.sh $(BINARY_NAME)-$(PLATFORM)-$(ARCH)
-	@echo "macOS .app bundle created: $(BUILD_DIR)/PicoClaw.app"
+	@echo "macOS .app bundle created: $(BUILD_DIR)/HalfMoon.app"
 
 ## help: Show this help message
 help:
-	@echo "picoclaw Makefile"
+	@echo "halfmoon Makefile"
 	@echo ""
 	@echo "Usage:"
 	@echo "  make [target]"
@@ -329,7 +329,7 @@ help:
 	@echo ""
 	@echo "Environment Variables:"
 	@echo "  INSTALL_PREFIX          # Installation prefix (default: ~/.local)"
-	@echo "  WORKSPACE_DIR           # Workspace directory (default: ~/.picoclaw/workspace)"
+	@echo "  WORKSPACE_DIR           # Workspace directory (default: ~/.halfmoon/workspace)"
 	@echo "  VERSION                 # Version string (default: git describe)"
 	@echo ""
 	@echo "Current Configuration:"

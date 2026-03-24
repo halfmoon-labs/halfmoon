@@ -4,12 +4,12 @@
 
 ## 🐳 Docker Compose
 
-Bạn cũng có thể chạy PicoClaw bằng Docker Compose mà không cần cài đặt gì trên máy.
+Bạn cũng có thể chạy Halfmoon bằng Docker Compose mà không cần cài đặt gì trên máy.
 
 ```bash
 # 1. Clone repo này
 git clone https://github.com/sipeed/picoclaw.git
-cd picoclaw
+cd halfmoon
 
 # 2. Lần chạy đầu tiên — tự động tạo docker/data/config.json rồi thoát
 #    (chỉ kích hoạt khi cả config.json và workspace/ đều không tồn tại)
@@ -24,11 +24,11 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ```
 
 > [!TIP]
-> **Người dùng Docker**: Mặc định, Gateway lắng nghe trên `127.0.0.1`, không thể truy cập từ host. Nếu bạn cần truy cập các health endpoint hoặc mở port, hãy đặt `PICOCLAW_GATEWAY_HOST=0.0.0.0` trong môi trường hoặc cập nhật `config.json`.
+> **Người dùng Docker**: Mặc định, Gateway lắng nghe trên `127.0.0.1`, không thể truy cập từ host. Nếu bạn cần truy cập các health endpoint hoặc mở port, hãy đặt `HALFMOON_GATEWAY_HOST=0.0.0.0` trong môi trường hoặc cập nhật `config.json`.
 
 ```bash
 # 5. Kiểm tra log
-docker compose -f docker/docker-compose.yml logs -f picoclaw-gateway
+docker compose -f docker/docker-compose.yml logs -f halfmoon-gateway
 
 # 6. Dừng
 docker compose -f docker/docker-compose.yml --profile gateway down
@@ -36,7 +36,7 @@ docker compose -f docker/docker-compose.yml --profile gateway down
 
 ### Chế Độ Launcher (Web Console)
 
-Image `launcher` bao gồm cả ba binary (`picoclaw`, `picoclaw-launcher`, `picoclaw-launcher-tui`) và khởi động web console mặc định, cung cấp giao diện trình duyệt để cấu hình và chat.
+Image `launcher` bao gồm cả ba binary (`halfmoon`, `halfmoon-launcher`, `halfmoon-launcher-tui`) và khởi động web console mặc định, cung cấp giao diện trình duyệt để cấu hình và chat.
 
 ```bash
 docker compose -f docker/docker-compose.yml --profile launcher up -d
@@ -51,10 +51,10 @@ Mở http://localhost:18800 trong trình duyệt. Launcher tự động quản l
 
 ```bash
 # Đặt câu hỏi
-docker compose -f docker/docker-compose.yml run --rm picoclaw-agent -m "What is 2+2?"
+docker compose -f docker/docker-compose.yml run --rm halfmoon-agent -m "What is 2+2?"
 
 # Chế độ tương tác
-docker compose -f docker/docker-compose.yml run --rm picoclaw-agent
+docker compose -f docker/docker-compose.yml run --rm halfmoon-agent
 ```
 
 ### Cập Nhật
@@ -67,21 +67,21 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ### 🚀 Bắt Đầu Nhanh
 
 > [!TIP]
-> Cấu hình API Key trong `~/.picoclaw/config.json`. Lấy API Key: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=PicoClaw&utm_content=PicoClaw&utm_medium=devrel&utm_source=OWO&utm_term=PicoClaw) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Tìm kiếm web là tùy chọn — lấy miễn phí [Tavily API](https://tavily.com) (1000 truy vấn miễn phí/tháng) hoặc [Brave Search API](https://brave.com/search/api) (2000 truy vấn miễn phí/tháng).
+> Cấu hình API Key trong `~/.halfmoon/config.json`. Lấy API Key: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=Halfmoon&utm_content=Halfmoon&utm_medium=devrel&utm_source=OWO&utm_term=Halfmoon) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Tìm kiếm web là tùy chọn — lấy miễn phí [Tavily API](https://tavily.com) (1000 truy vấn miễn phí/tháng) hoặc [Brave Search API](https://brave.com/search/api) (2000 truy vấn miễn phí/tháng).
 
 **1. Khởi tạo**
 
 ```bash
-picoclaw onboard
+halfmoon onboard
 ```
 
-**2. Cấu hình** (`~/.picoclaw/config.json`)
+**2. Cấu hình** (`~/.halfmoon/config.json`)
 
 ```json
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.picoclaw/workspace",
+      "workspace": "~/.halfmoon/workspace",
       "model_name": "gpt-5.4",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -142,7 +142,7 @@ picoclaw onboard
 ```
 
 > **Mới**: Định dạng cấu hình `model_list` cho phép thêm provider mà không cần thay đổi code. Xem [Cấu Hình Mô Hình](#cấu-hình-mô-hình-model_list) để biết chi tiết.
-> `request_timeout` là tùy chọn và tính bằng giây. Nếu bỏ qua hoặc đặt `<= 0`, PicoClaw sử dụng timeout mặc định (120s).
+> `request_timeout` là tùy chọn và tính bằng giây. Nếu bỏ qua hoặc đặt `<= 0`, Halfmoon sử dụng timeout mặc định (120s).
 
 **3. Lấy API Key**
 
@@ -159,7 +159,7 @@ picoclaw onboard
 **4. Chat**
 
 ```bash
-picoclaw agent -m "What is 2+2?"
+halfmoon agent -m "What is 2+2?"
 ```
 
 Vậy là xong! Bạn có một trợ lý AI hoạt động trong 2 phút.

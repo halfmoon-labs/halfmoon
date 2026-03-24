@@ -4,9 +4,9 @@ ARG TARGETPLATFORM
 
 RUN apk add --no-cache ca-certificates tzdata
 
-COPY $TARGETPLATFORM/picoclaw /usr/local/bin/picoclaw
-COPY $TARGETPLATFORM/picoclaw-launcher /usr/local/bin/picoclaw-launcher
-COPY $TARGETPLATFORM/picoclaw-launcher-tui /usr/local/bin/picoclaw-launcher-tui
+COPY $TARGETPLATFORM/halfmoon /usr/local/bin/halfmoon
+COPY $TARGETPLATFORM/halfmoon-launcher /usr/local/bin/halfmoon-launcher
+COPY $TARGETPLATFORM/halfmoon-launcher-tui /usr/local/bin/halfmoon-launcher-tui
 
-ENTRYPOINT ["picoclaw-launcher"]
+ENTRYPOINT ["halfmoon-launcher"]
 CMD ["-public", "-no-browser"]

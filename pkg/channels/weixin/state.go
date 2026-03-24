@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	basechannels "github.com/sipeed/picoclaw/pkg/channels"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/fileutil"
-	"github.com/sipeed/picoclaw/pkg/logger"
+	basechannels "github.com/halfmoon-labs/halfmoon/pkg/channels"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/fileutil"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 )
 
 const (
@@ -36,12 +36,12 @@ type syncCursorFile struct {
 	GetUpdatesBuf string `json:"get_updates_buf"`
 }
 
-func picoclawHomeDir() string {
+func halfmoonHomeDir() string {
 	if home := os.Getenv(config.EnvHome); home != "" {
 		return home
 	}
 	userHome, _ := os.UserHomeDir()
-	return filepath.Join(userHome, ".picoclaw")
+	return filepath.Join(userHome, ".halfmoon")
 }
 
 func buildWeixinSyncBufPath(cfg config.WeixinConfig) string {
@@ -51,7 +51,7 @@ func buildWeixinSyncBufPath(cfg config.WeixinConfig) string {
 		sum := sha256.Sum256([]byte(strings.TrimSpace(cfg.BaseURL) + "|" + token))
 		key = hex.EncodeToString(sum[:8])
 	}
-	return filepath.Join(picoclawHomeDir(), "channels", "weixin", "sync", key+".json")
+	return filepath.Join(halfmoonHomeDir(), "channels", "weixin", "sync", key+".json")
 }
 
 func loadGetUpdatesBuf(path string) (string, error) {

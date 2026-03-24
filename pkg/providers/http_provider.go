@@ -1,8 +1,8 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // Inspired by and based on nanobot: https://github.com/HKUDS/nanobot
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 package providers
 
@@ -10,7 +10,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/providers/openai_compat"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers/openai_compat"
 )
 
 type HTTPProvider struct {

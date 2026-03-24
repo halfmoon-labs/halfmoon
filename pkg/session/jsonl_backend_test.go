@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/memory"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/session"
+	"github.com/halfmoon-labs/halfmoon/pkg/memory"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/session"
 )
 
 // Compile-time interface satisfaction checks.

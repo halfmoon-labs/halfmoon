@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
 )
 
 type mockRegistryProvider struct{}
@@ -28,7 +28,7 @@ func testCfg(agents []config.AgentConfig) *config.Config {
 	return &config.Config{
 		Agents: config.AgentsConfig{
 			Defaults: config.AgentDefaults{
-				Workspace:         "/tmp/picoclaw-test-registry",
+				Workspace:         "/tmp/halfmoon-test-registry",
 				ModelName:         "gpt-4",
 				MaxTokens:         8192,
 				MaxToolIterations: 10,

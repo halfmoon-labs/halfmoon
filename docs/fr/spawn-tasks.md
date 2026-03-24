@@ -57,5 +57,5 @@ Le subagent a accès aux outils (message, web_search, etc.) et peut communiquer 
 
 **Variables d'environnement :**
 
-* `PICOCLAW_HEARTBEAT_ENABLED=false` pour désactiver
-* `PICOCLAW_HEARTBEAT_INTERVAL=60` pour changer l'intervalle
+* `HALFMOON_HEARTBEAT_ENABLED=false` pour désactiver
+* `HALFMOON_HEARTBEAT_INTERVAL=60` pour changer l'intervalle

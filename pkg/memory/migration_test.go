@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
 )
 
 func writeJSONSession(

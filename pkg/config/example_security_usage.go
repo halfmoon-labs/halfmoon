@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 // This file demonstrates how to use the security configuration feature
 // It's not meant to be compiled, just for documentation purposes
@@ -13,7 +13,7 @@ Package config
 
 ## 1. Create security.yml
 
-File: ~/.picoclaw/security.yml
+File: ~/.halfmoon/security.yml
 
 ```yaml
 # Model API Keys
@@ -56,7 +56,7 @@ web:
 
 ## 2. Update config.json to use references
 
-File: ~/.picoclaw/config.json
+File: ~/.halfmoon/config.json
 
 ```json
 
@@ -64,7 +64,7 @@ File: ~/.picoclaw/config.json
 		  "version": 1,
 		  "agents": {
 		    "defaults": {
-		      "workspace": "~/picoclaw-workspace",
+		      "workspace": "~/halfmoon-workspace",
 		      "model_name": "gpt-5.4"
 		    }
 		  },
@@ -111,7 +111,7 @@ File: ~/.picoclaw/config.json
 ## 3. Set proper permissions
 
 ```bash
-chmod 600 ~/.picoclaw/security.yml
+chmod 600 ~/.halfmoon/security.yml
 ```
 
 ## 4. Add to .gitignore
@@ -124,7 +124,7 @@ chmod 600 ~/.picoclaw/security.yml
 ## 5. Verify it works
 
 ```bash
-picoclaw --version
+halfmoon --version
 ```
 
 # Available Reference Paths
@@ -221,28 +221,28 @@ You can also mix references and direct values:
 
 ## Step 1: Backup your config
 ```bash
-cp ~/.picoclaw/config.json ~/.picoclaw/config.json.backup
+cp ~/.halfmoon/config.json ~/.halfmoon/config.json.backup
 ```
 
 ## Step 2: Copy the example security file
 ```bash
-cp security.example.yml ~/.picoclaw/.security.yml
+cp security.example.yml ~/.halfmoon/.security.yml
 ```
 
 ## Step 3: Fill in your API keys
-Edit ~/.picoclaw/.security.yml and replace placeholders with your actual keys.
+Edit ~/.halfmoon/.security.yml and replace placeholders with your actual keys.
 
 ## Step 4: Update config.json references
-Replace sensitive values in ~/.picoclaw/config.json with ref: references.
+Replace sensitive values in ~/.halfmoon/config.json with ref: references.
 
 ## Step 5: Test
 ```bash
-picoclaw --version
+halfmoon --version
 ```
 
 If everything works, you can delete the backup:
 ```bash
-rm ~/.picoclaw/config.json.backup
+rm ~/.halfmoon/config.json.backup
 ```
 
 # Advanced Features
@@ -389,7 +389,7 @@ even when your config uses indexed model names for load balancing.
 The security file should have restricted permissions:
 
 ```bash
-chmod 600 ~/.picoclaw/.security.yml
+chmod 600 ~/.halfmoon/.security.yml
 ```
 
 This ensures only the owner can read and write the file.
@@ -397,7 +397,7 @@ This ensures only the owner can read and write the file.
 # Security Best Practices
 
 1. Never commit .security.yml to version control
-2. Set file permissions: chmod 600 ~/.picoclaw/.security.yml
+2. Set file permissions: chmod 600 ~/.halfmoon/.security.yml
 3. Use different keys for different environments
 4. Rotate keys regularly and update .security.yml
 5. Encrypt backups containing .security.yml

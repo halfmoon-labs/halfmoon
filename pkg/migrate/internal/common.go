@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sipeed/picoclaw/pkg"
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 func ResolveTargetHome(override string) (string, error) {
@@ -21,7 +21,7 @@ func ResolveTargetHome(override string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("resolving home directory: %w", err)
 	}
-	return filepath.Join(home, pkg.DefaultPicoClawHome), nil
+	return filepath.Join(home, pkg.DefaultHalfmoonHome), nil
 }
 
 func ExpandHome(path string) string {

@@ -1,15 +1,15 @@
 <div align="center">
-<img src="assets/logo.webp" alt="PicoClaw" width="512">
+<img src="assets/logo.webp" alt="Halfmoon" width="512">
 
-<h1>PicoClaw: Asisten AI Super Ringan berbasis Go</h1>
+<h1>Halfmoon: Asisten AI Super Ringan berbasis Go</h1>
 
-<h3>Perangkat Keras $10 · RAM 10MB · Boot ms · Let's Go, PicoClaw!</h3>
+<h3>Perangkat Keras $10 · RAM 10MB · Boot ms · Let's Go, Halfmoon!</h3>
   <p>
     <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
     <img src="https://img.shields.io/badge/Arch-x86__64%2C%20ARM64%2C%20MIPS%2C%20RISC--V%2C%20LoongArch-blue" alt="Hardware">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
     <br>
-    <a href="https://picoclaw.io"><img src="https://img.shields.io/badge/Website-picoclaw.io-blue?style=flat&logo=google-chrome&logoColor=white" alt="Website"></a>
+    <a href="https://halfmoon.io"><img src="https://img.shields.io/badge/Website-halfmoon.io-blue?style=flat&logo=google-chrome&logoColor=white" alt="Website"></a>
     <a href="https://docs.picoclaw.io/"><img src="https://img.shields.io/badge/Docs-Official-007acc?style=flat&logo=read-the-docs&logoColor=white" alt="Docs"></a>
     <a href="https://deepwiki.com/sipeed/picoclaw"><img src="https://img.shields.io/badge/Wiki-DeepWiki-FFA500?style=flat&logo=wikipedia&logoColor=white" alt="Wiki"></a>
     <br>
@@ -24,9 +24,9 @@
 
 ---
 
-> **PicoClaw** adalah proyek open-source independen yang diinisiasi oleh [Sipeed](https://sipeed.com), ditulis sepenuhnya dalam **Go** — bukan fork dari OpenClaw, NanoBot, atau proyek lainnya.
+> **Halfmoon** adalah proyek open-source independen yang diinisiasi oleh [Sipeed](https://sipeed.com), ditulis sepenuhnya dalam **Go** — bukan fork dari OpenClaw, NanoBot, atau proyek lainnya.
 
-**PicoClaw** adalah asisten AI pribadi yang super ringan, terinspirasi dari [NanoBot](https://github.com/HKUDS/nanobot). Dibangun ulang dari awal dalam **Go** melalui proses "self-bootstrapping" — AI Agent itu sendiri yang memandu migrasi arsitektur dan optimasi kode.
+**Halfmoon** adalah asisten AI pribadi yang super ringan, terinspirasi dari [NanoBot](https://github.com/HKUDS/nanobot). Dibangun ulang dari awal dalam **Go** melalui proses "self-bootstrapping" — AI Agent itu sendiri yang memandu migrasi arsitektur dan optimasi kode.
 
 **Berjalan di perangkat keras $10 dengan RAM <10MB** — hemat 99% memori dibanding OpenClaw dan 98% lebih murah dari Mac mini!
 
@@ -34,7 +34,7 @@
 <tr align="center">
 <td align="center" valign="top">
 <p align="center">
-<img src="assets/picoclaw_mem.gif" width="360" height="240">
+<img src="assets/halfmoon_mem.gif" width="360" height="240">
 </p>
 </td>
 <td align="center" valign="top">
@@ -48,30 +48,30 @@
 > [!CAUTION]
 > **Peringatan Keamanan**
 >
-> * **TANPA KRIPTO:** PicoClaw **tidak** menerbitkan token atau cryptocurrency resmi apa pun. Semua klaim di `pump.fun` atau platform trading lainnya adalah **penipuan**.
-> * **DOMAIN RESMI:** Satu-satunya website resmi adalah **[picoclaw.io](https://picoclaw.io)**, dan website perusahaan adalah **[sipeed.com](https://sipeed.com)**
+> * **TANPA KRIPTO:** Halfmoon **tidak** menerbitkan token atau cryptocurrency resmi apa pun. Semua klaim di `pump.fun` atau platform trading lainnya adalah **penipuan**.
+> * **DOMAIN RESMI:** Satu-satunya website resmi adalah **[halfmoon.io](https://halfmoon.io)**, dan website perusahaan adalah **[sipeed.com](https://sipeed.com)**
 > * **WASPADA:** Banyak domain `.ai/.org/.com/.net/...` telah didaftarkan oleh pihak ketiga. Jangan percaya mereka.
-> * **CATATAN:** PicoClaw masih dalam tahap pengembangan awal yang cepat. Mungkin ada masalah keamanan yang belum terselesaikan. Jangan deploy ke produksi sebelum v1.0.
-> * **CATATAN:** PicoClaw baru-baru ini menggabungkan banyak PR. Build terbaru mungkin menggunakan RAM 10-20MB. Optimasi sumber daya direncanakan setelah fitur stabil.
+> * **CATATAN:** Halfmoon masih dalam tahap pengembangan awal yang cepat. Mungkin ada masalah keamanan yang belum terselesaikan. Jangan deploy ke produksi sebelum v1.0.
+> * **CATATAN:** Halfmoon baru-baru ini menggabungkan banyak PR. Build terbaru mungkin menggunakan RAM 10-20MB. Optimasi sumber daya direncanakan setelah fitur stabil.
 
 ## 📢 Berita
 
-2026-03-17 🚀 **v0.2.3 Dirilis!** UI system tray (Windows & Linux), pelacakan status sub-agent (`spawn_status`), eksperimental Gateway hot-reload, gerbang keamanan Cron, dan 2 perbaikan keamanan. PicoClaw telah mencapai **25K Stars**!
+2026-03-17 🚀 **v0.2.3 Dirilis!** UI system tray (Windows & Linux), pelacakan status sub-agent (`spawn_status`), eksperimental Gateway hot-reload, gerbang keamanan Cron, dan 2 perbaikan keamanan. Halfmoon telah mencapai **25K Stars**!
 
 2026-03-09 🎉 **v0.2.1 — Update terbesar sejauh ini!** Dukungan protokol MCP, 4 channel baru (Matrix/IRC/WeCom/Discord Proxy), 3 provider baru (Kimi/Minimax/Avian), pipeline vision, penyimpanan memori JSONL, routing model.
 
 2026-02-28 📦 **v0.2.0** dirilis dengan dukungan Docker Compose dan Web UI Launcher.
 
-2026-02-26 🎉 PicoClaw mencapai **20K Stars** hanya dalam 17 hari! Orkestrasi channel otomatis dan antarmuka kapabilitas kini aktif.
+2026-02-26 🎉 Halfmoon mencapai **20K Stars** hanya dalam 17 hari! Orkestrasi channel otomatis dan antarmuka kapabilitas kini aktif.
 
 <details>
 <summary>Berita sebelumnya...</summary>
 
-2026-02-16 🎉 PicoClaw menembus 12K Stars dalam satu minggu! Peran maintainer komunitas dan [Roadmap](ROADMAP.md) resmi diluncurkan.
+2026-02-16 🎉 Halfmoon menembus 12K Stars dalam satu minggu! Peran maintainer komunitas dan [Roadmap](ROADMAP.md) resmi diluncurkan.
 
-2026-02-13 🎉 PicoClaw menembus 5000 Stars dalam 4 hari! Roadmap proyek dan grup pengembang sedang dalam proses.
+2026-02-13 🎉 Halfmoon menembus 5000 Stars dalam 4 hari! Roadmap proyek dan grup pengembang sedang dalam proses.
 
-2026-02-09 🎉 **PicoClaw Diluncurkan!** Dibangun dalam 1 hari untuk menghadirkan AI Agent ke perangkat keras $10 dengan RAM <10MB. Let's Go, PicoClaw!
+2026-02-09 🎉 **Halfmoon Diluncurkan!** Dibangun dalam 1 hari untuk menghadirkan AI Agent ke perangkat keras $10 dengan RAM <10MB. Let's Go, Halfmoon!
 
 </details>
 
@@ -97,21 +97,21 @@ _*Build terbaru mungkin menggunakan 10-20MB karena penggabungan PR yang cepat. O
 
 <div align="center">
 
-|                                | OpenClaw      | NanoBot                  | **PicoClaw**                           |
+|                                | OpenClaw      | NanoBot                  | **Halfmoon**                           |
 | ------------------------------ | ------------- | ------------------------ | -------------------------------------- |
 | **Bahasa**                     | TypeScript    | Python                   | **Go**                                 |
 | **RAM**                        | >1GB          | >100MB                   | **< 10MB***                            |
 | **Waktu Boot**</br>(core 0,8GHz) | >500d       | >30d                     | **<1d**                                |
 | **Biaya**                      | Mac Mini $599 | Kebanyakan board Linux ~$50 | **Board Linux mana pun**</br>**mulai $10** |
 
-<img src="assets/compare.jpg" alt="PicoClaw" width="512">
+<img src="assets/compare.jpg" alt="Halfmoon" width="512">
 
 </div>
 
 > **[Daftar Kompatibilitas Hardware](docs/hardware-compatibility.md)** — Lihat semua board yang telah diuji, dari RISC-V $5 hingga Raspberry Pi hingga ponsel Android. Board Anda belum terdaftar? Kirim PR!
 
 <p align="center">
-<img src="assets/hardware-banner.jpg" alt="PicoClaw Hardware Compatibility" width="100%">
+<img src="assets/hardware-banner.jpg" alt="Halfmoon Hardware Compatibility" width="100%">
 </p>
 
 ## 🦾 Demonstrasi
@@ -125,9 +125,9 @@ _*Build terbaru mungkin menggunakan 10-20MB karena penggabungan PR yang cepat. O
 <th><p align="center">Pencarian Web & Pembelajaran</p></th>
 </tr>
 <tr>
-<td align="center"><p align="center"><img src="assets/picoclaw_code.gif" width="240" height="180"></p></td>
-<td align="center"><p align="center"><img src="assets/picoclaw_memory.gif" width="240" height="180"></p></td>
-<td align="center"><p align="center"><img src="assets/picoclaw_search.gif" width="240" height="180"></p></td>
+<td align="center"><p align="center"><img src="assets/halfmoon_code.gif" width="240" height="180"></p></td>
+<td align="center"><p align="center"><img src="assets/halfmoon_memory.gif" width="240" height="180"></p></td>
+<td align="center"><p align="center"><img src="assets/halfmoon_search.gif" width="240" height="180"></p></td>
 </tr>
 <tr>
 <td align="center">Develop · Deploy · Scale</td>
@@ -138,7 +138,7 @@ _*Build terbaru mungkin menggunakan 10-20MB karena penggabungan PR yang cepat. O
 
 ### 🐜 Deploy Inovatif dengan Footprint Rendah
 
-PicoClaw dapat di-deploy di hampir semua perangkat Linux!
+Halfmoon dapat di-deploy di hampir semua perangkat Linux!
 
 - $9,9 [LicheeRV-Nano](https://www.aliexpress.com/item/1005006519668532.html) versi E(Ethernet) atau W(WiFi6), untuk home assistant minimal
 - $30~50 [NanoKVM](https://www.aliexpress.com/item/1005007369816019.html), atau $100 [NanoKVM-Pro](https://www.aliexpress.com/item/1005010048471263.html), untuk operasi server otomatis
@@ -150,9 +150,9 @@ PicoClaw dapat di-deploy di hampir semua perangkat Linux!
 
 ## 📦 Instalasi
 
-### Unduh dari picoclaw.io (Direkomendasikan)
+### Unduh dari halfmoon.io (Direkomendasikan)
 
-Kunjungi **[picoclaw.io](https://picoclaw.io)** — website resmi mendeteksi platform Anda secara otomatis dan menyediakan unduhan satu klik. Tidak perlu memilih arsitektur secara manual.
+Kunjungi **[halfmoon.io](https://halfmoon.io)** — website resmi mendeteksi platform Anda secara otomatis dan menyediakan unduhan satu klik. Tidak perlu memilih arsitektur secara manual.
 
 ### Unduh binary yang sudah dikompilasi
 
@@ -163,7 +163,7 @@ Atau, unduh binary untuk platform Anda dari halaman [GitHub Releases](https://gi
 ```bash
 git clone https://github.com/sipeed/picoclaw.git
 
-cd picoclaw
+cd halfmoon
 make deps
 
 # Build binary inti
@@ -192,19 +192,19 @@ WebUI Launcher menyediakan antarmuka berbasis browser untuk konfigurasi dan chat
 
 **Opsi 1: Klik dua kali (Desktop)**
 
-Setelah mengunduh dari [picoclaw.io](https://picoclaw.io), klik dua kali `picoclaw-launcher` (atau `picoclaw-launcher.exe` di Windows). Browser Anda akan terbuka otomatis di `http://localhost:18800`.
+Setelah mengunduh dari [halfmoon.io](https://halfmoon.io), klik dua kali `halfmoon-launcher` (atau `halfmoon-launcher.exe` di Windows). Browser Anda akan terbuka otomatis di `http://localhost:18800`.
 
 **Opsi 2: Command line**
 
 ```bash
-picoclaw-launcher
+halfmoon-launcher
 # Buka http://localhost:18800 di browser Anda
 ```
 
 > [!TIP]
 > **Akses jarak jauh / Docker / VM:** Tambahkan flag `-public` untuk mendengarkan di semua antarmuka:
 > ```bash
-> picoclaw-launcher -public
+> halfmoon-launcher -public
 > ```
 
 <p align="center">
@@ -223,7 +223,7 @@ Untuk dokumentasi WebUI lengkap, lihat [docs.picoclaw.io](https://docs.picoclaw.
 ```bash
 # 1. Clone repo ini
 git clone https://github.com/sipeed/picoclaw.git
-cd picoclaw
+cd halfmoon
 
 # 2. Jalankan pertama kali — otomatis membuat docker/data/config.json lalu keluar
 #    (hanya terpicu ketika config.json dan workspace/ keduanya tidak ada)
@@ -238,7 +238,7 @@ docker compose -f docker/docker-compose.yml --profile launcher up -d
 # Buka http://localhost:18800
 ```
 
-> **Pengguna Docker / VM:** Gateway mendengarkan di `127.0.0.1` secara default. Atur `PICOCLAW_GATEWAY_HOST=0.0.0.0` atau gunakan flag `-public` agar dapat diakses dari host.
+> **Pengguna Docker / VM:** Gateway mendengarkan di `127.0.0.1` secara default. Atur `HALFMOON_GATEWAY_HOST=0.0.0.0` atau gunakan flag `-public` agar dapat diakses dari host.
 
 ```bash
 # Cek log
@@ -259,7 +259,7 @@ docker compose -f docker/docker-compose.yml --profile launcher up -d
 TUI (Terminal UI) Launcher menyediakan antarmuka terminal lengkap untuk konfigurasi dan manajemen. Ideal untuk server, Raspberry Pi, dan lingkungan headless lainnya.
 
 ```bash
-picoclaw-launcher-tui
+halfmoon-launcher-tui
 ```
 
 <p align="center">
@@ -274,7 +274,7 @@ Untuk dokumentasi TUI lengkap, lihat [docs.picoclaw.io](https://docs.picoclaw.io
 
 ### 📱 Android
 
-Berikan kehidupan kedua untuk ponsel lama Anda! Ubah menjadi Asisten AI pintar dengan PicoClaw.
+Berikan kehidupan kedua untuk ponsel lama Anda! Ubah menjadi Asisten AI pintar dengan Halfmoon.
 
 **Opsi 1: Termux (tersedia sekarang)**
 
@@ -284,14 +284,14 @@ Berikan kehidupan kedua untuk ponsel lama Anda! Ubah menjadi Asisten AI pintar d
 ```bash
 # Unduh rilis terbaru
 wget https://github.com/sipeed/picoclaw/releases/latest/download/picoclaw_Linux_arm64.tar.gz
-tar xzf picoclaw_Linux_arm64.tar.gz
+tar xzf halfmoon_Linux_arm64.tar.gz
 pkg install proot
-termux-chroot ./picoclaw onboard   # chroot menyediakan tata letak filesystem Linux standar
+termux-chroot ./halfmoon onboard   # chroot menyediakan tata letak filesystem Linux standar
 ```
 
 Kemudian ikuti bagian Terminal Launcher di bawah untuk menyelesaikan konfigurasi.
 
-<img src="assets/termux.jpg" alt="PicoClaw on Termux" width="512">
+<img src="assets/termux.jpg" alt="Halfmoon on Termux" width="512">
 
 **Opsi 2: Instal APK (segera hadir)**
 
@@ -300,17 +300,17 @@ APK Android mandiri dengan WebUI bawaan sedang dalam pengembangan. Pantau terus!
 <details>
 <summary><b>Terminal Launcher (untuk lingkungan dengan sumber daya terbatas)</b></summary>
 
-Untuk lingkungan minimal di mana hanya binary inti `picoclaw` yang tersedia (tanpa Launcher UI), Anda dapat mengonfigurasi semuanya melalui command line dan file konfigurasi JSON.
+Untuk lingkungan minimal di mana hanya binary inti `halfmoon` yang tersedia (tanpa Launcher UI), Anda dapat mengonfigurasi semuanya melalui command line dan file konfigurasi JSON.
 
 **1. Inisialisasi**
 
 ```bash
-picoclaw onboard
+halfmoon onboard
 ```
 
-Ini membuat `~/.picoclaw/config.json` dan direktori workspace.
+Ini membuat `~/.halfmoon/config.json` dan direktori workspace.
 
-**2. Konfigurasi** (`~/.picoclaw/config.json`)
+**2. Konfigurasi** (`~/.halfmoon/config.json`)
 
 ```json
 {
@@ -335,20 +335,20 @@ Ini membuat `~/.picoclaw/config.json` dan direktori workspace.
 
 ```bash
 # Pertanyaan satu kali
-picoclaw agent -m "What is 2+2?"
+halfmoon agent -m "What is 2+2?"
 
 # Mode interaktif
-picoclaw agent
+halfmoon agent
 
 # Mulai gateway untuk integrasi aplikasi chat
-picoclaw gateway
+halfmoon gateway
 ```
 
 </details>
 
 ## 🔌 Providers (LLM)
 
-PicoClaw mendukung 30+ provider LLM melalui konfigurasi `model_list`. Gunakan format `protocol/model`:
+Halfmoon mendukung 30+ provider LLM melalui konfigurasi `model_list`. Gunakan format `protocol/model`:
 
 | Provider | Protocol | API Key | Catatan |
 |----------|----------|---------|---------|
@@ -409,7 +409,7 @@ Untuk detail konfigurasi provider lengkap, lihat [Providers & Models](docs/provi
 
 ## 💬 Channels (Aplikasi Chat)
 
-Bicara dengan PicoClaw Anda melalui 17+ platform pesan:
+Bicara dengan Halfmoon Anda melalui 17+ platform pesan:
 
 | Channel | Pengaturan | Protocol | Dokumentasi |
 |---------|------------|----------|-------------|
@@ -440,7 +440,7 @@ Untuk instruksi pengaturan channel lengkap, lihat [Konfigurasi Aplikasi Chat](do
 
 ### 🔍 Pencarian Web
 
-PicoClaw dapat mencari web untuk memberikan informasi terkini. Konfigurasi di `tools.web`:
+Halfmoon dapat mencari web untuk memberikan informasi terkini. Konfigurasi di `tools.web`:
 
 | Mesin Pencari | API Key | Tier Gratis | Tautan |
 |--------------|---------|-------------|--------|
@@ -454,7 +454,7 @@ PicoClaw dapat mencari web untuk memberikan informasi terkini. Konfigurasi di `t
 
 ### ⚙️ Tools Lainnya
 
-PicoClaw menyertakan tools bawaan untuk operasi file, eksekusi kode, penjadwalan, dan lainnya. Lihat [Konfigurasi Tools](docs/tools_configuration.md) untuk detail.
+Halfmoon menyertakan tools bawaan untuk operasi file, eksekusi kode, penjadwalan, dan lainnya. Lihat [Konfigurasi Tools](docs/tools_configuration.md) untuk detail.
 
 ## 🎯 Skills
 
@@ -463,8 +463,8 @@ Skills adalah kapabilitas modular yang memperluas Agent Anda. Dimuat dari file `
 **Instal skills dari ClawHub:**
 
 ```bash
-picoclaw skills search "web scraping"
-picoclaw skills install <skill-name>
+halfmoon skills search "web scraping"
+halfmoon skills install <skill-name>
 ```
 
 **Konfigurasi token ClawHub** (opsional, untuk rate limit lebih tinggi):
@@ -488,7 +488,7 @@ Untuk detail lebih lanjut, lihat [Konfigurasi Tools - Skills](docs/tools_configu
 
 ## 🔗 MCP (Model Context Protocol)
 
-PicoClaw mendukung [MCP](https://modelcontextprotocol.io/) secara native — hubungkan server MCP mana pun untuk memperluas kapabilitas Agent Anda dengan tools dan sumber data eksternal.
+Halfmoon mendukung [MCP](https://modelcontextprotocol.io/) secara native — hubungkan server MCP mana pun untuk memperluas kapabilitas Agent Anda dengan tools dan sumber data eksternal.
 
 ```json
 {
@@ -511,7 +511,7 @@ Untuk konfigurasi MCP lengkap (transport stdio, SSE, HTTP, Tool Discovery), liha
 
 ## <img src="assets/clawdchat-icon.png" width="24" height="24" alt="ClawdChat"> Bergabung dengan Jaringan Sosial Agent
 
-Hubungkan PicoClaw ke Jaringan Sosial Agent hanya dengan mengirim satu pesan melalui CLI atau Aplikasi Chat terintegrasi mana pun.
+Hubungkan Halfmoon ke Jaringan Sosial Agent hanya dengan mengirim satu pesan melalui CLI atau Aplikasi Chat terintegrasi mana pun.
 
 **Baca `https://clawdchat.ai/skill.md` dan ikuti instruksi untuk bergabung dengan [ClawdChat.ai](https://clawdchat.ai)**
 
@@ -519,26 +519,26 @@ Hubungkan PicoClaw ke Jaringan Sosial Agent hanya dengan mengirim satu pesan mel
 
 | Perintah                   | Deskripsi                        |
 | -------------------------- | -------------------------------- |
-| `picoclaw onboard`         | Inisialisasi konfigurasi & workspace |
-| `picoclaw auth weixin` | Hubungkan akun WeChat via QR |
-| `picoclaw agent -m "..."` | Chat dengan agent                |
-| `picoclaw agent`           | Mode chat interaktif             |
-| `picoclaw gateway`         | Mulai gateway                    |
-| `picoclaw status`          | Tampilkan status                 |
-| `picoclaw version`         | Tampilkan info versi             |
-| `picoclaw model`           | Lihat atau ganti model default   |
-| `picoclaw cron list`       | Daftar semua tugas terjadwal     |
-| `picoclaw cron add ...`    | Tambah tugas terjadwal           |
-| `picoclaw cron disable`    | Nonaktifkan tugas terjadwal      |
-| `picoclaw cron remove`     | Hapus tugas terjadwal            |
-| `picoclaw skills list`     | Daftar skill yang terinstal      |
-| `picoclaw skills install`  | Instal skill                     |
-| `picoclaw migrate`         | Migrasi data dari versi lama     |
-| `picoclaw auth login`      | Autentikasi dengan provider      |
+| `halfmoon onboard`         | Inisialisasi konfigurasi & workspace |
+| `halfmoon auth weixin` | Hubungkan akun WeChat via QR |
+| `halfmoon agent -m "..."` | Chat dengan agent                |
+| `halfmoon agent`           | Mode chat interaktif             |
+| `halfmoon gateway`         | Mulai gateway                    |
+| `halfmoon status`          | Tampilkan status                 |
+| `halfmoon version`         | Tampilkan info versi             |
+| `halfmoon model`           | Lihat atau ganti model default   |
+| `halfmoon cron list`       | Daftar semua tugas terjadwal     |
+| `halfmoon cron add ...`    | Tambah tugas terjadwal           |
+| `halfmoon cron disable`    | Nonaktifkan tugas terjadwal      |
+| `halfmoon cron remove`     | Hapus tugas terjadwal            |
+| `halfmoon skills list`     | Daftar skill yang terinstal      |
+| `halfmoon skills install`  | Instal skill                     |
+| `halfmoon migrate`         | Migrasi data dari versi lama     |
+| `halfmoon auth login`      | Autentikasi dengan provider      |
 
 ### ⏰ Tugas Terjadwal / Pengingat
 
-PicoClaw mendukung pengingat terjadwal dan tugas berulang melalui tool `cron`:
+Halfmoon mendukung pengingat terjadwal dan tugas berulang melalui tool `cron`:
 
 * **Pengingat satu kali**: "Ingatkan saya dalam 10 menit" -> terpicu sekali setelah 10 menit
 * **Tugas berulang**: "Ingatkan saya setiap 2 jam" -> terpicu setiap 2 jam

@@ -8,36 +8,36 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
-// GetPicoclawHome returns the picoclaw home directory.
-// Priority: $PICOCLAW_HOME > ~/.picoclaw
-func GetPicoclawHome() string {
+// GetHalfmoonHome returns the halfmoon home directory.
+// Priority: $HALFMOON_HOME > ~/.halfmoon
+func GetHalfmoonHome() string {
 	if home := os.Getenv(config.EnvHome); home != "" {
 		return home
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".picoclaw")
+	return filepath.Join(home, ".halfmoon")
 }
 
-// GetDefaultConfigPath returns the default path to the picoclaw config file.
+// GetDefaultConfigPath returns the default path to the halfmoon config file.
 func GetDefaultConfigPath() string {
 	if configPath := os.Getenv(config.EnvConfig); configPath != "" {
 		return configPath
 	}
-	return filepath.Join(GetPicoclawHome(), "config.json")
+	return filepath.Join(GetHalfmoonHome(), "config.json")
 }
 
-// FindPicoclawBinary locates the picoclaw executable.
+// FindHalfmoonBinary locates the halfmoon executable.
 // Search order:
-//  1. PICOCLAW_BINARY environment variable (explicit override)
+//  1. HALFMOON_BINARY environment variable (explicit override)
 //  2. Same directory as the current executable
-//  3. Falls back to "picoclaw" and relies on $PATH
-func FindPicoclawBinary() string {
-	binaryName := "picoclaw"
+//  3. Falls back to "halfmoon" and relies on $PATH
+func FindHalfmoonBinary() string {
+	binaryName := "halfmoon"
 	if runtime.GOOS == "windows" {
-		binaryName = "picoclaw.exe"
+		binaryName = "halfmoon.exe"
 	}
 
 	if p := os.Getenv(config.EnvBinary); p != "" {
@@ -53,7 +53,7 @@ func FindPicoclawBinary() string {
 		}
 	}
 
-	return "picoclaw"
+	return "halfmoon"
 }
 
 // GetLocalIP returns the local IP address of the machine.

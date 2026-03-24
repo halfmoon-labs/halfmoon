@@ -11,7 +11,7 @@
 | -------------------- | ---------------------------- | -------------------------------------------------------------------- |
 | `gemini`             | LLM (Gemini 直连)            | [aistudio.google.com](https://aistudio.google.com)                   |
 | `zhipu`              | LLM (智谱直连)               | [bigmodel.cn](https://bigmodel.cn)                                   |
-| `volcengine`         | LLM (火山引擎直连)           | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=PicoClaw&utm_content=PicoClaw&utm_medium=devrel&utm_source=OWO&utm_term=PicoClaw) |
+| `volcengine`         | LLM (火山引擎直连)           | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=Halfmoon&utm_content=Halfmoon&utm_medium=devrel&utm_source=OWO&utm_term=Halfmoon) |
 | `openrouter`         | LLM (推荐，可访问所有模型)   | [openrouter.ai](https://openrouter.ai)                               |
 | `anthropic`          | LLM (Claude 直连)            | [console.anthropic.com](https://console.anthropic.com)               |
 | `openai`             | LLM (GPT 直连)               | [platform.openai.com](https://platform.openai.com)                   |
@@ -29,7 +29,7 @@
 
 ### 模型配置 (model_list)
 
-> **新功能！** PicoClaw 现在采用**以模型为中心**的配置方式。只需使用 `厂商/模型` 格式（如 `zhipu/glm-4.7`）即可添加新的 provider——**无需修改任何代码！**
+> **新功能！** Halfmoon 现在采用**以模型为中心**的配置方式。只需使用 `厂商/模型` 格式（如 `zhipu/glm-4.7`）即可添加新的 provider——**无需修改任何代码！**
 
 该设计同时支持**多 Agent 场景**，提供灵活的 Provider 选择：
 
@@ -56,7 +56,7 @@
 | **LiteLLM Proxy**   | `litellm/`        | `http://localhost:4000/v1`                          | OpenAI    | 你的 LiteLLM 代理密钥                                             |
 | **VLLM**            | `vllm/`           | `http://localhost:8000/v1`                          | OpenAI    | 本地                                                              |
 | **Cerebras**        | `cerebras/`       | `https://api.cerebras.ai/v1`                        | OpenAI    | [获取密钥](https://cerebras.ai)                                   |
-| **火山引擎（Doubao）** | `volcengine/`  | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [获取密钥](https://www.volcengine.com/activity/codingplan?utm_campaign=PicoClaw&utm_content=PicoClaw&utm_medium=devrel&utm_source=OWO&utm_term=PicoClaw) |
+| **火山引擎（Doubao）** | `volcengine/`  | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [获取密钥](https://www.volcengine.com/activity/codingplan?utm_campaign=Halfmoon&utm_content=Halfmoon&utm_medium=devrel&utm_source=OWO&utm_term=Halfmoon) |
 | **神算云**          | `shengsuanyun/`   | `https://router.shengsuanyun.com/api/v1`            | OpenAI    | -                                                                 |
 | **BytePlus**        | `byteplus/`       | `https://ark.ap-southeast.bytepluses.com/api/v3`    | OpenAI    | [获取密钥](https://www.byteplus.com)                              |
 | **Vivgrid**         | `vivgrid/`        | `https://api.vivgrid.com/v1`                        | OpenAI    | [获取密钥](https://vivgrid.com)                                   |
@@ -103,7 +103,7 @@
 
 你可以通过 `voice.model_name` 为语音转录指定一个专用模型。这样可以直接复用已经配置好的、支持音频输入的多模态 provider，而不必只依赖 Groq。
 
-如果没有配置 `voice.model_name`，且存在 Groq API Key，PicoClaw 会继续回退到 Groq 转录。
+如果没有配置 `voice.model_name`，且存在 Groq API Key，Halfmoon 会继续回退到 Groq 转录。
 
 ```json
 {
@@ -178,7 +178,7 @@
 }
 ```
 
-> 运行 `picoclaw auth login --provider anthropic` 来设置 OAuth 凭证。
+> 运行 `halfmoon auth login --provider anthropic` 来设置 OAuth 凭证。
 
 **Anthropic Messages API（原生格式）**
 
@@ -232,11 +232,11 @@
 }
 ```
 
-PicoClaw 在发送请求前仅去除外层 `litellm/` 前缀，因此 `litellm/lite-gpt4` 会发送 `lite-gpt4`，而 `litellm/openai/gpt-4o` 会发送 `openai/gpt-4o`。
+Halfmoon 在发送请求前仅去除外层 `litellm/` 前缀，因此 `litellm/lite-gpt4` 会发送 `lite-gpt4`，而 `litellm/openai/gpt-4o` 会发送 `openai/gpt-4o`。
 
 #### 负载均衡
 
-为同一个模型名称配置多个端点——PicoClaw 会自动在它们之间轮询：
+为同一个模型名称配置多个端点——Halfmoon 会自动在它们之间轮询：
 
 ```json
 {
@@ -303,7 +303,7 @@ PicoClaw 在发送请求前仅去除外层 `litellm/` 前缀，因此 `litellm/l
 
 ### Provider 架构
 
-PicoClaw 按协议族路由 Provider：
+Halfmoon 按协议族路由 Provider：
 
 - OpenAI 兼容协议：OpenRouter、OpenAI 兼容网关、Groq、智谱、vLLM 风格端点。
 - Anthropic 协议：Claude 原生 API 行为。
@@ -324,7 +324,7 @@ PicoClaw 按协议族路由 Provider：
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.picoclaw/workspace",
+      "workspace": "~/.halfmoon/workspace",
       "model_name": "glm-4.7",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -343,7 +343,7 @@ PicoClaw 按协议族路由 Provider：
 **3. 运行**
 
 ```bash
-picoclaw agent -m "你好"
+halfmoon agent -m "你好"
 ```
 
 </details>

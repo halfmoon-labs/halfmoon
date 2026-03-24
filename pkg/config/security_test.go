@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 package config
 
@@ -34,8 +34,8 @@ func TestSecurityPath(t *testing.T) {
 	}{
 		{
 			name:      "standard path",
-			configDir: "/home/user/.picoclaw/config.json",
-			want:      "/home/user/.picoclaw/.security.yml",
+			configDir: "/home/user/.halfmoon/config.json",
+			want:      "/home/user/.halfmoon/.security.yml",
 		},
 		{
 			name:      "nested path",

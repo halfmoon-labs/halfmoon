@@ -16,10 +16,10 @@ import (
 	"github.com/tencent-connect/botgo/dto"
 	"github.com/tencent-connect/botgo/openapi/options"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/channels"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/media"
+	"github.com/halfmoon-labs/halfmoon/pkg/bus"
+	"github.com/halfmoon-labs/halfmoon/pkg/channels"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/media"
 )
 
 func TestHandleC2CMessage_IncludesAccountIDMetadata(t *testing.T) {

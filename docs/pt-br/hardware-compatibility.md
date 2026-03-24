@@ -1,8 +1,8 @@
 > Voltar ao [README](../../README.pt-br.md)
 
-# 🖥️ PicoClaw Lista de compatibilidade de hardware
+# 🖥️ Halfmoon Lista de compatibilidade de hardware
 
-O PicoClaw roda em praticamente qualquer dispositivo Linux. Esta página registra chips, produtos e placas de desenvolvimento verificados.
+O Halfmoon roda em praticamente qualquer dispositivo Linux. Esta página registra chips, produtos e placas de desenvolvimento verificados.
 
 **Seu hardware não está na lista?** Envie um PR para adicioná-lo! Fabricantes de hardware são bem-vindos para contribuir e co-promover.
 
@@ -59,7 +59,7 @@ O PicoClaw roda em praticamente qualquer dispositivo Linux. Esta página registr
 
 ## 2. Produtos verificados (por data de lançamento)
 
-Produtos de consumo, roteadores e dispositivos industriais testados com o PicoClaw.
+Produtos de consumo, roteadores e dispositivos industriais testados com o Halfmoon.
 
 | Ano | Produto | Arq | SoC | RAM | Categoria |
 |-----|---------|-----|-----|-----|-----------|
@@ -97,7 +97,7 @@ Produtos de consumo, roteadores e dispositivos industriais testados com o PicoCl
 
 ### Celulares Android (via Termux)
 
-Qualquer celular Android ARM64 (2015+) com 1GB+ de RAM. Instale o [Termux](https://github.com/termux/termux-app), use `proot` para rodar o PicoClaw.
+Qualquer celular Android ARM64 (2015+) com 1GB+ de RAM. Instale o [Termux](https://github.com/termux/termux-app), use `proot` para rodar o Halfmoon.
 
 > Veja [README: Rodar em celulares Android antigos](../../README.pt-br.md#-run-on-old-android-phones) para instruções de configuração.
 
@@ -131,13 +131,13 @@ Qualquer celular Android ARM64 (2015+) com 1GB+ de RAM. Instale o [Termux](https
 ```bash
 # 1. Baixar para sua arquitetura
 wget https://github.com/sipeed/picoclaw/releases/latest/download/picoclaw_Linux_arm64.tar.gz
-tar xzf picoclaw_Linux_arm64.tar.gz
+tar xzf halfmoon_Linux_arm64.tar.gz
 
 # 2. Inicializar
-./picoclaw onboard
+./halfmoon onboard
 
 # 3. Testar
-./picoclaw agent -m "Hello, what board am I running on?"
+./halfmoon agent -m "Hello, what board am I running on?"
 ```
 
 Builds disponíveis: `linux-amd64`, `linux-arm64`, `linux-arm`, `linux-riscv64`, `linux-loong64`, `linux-mipsle`

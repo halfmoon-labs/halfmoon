@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/auth"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/web/backend/utils"
+	"github.com/halfmoon-labs/halfmoon/pkg/auth"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/web/backend/utils"
 )
 
 func startLongRunningProcess(t *testing.T) *exec.Cmd {
@@ -756,11 +756,11 @@ func TestGatewayRestartReturnsErrorStatusWhenReplacementFailsToStart(t *testing.
 		t.Fatalf("SaveConfig() error = %v", err)
 	}
 
-	invalidBinaryPath := filepath.Join(t.TempDir(), "fake-picoclaw")
+	invalidBinaryPath := filepath.Join(t.TempDir(), "fake-halfmoon")
 	if err := os.WriteFile(invalidBinaryPath, []byte("#!/bin/sh\n"), 0o644); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
-	t.Setenv("PICOCLAW_BINARY", invalidBinaryPath)
+	t.Setenv("HALFMOON_BINARY", invalidBinaryPath)
 
 	h := NewHandler(configPath)
 	mux := http.NewServeMux()
@@ -933,29 +933,29 @@ func TestGatewayClearLogsResetsBufferedHistory(t *testing.T) {
 	}
 }
 
-func TestFindPicoclawBinary_EnvOverride(t *testing.T) {
+func TestFindHalfmoonBinary_EnvOverride(t *testing.T) {
 	// Create a temporary file to act as the mock binary
 	tmpDir := t.TempDir()
-	mockBinary := filepath.Join(tmpDir, "picoclaw-mock")
+	mockBinary := filepath.Join(tmpDir, "halfmoon-mock")
 	if err := os.WriteFile(mockBinary, []byte("mock"), 0o755); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
 
-	t.Setenv("PICOCLAW_BINARY", mockBinary)
+	t.Setenv("HALFMOON_BINARY", mockBinary)
 
-	got := utils.FindPicoclawBinary()
+	got := utils.FindHalfmoonBinary()
 	if got != mockBinary {
-		t.Errorf("FindPicoclawBinary() = %q, want %q", got, mockBinary)
+		t.Errorf("FindHalfmoonBinary() = %q, want %q", got, mockBinary)
 	}
 }
 
-func TestFindPicoclawBinary_EnvOverride_InvalidPath(t *testing.T) {
-	// When PICOCLAW_BINARY points to a non-existent path, fall through to next strategy
-	t.Setenv("PICOCLAW_BINARY", "/nonexistent/picoclaw-binary")
+func TestFindHalfmoonBinary_EnvOverride_InvalidPath(t *testing.T) {
+	// When HALFMOON_BINARY points to a non-existent path, fall through to next strategy
+	t.Setenv("HALFMOON_BINARY", "/nonexistent/halfmoon-binary")
 
-	got := utils.FindPicoclawBinary()
-	// Should not return the invalid path; falls back to "picoclaw" or another found path
-	if got == "/nonexistent/picoclaw-binary" {
-		t.Errorf("FindPicoclawBinary() returned invalid env path %q, expected fallback", got)
+	got := utils.FindHalfmoonBinary()
+	// Should not return the invalid path; falls back to "halfmoon" or another found path
+	if got == "/nonexistent/halfmoon-binary" {
+		t.Errorf("FindHalfmoonBinary() returned invalid env path %q, expected fallback", got)
 	}
 }

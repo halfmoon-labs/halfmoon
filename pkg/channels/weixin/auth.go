@@ -8,7 +8,7 @@ import (
 
 	"github.com/mdp/qrterminal/v3"
 
-	"github.com/sipeed/picoclaw/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 )
 
 // AuthFlowOpts configures the interactive QR login flow.

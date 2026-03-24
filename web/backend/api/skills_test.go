@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 func TestHandleListSkills(t *testing.T) {
@@ -54,15 +54,15 @@ func TestHandleListSkills(t *testing.T) {
 	}
 
 	builtinRoot := filepath.Join(t.TempDir(), "builtin-skills")
-	oldBuiltin := os.Getenv("PICOCLAW_BUILTIN_SKILLS")
-	if err := os.Setenv("PICOCLAW_BUILTIN_SKILLS", builtinRoot); err != nil {
-		t.Fatalf("Setenv(PICOCLAW_BUILTIN_SKILLS) error = %v", err)
+	oldBuiltin := os.Getenv("HALFMOON_BUILTIN_SKILLS")
+	if err := os.Setenv("HALFMOON_BUILTIN_SKILLS", builtinRoot); err != nil {
+		t.Fatalf("Setenv(HALFMOON_BUILTIN_SKILLS) error = %v", err)
 	}
 	defer func() {
 		if oldBuiltin == "" {
-			_ = os.Unsetenv("PICOCLAW_BUILTIN_SKILLS")
+			_ = os.Unsetenv("HALFMOON_BUILTIN_SKILLS")
 		} else {
-			_ = os.Setenv("PICOCLAW_BUILTIN_SKILLS", oldBuiltin)
+			_ = os.Setenv("HALFMOON_BUILTIN_SKILLS", oldBuiltin)
 		}
 	}()
 

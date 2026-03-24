@@ -1,9 +1,9 @@
 //go:build !bedrock
 
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 // Package bedrock provides a stub implementation when built without the bedrock tag.
 // To enable AWS Bedrock support, build with: go build -tags bedrock
@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/providers/protocoltypes"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers/protocoltypes"
 )
 
 type (

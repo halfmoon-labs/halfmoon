@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/skills"
-	"github.com/sipeed/picoclaw/pkg/utils"
+	"github.com/halfmoon-labs/halfmoon/pkg"
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/skills"
+	"github.com/halfmoon-labs/halfmoon/pkg/utils"
 )
 
 type ContextBuilder struct {
@@ -60,7 +60,7 @@ func getGlobalConfigDir() string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, pkg.DefaultPicoClawHome)
+	return filepath.Join(home, pkg.DefaultHalfmoonHome)
 }
 
 func NewContextBuilder(workspace string) *ContextBuilder {
@@ -86,9 +86,9 @@ func (cb *ContextBuilder) getIdentity() string {
 	version := config.FormatVersion()
 
 	return fmt.Sprintf(
-		`# picoclaw 🦞 (%s)
+		`# halfmoon 🌙 (%s)
 
-You are picoclaw, a helpful AI assistant.
+You are halfmoon, a helpful AI assistant.
 
 ## Workspace
 Your workspace is at: %s

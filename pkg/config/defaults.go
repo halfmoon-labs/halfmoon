@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// Halfmoon - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 Halfmoon contributors
 
 package config
 
@@ -9,19 +9,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sipeed/picoclaw/pkg"
+	"github.com/halfmoon-labs/halfmoon/pkg"
 )
 
-// DefaultConfig returns the default configuration for PicoClaw.
+// DefaultConfig returns the default configuration for Halfmoon.
 func DefaultConfig() *Config {
 	// Determine the base path for the workspace.
-	// Priority: $PICOCLAW_HOME > ~/.picoclaw
+	// Priority: $HALFMOON_HOME > ~/.halfmoon
 	var homePath string
-	if picoclawHome := os.Getenv(EnvHome); picoclawHome != "" {
-		homePath = picoclawHome
+	if halfmoonHome := os.Getenv(EnvHome); halfmoonHome != "" {
+		homePath = halfmoonHome
 	} else {
 		userHome, _ := os.UserHomeDir()
-		homePath = filepath.Join(userHome, pkg.DefaultPicoClawHome)
+		homePath = filepath.Join(userHome, pkg.DefaultHalfmoonHome)
 	}
 	workspacePath := filepath.Join(homePath, pkg.WorkspaceName)
 

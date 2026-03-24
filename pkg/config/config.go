@@ -10,10 +10,10 @@ import (
 
 	"github.com/caarlos0/env/v11"
 
-	"github.com/sipeed/picoclaw/pkg"
-	"github.com/sipeed/picoclaw/pkg/credential"
-	"github.com/sipeed/picoclaw/pkg/fileutil"
-	"github.com/sipeed/picoclaw/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg"
+	"github.com/halfmoon-labs/halfmoon/pkg/credential"
+	"github.com/halfmoon-labs/halfmoon/pkg/fileutil"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 )
 
 // rrCounter is a global counter for round-robin load balancing across models.
@@ -287,37 +287,37 @@ type RoutingConfig struct {
 
 // SubTurnConfig configures the SubTurn execution system.
 type SubTurnConfig struct {
-	MaxDepth              int `json:"max_depth"               env:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_MAX_DEPTH"`
-	MaxConcurrent         int `json:"max_concurrent"          env:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_MAX_CONCURRENT"`
-	DefaultTimeoutMinutes int `json:"default_timeout_minutes" env:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_DEFAULT_TIMEOUT_MINUTES"`
-	DefaultTokenBudget    int `json:"default_token_budget"    env:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_DEFAULT_TOKEN_BUDGET"`
-	ConcurrencyTimeoutSec int `json:"concurrency_timeout_sec" env:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_CONCURRENCY_TIMEOUT_SEC"`
+	MaxDepth              int `json:"max_depth"               env:"HALFMOON_AGENTS_DEFAULTS_SUBTURN_MAX_DEPTH"`
+	MaxConcurrent         int `json:"max_concurrent"          env:"HALFMOON_AGENTS_DEFAULTS_SUBTURN_MAX_CONCURRENT"`
+	DefaultTimeoutMinutes int `json:"default_timeout_minutes" env:"HALFMOON_AGENTS_DEFAULTS_SUBTURN_DEFAULT_TIMEOUT_MINUTES"`
+	DefaultTokenBudget    int `json:"default_token_budget"    env:"HALFMOON_AGENTS_DEFAULTS_SUBTURN_DEFAULT_TOKEN_BUDGET"`
+	ConcurrencyTimeoutSec int `json:"concurrency_timeout_sec" env:"HALFMOON_AGENTS_DEFAULTS_SUBTURN_CONCURRENCY_TIMEOUT_SEC"`
 }
 
 type ToolFeedbackConfig struct {
-	Enabled       bool `json:"enabled"         env:"PICOCLAW_AGENTS_DEFAULTS_TOOL_FEEDBACK_ENABLED"`
-	MaxArgsLength int  `json:"max_args_length" env:"PICOCLAW_AGENTS_DEFAULTS_TOOL_FEEDBACK_MAX_ARGS_LENGTH"`
+	Enabled       bool `json:"enabled"         env:"HALFMOON_AGENTS_DEFAULTS_TOOL_FEEDBACK_ENABLED"`
+	MaxArgsLength int  `json:"max_args_length" env:"HALFMOON_AGENTS_DEFAULTS_TOOL_FEEDBACK_MAX_ARGS_LENGTH"`
 }
 
 type AgentDefaults struct {
-	Workspace                 string             `json:"workspace"                       env:"PICOCLAW_AGENTS_DEFAULTS_WORKSPACE"`
-	RestrictToWorkspace       bool               `json:"restrict_to_workspace"           env:"PICOCLAW_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE"`
-	AllowReadOutsideWorkspace bool               `json:"allow_read_outside_workspace"    env:"PICOCLAW_AGENTS_DEFAULTS_ALLOW_READ_OUTSIDE_WORKSPACE"`
-	Provider                  string             `json:"provider"                        env:"PICOCLAW_AGENTS_DEFAULTS_PROVIDER"`
-	ModelName                 string             `json:"model_name"                      env:"PICOCLAW_AGENTS_DEFAULTS_MODEL_NAME"`
+	Workspace                 string             `json:"workspace"                       env:"HALFMOON_AGENTS_DEFAULTS_WORKSPACE"`
+	RestrictToWorkspace       bool               `json:"restrict_to_workspace"           env:"HALFMOON_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE"`
+	AllowReadOutsideWorkspace bool               `json:"allow_read_outside_workspace"    env:"HALFMOON_AGENTS_DEFAULTS_ALLOW_READ_OUTSIDE_WORKSPACE"`
+	Provider                  string             `json:"provider"                        env:"HALFMOON_AGENTS_DEFAULTS_PROVIDER"`
+	ModelName                 string             `json:"model_name"                      env:"HALFMOON_AGENTS_DEFAULTS_MODEL_NAME"`
 	ModelFallbacks            []string           `json:"model_fallbacks,omitempty"`
-	ImageModel                string             `json:"image_model,omitempty"           env:"PICOCLAW_AGENTS_DEFAULTS_IMAGE_MODEL"`
+	ImageModel                string             `json:"image_model,omitempty"           env:"HALFMOON_AGENTS_DEFAULTS_IMAGE_MODEL"`
 	ImageModelFallbacks       []string           `json:"image_model_fallbacks,omitempty"`
-	MaxTokens                 int                `json:"max_tokens"                      env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOKENS"`
-	ContextWindow             int                `json:"context_window,omitempty"        env:"PICOCLAW_AGENTS_DEFAULTS_CONTEXT_WINDOW"`
-	Temperature               *float64           `json:"temperature,omitempty"           env:"PICOCLAW_AGENTS_DEFAULTS_TEMPERATURE"`
-	MaxToolIterations         int                `json:"max_tool_iterations"             env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
-	SummarizeMessageThreshold int                `json:"summarize_message_threshold"     env:"PICOCLAW_AGENTS_DEFAULTS_SUMMARIZE_MESSAGE_THRESHOLD"`
-	SummarizeTokenPercent     int                `json:"summarize_token_percent"         env:"PICOCLAW_AGENTS_DEFAULTS_SUMMARIZE_TOKEN_PERCENT"`
-	MaxMediaSize              int                `json:"max_media_size,omitempty"        env:"PICOCLAW_AGENTS_DEFAULTS_MAX_MEDIA_SIZE"`
+	MaxTokens                 int                `json:"max_tokens"                      env:"HALFMOON_AGENTS_DEFAULTS_MAX_TOKENS"`
+	ContextWindow             int                `json:"context_window,omitempty"        env:"HALFMOON_AGENTS_DEFAULTS_CONTEXT_WINDOW"`
+	Temperature               *float64           `json:"temperature,omitempty"           env:"HALFMOON_AGENTS_DEFAULTS_TEMPERATURE"`
+	MaxToolIterations         int                `json:"max_tool_iterations"             env:"HALFMOON_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
+	SummarizeMessageThreshold int                `json:"summarize_message_threshold"     env:"HALFMOON_AGENTS_DEFAULTS_SUMMARIZE_MESSAGE_THRESHOLD"`
+	SummarizeTokenPercent     int                `json:"summarize_token_percent"         env:"HALFMOON_AGENTS_DEFAULTS_SUMMARIZE_TOKEN_PERCENT"`
+	MaxMediaSize              int                `json:"max_media_size,omitempty"        env:"HALFMOON_AGENTS_DEFAULTS_MAX_MEDIA_SIZE"`
 	Routing                   *RoutingConfig     `json:"routing,omitempty"`
-	SteeringMode              string             `json:"steering_mode,omitempty"         env:"PICOCLAW_AGENTS_DEFAULTS_STEERING_MODE"` // "one-at-a-time" (default) or "all"
-	SubTurn                   SubTurnConfig      `json:"subturn"                                                                                     envPrefix:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_"`
+	SteeringMode              string             `json:"steering_mode,omitempty"         env:"HALFMOON_AGENTS_DEFAULTS_STEERING_MODE"` // "one-at-a-time" (default) or "all"
+	SubTurn                   SubTurnConfig      `json:"subturn"                                                                                     envPrefix:"HALFMOON_AGENTS_DEFAULTS_SUBTURN_"`
 	ToolFeedback              ToolFeedbackConfig `json:"tool_feedback,omitempty"`
 }
 
@@ -391,32 +391,32 @@ type PlaceholderConfig struct {
 }
 
 type StreamingConfig struct {
-	Enabled         bool `json:"enabled,omitempty"          env:"PICOCLAW_CHANNELS_TELEGRAM_STREAMING_ENABLED"`
-	ThrottleSeconds int  `json:"throttle_seconds,omitempty" env:"PICOCLAW_CHANNELS_TELEGRAM_STREAMING_THROTTLE_SECONDS"`
-	MinGrowthChars  int  `json:"min_growth_chars,omitempty" env:"PICOCLAW_CHANNELS_TELEGRAM_STREAMING_MIN_GROWTH_CHARS"`
+	Enabled         bool `json:"enabled,omitempty"          env:"HALFMOON_CHANNELS_TELEGRAM_STREAMING_ENABLED"`
+	ThrottleSeconds int  `json:"throttle_seconds,omitempty" env:"HALFMOON_CHANNELS_TELEGRAM_STREAMING_THROTTLE_SECONDS"`
+	MinGrowthChars  int  `json:"min_growth_chars,omitempty" env:"HALFMOON_CHANNELS_TELEGRAM_STREAMING_MIN_GROWTH_CHARS"`
 }
 
 type WhatsAppConfig struct {
-	Enabled            bool                `json:"enabled"              env:"PICOCLAW_CHANNELS_WHATSAPP_ENABLED"`
-	BridgeURL          string              `json:"bridge_url"           env:"PICOCLAW_CHANNELS_WHATSAPP_BRIDGE_URL"`
-	UseNative          bool                `json:"use_native"           env:"PICOCLAW_CHANNELS_WHATSAPP_USE_NATIVE"`
-	SessionStorePath   string              `json:"session_store_path"   env:"PICOCLAW_CHANNELS_WHATSAPP_SESSION_STORE_PATH"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"PICOCLAW_CHANNELS_WHATSAPP_ALLOW_FROM"`
-	ReasoningChannelID string              `json:"reasoning_channel_id" env:"PICOCLAW_CHANNELS_WHATSAPP_REASONING_CHANNEL_ID"`
+	Enabled            bool                `json:"enabled"              env:"HALFMOON_CHANNELS_WHATSAPP_ENABLED"`
+	BridgeURL          string              `json:"bridge_url"           env:"HALFMOON_CHANNELS_WHATSAPP_BRIDGE_URL"`
+	UseNative          bool                `json:"use_native"           env:"HALFMOON_CHANNELS_WHATSAPP_USE_NATIVE"`
+	SessionStorePath   string              `json:"session_store_path"   env:"HALFMOON_CHANNELS_WHATSAPP_SESSION_STORE_PATH"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"HALFMOON_CHANNELS_WHATSAPP_ALLOW_FROM"`
+	ReasoningChannelID string              `json:"reasoning_channel_id" env:"HALFMOON_CHANNELS_WHATSAPP_REASONING_CHANNEL_ID"`
 }
 
 type TelegramConfig struct {
-	Enabled            bool `json:"enabled"                 env:"PICOCLAW_CHANNELS_TELEGRAM_ENABLED"`
+	Enabled            bool `json:"enabled"                 env:"HALFMOON_CHANNELS_TELEGRAM_ENABLED"`
 	token              string
-	BaseURL            string              `json:"base_url"                env:"PICOCLAW_CHANNELS_TELEGRAM_BASE_URL"`
-	Proxy              string              `json:"proxy"                   env:"PICOCLAW_CHANNELS_TELEGRAM_PROXY"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_TELEGRAM_ALLOW_FROM"`
+	BaseURL            string              `json:"base_url"                env:"HALFMOON_CHANNELS_TELEGRAM_BASE_URL"`
+	Proxy              string              `json:"proxy"                   env:"HALFMOON_CHANNELS_TELEGRAM_PROXY"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_TELEGRAM_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
 	Streaming          StreamingConfig     `json:"streaming,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_TELEGRAM_REASONING_CHANNEL_ID"`
-	UseMarkdownV2      bool                `json:"use_markdown_v2"         env:"PICOCLAW_CHANNELS_TELEGRAM_USE_MARKDOWN_V2"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_TELEGRAM_REASONING_CHANNEL_ID"`
+	UseMarkdownV2      bool                `json:"use_markdown_v2"         env:"HALFMOON_CHANNELS_TELEGRAM_USE_MARKDOWN_V2"`
 	secDirty           bool
 }
 
@@ -432,17 +432,17 @@ func (c *TelegramConfig) SetToken(token string) {
 }
 
 type FeishuConfig struct {
-	Enabled             bool   `json:"enabled"                 env:"PICOCLAW_CHANNELS_FEISHU_ENABLED"`
-	AppID               string `json:"app_id"                  env:"PICOCLAW_CHANNELS_FEISHU_APP_ID"`
+	Enabled             bool   `json:"enabled"                 env:"HALFMOON_CHANNELS_FEISHU_ENABLED"`
+	AppID               string `json:"app_id"                  env:"HALFMOON_CHANNELS_FEISHU_APP_ID"`
 	appSecret           string
 	encryptKey          string
 	verificationToken   string
-	AllowFrom           FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_FEISHU_ALLOW_FROM"`
+	AllowFrom           FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_FEISHU_ALLOW_FROM"`
 	GroupTrigger        GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Placeholder         PlaceholderConfig   `json:"placeholder,omitempty"`
-	ReasoningChannelID  string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_FEISHU_REASONING_CHANNEL_ID"`
-	RandomReactionEmoji FlexibleStringSlice `json:"random_reaction_emoji"   env:"PICOCLAW_CHANNELS_FEISHU_RANDOM_REACTION_EMOJI"`
-	IsLark              bool                `json:"is_lark"                 env:"PICOCLAW_CHANNELS_FEISHU_IS_LARK"`
+	ReasoningChannelID  string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_FEISHU_REASONING_CHANNEL_ID"`
+	RandomReactionEmoji FlexibleStringSlice `json:"random_reaction_emoji"   env:"HALFMOON_CHANNELS_FEISHU_RANDOM_REACTION_EMOJI"`
+	IsLark              bool                `json:"is_lark"                 env:"HALFMOON_CHANNELS_FEISHU_IS_LARK"`
 	secDirty            bool
 }
 
@@ -480,15 +480,15 @@ func (c *FeishuConfig) SetVerificationToken(token string) {
 }
 
 type DiscordConfig struct {
-	Enabled            bool `json:"enabled"                 env:"PICOCLAW_CHANNELS_DISCORD_ENABLED"`
+	Enabled            bool `json:"enabled"                 env:"HALFMOON_CHANNELS_DISCORD_ENABLED"`
 	token              string
-	Proxy              string              `json:"proxy"                   env:"PICOCLAW_CHANNELS_DISCORD_PROXY"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_DISCORD_ALLOW_FROM"`
-	MentionOnly        bool                `json:"mention_only"            env:"PICOCLAW_CHANNELS_DISCORD_MENTION_ONLY"`
+	Proxy              string              `json:"proxy"                   env:"HALFMOON_CHANNELS_DISCORD_PROXY"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_DISCORD_ALLOW_FROM"`
+	MentionOnly        bool                `json:"mention_only"            env:"HALFMOON_CHANNELS_DISCORD_MENTION_ONLY"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_DISCORD_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_DISCORD_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -504,23 +504,23 @@ func (c *DiscordConfig) SetToken(token string) {
 }
 
 type MaixCamConfig struct {
-	Enabled            bool                `json:"enabled"              env:"PICOCLAW_CHANNELS_MAIXCAM_ENABLED"`
-	Host               string              `json:"host"                 env:"PICOCLAW_CHANNELS_MAIXCAM_HOST"`
-	Port               int                 `json:"port"                 env:"PICOCLAW_CHANNELS_MAIXCAM_PORT"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"PICOCLAW_CHANNELS_MAIXCAM_ALLOW_FROM"`
-	ReasoningChannelID string              `json:"reasoning_channel_id" env:"PICOCLAW_CHANNELS_MAIXCAM_REASONING_CHANNEL_ID"`
+	Enabled            bool                `json:"enabled"              env:"HALFMOON_CHANNELS_MAIXCAM_ENABLED"`
+	Host               string              `json:"host"                 env:"HALFMOON_CHANNELS_MAIXCAM_HOST"`
+	Port               int                 `json:"port"                 env:"HALFMOON_CHANNELS_MAIXCAM_PORT"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"HALFMOON_CHANNELS_MAIXCAM_ALLOW_FROM"`
+	ReasoningChannelID string              `json:"reasoning_channel_id" env:"HALFMOON_CHANNELS_MAIXCAM_REASONING_CHANNEL_ID"`
 }
 
 type QQConfig struct {
-	Enabled              bool   `json:"enabled"                  env:"PICOCLAW_CHANNELS_QQ_ENABLED"`
-	AppID                string `json:"app_id"                   env:"PICOCLAW_CHANNELS_QQ_APP_ID"`
+	Enabled              bool   `json:"enabled"                  env:"HALFMOON_CHANNELS_QQ_ENABLED"`
+	AppID                string `json:"app_id"                   env:"HALFMOON_CHANNELS_QQ_APP_ID"`
 	appSecret            string
-	AllowFrom            FlexibleStringSlice `json:"allow_from"               env:"PICOCLAW_CHANNELS_QQ_ALLOW_FROM"`
+	AllowFrom            FlexibleStringSlice `json:"allow_from"               env:"HALFMOON_CHANNELS_QQ_ALLOW_FROM"`
 	GroupTrigger         GroupTriggerConfig  `json:"group_trigger,omitempty"`
-	MaxMessageLength     int                 `json:"max_message_length"       env:"PICOCLAW_CHANNELS_QQ_MAX_MESSAGE_LENGTH"`
-	MaxBase64FileSizeMiB int64               `json:"max_base64_file_size_mib" env:"PICOCLAW_CHANNELS_QQ_MAX_BASE64_FILE_SIZE_MIB"`
-	SendMarkdown         bool                `json:"send_markdown"            env:"PICOCLAW_CHANNELS_QQ_SEND_MARKDOWN"`
-	ReasoningChannelID   string              `json:"reasoning_channel_id"     env:"PICOCLAW_CHANNELS_QQ_REASONING_CHANNEL_ID"`
+	MaxMessageLength     int                 `json:"max_message_length"       env:"HALFMOON_CHANNELS_QQ_MAX_MESSAGE_LENGTH"`
+	MaxBase64FileSizeMiB int64               `json:"max_base64_file_size_mib" env:"HALFMOON_CHANNELS_QQ_MAX_BASE64_FILE_SIZE_MIB"`
+	SendMarkdown         bool                `json:"send_markdown"            env:"HALFMOON_CHANNELS_QQ_SEND_MARKDOWN"`
+	ReasoningChannelID   string              `json:"reasoning_channel_id"     env:"HALFMOON_CHANNELS_QQ_REASONING_CHANNEL_ID"`
 	secDirty             bool
 }
 
@@ -536,12 +536,12 @@ func (c *QQConfig) SetAppSecret(secret string) {
 }
 
 type DingTalkConfig struct {
-	Enabled            bool   `json:"enabled"                 env:"PICOCLAW_CHANNELS_DINGTALK_ENABLED"`
-	ClientID           string `json:"client_id"               env:"PICOCLAW_CHANNELS_DINGTALK_CLIENT_ID"`
+	Enabled            bool   `json:"enabled"                 env:"HALFMOON_CHANNELS_DINGTALK_ENABLED"`
+	ClientID           string `json:"client_id"               env:"HALFMOON_CHANNELS_DINGTALK_CLIENT_ID"`
 	clientSecret       string
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_DINGTALK_ALLOW_FROM"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_DINGTALK_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_DINGTALK_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_DINGTALK_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -557,14 +557,14 @@ func (c *DingTalkConfig) SetClientSecret(secret string) {
 }
 
 type SlackConfig struct {
-	Enabled            bool `json:"enabled"                 env:"PICOCLAW_CHANNELS_SLACK_ENABLED"`
+	Enabled            bool `json:"enabled"                 env:"HALFMOON_CHANNELS_SLACK_ENABLED"`
 	botToken           string
 	appToken           string
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_SLACK_ALLOW_FROM"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_SLACK_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_SLACK_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_SLACK_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -591,17 +591,17 @@ func (c *SlackConfig) SetAppToken(token string) {
 }
 
 type MatrixConfig struct {
-	Enabled            bool   `json:"enabled"                  env:"PICOCLAW_CHANNELS_MATRIX_ENABLED"`
-	Homeserver         string `json:"homeserver"               env:"PICOCLAW_CHANNELS_MATRIX_HOMESERVER"`
-	UserID             string `json:"user_id"                  env:"PICOCLAW_CHANNELS_MATRIX_USER_ID"`
+	Enabled            bool   `json:"enabled"                  env:"HALFMOON_CHANNELS_MATRIX_ENABLED"`
+	Homeserver         string `json:"homeserver"               env:"HALFMOON_CHANNELS_MATRIX_HOMESERVER"`
+	UserID             string `json:"user_id"                  env:"HALFMOON_CHANNELS_MATRIX_USER_ID"`
 	accessToken        string
-	DeviceID           string              `json:"device_id,omitempty"      env:"PICOCLAW_CHANNELS_MATRIX_DEVICE_ID"`
-	JoinOnInvite       bool                `json:"join_on_invite"           env:"PICOCLAW_CHANNELS_MATRIX_JOIN_ON_INVITE"`
-	MessageFormat      string              `json:"message_format,omitempty" env:"PICOCLAW_CHANNELS_MATRIX_MESSAGE_FORMAT"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"               env:"PICOCLAW_CHANNELS_MATRIX_ALLOW_FROM"`
+	DeviceID           string              `json:"device_id,omitempty"      env:"HALFMOON_CHANNELS_MATRIX_DEVICE_ID"`
+	JoinOnInvite       bool                `json:"join_on_invite"           env:"HALFMOON_CHANNELS_MATRIX_JOIN_ON_INVITE"`
+	MessageFormat      string              `json:"message_format,omitempty" env:"HALFMOON_CHANNELS_MATRIX_MESSAGE_FORMAT"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"               env:"HALFMOON_CHANNELS_MATRIX_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"     env:"PICOCLAW_CHANNELS_MATRIX_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"     env:"HALFMOON_CHANNELS_MATRIX_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -617,17 +617,17 @@ func (c *MatrixConfig) SetAccessToken(token string) {
 }
 
 type LINEConfig struct {
-	Enabled            bool `json:"enabled"                 env:"PICOCLAW_CHANNELS_LINE_ENABLED"`
+	Enabled            bool `json:"enabled"                 env:"HALFMOON_CHANNELS_LINE_ENABLED"`
 	channelSecret      string
 	channelAccessToken string
-	WebhookHost        string              `json:"webhook_host"            env:"PICOCLAW_CHANNELS_LINE_WEBHOOK_HOST"`
-	WebhookPort        int                 `json:"webhook_port"            env:"PICOCLAW_CHANNELS_LINE_WEBHOOK_PORT"`
-	WebhookPath        string              `json:"webhook_path"            env:"PICOCLAW_CHANNELS_LINE_WEBHOOK_PATH"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_LINE_ALLOW_FROM"`
+	WebhookHost        string              `json:"webhook_host"            env:"HALFMOON_CHANNELS_LINE_WEBHOOK_HOST"`
+	WebhookPort        int                 `json:"webhook_port"            env:"HALFMOON_CHANNELS_LINE_WEBHOOK_PORT"`
+	WebhookPath        string              `json:"webhook_path"            env:"HALFMOON_CHANNELS_LINE_WEBHOOK_PATH"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_LINE_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_LINE_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_LINE_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -654,16 +654,16 @@ func (c *LINEConfig) SetChannelAccessToken(token string) {
 }
 
 type OneBotConfig struct {
-	Enabled            bool   `json:"enabled"                 env:"PICOCLAW_CHANNELS_ONEBOT_ENABLED"`
-	WSUrl              string `json:"ws_url"                  env:"PICOCLAW_CHANNELS_ONEBOT_WS_URL"`
+	Enabled            bool   `json:"enabled"                 env:"HALFMOON_CHANNELS_ONEBOT_ENABLED"`
+	WSUrl              string `json:"ws_url"                  env:"HALFMOON_CHANNELS_ONEBOT_WS_URL"`
 	accessToken        string
-	ReconnectInterval  int                 `json:"reconnect_interval"      env:"PICOCLAW_CHANNELS_ONEBOT_RECONNECT_INTERVAL"`
-	GroupTriggerPrefix []string            `json:"group_trigger_prefix"    env:"PICOCLAW_CHANNELS_ONEBOT_GROUP_TRIGGER_PREFIX"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_ONEBOT_ALLOW_FROM"`
+	ReconnectInterval  int                 `json:"reconnect_interval"      env:"HALFMOON_CHANNELS_ONEBOT_RECONNECT_INTERVAL"`
+	GroupTriggerPrefix []string            `json:"group_trigger_prefix"    env:"HALFMOON_CHANNELS_ONEBOT_GROUP_TRIGGER_PREFIX"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_ONEBOT_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_ONEBOT_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_ONEBOT_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -679,17 +679,17 @@ func (c *OneBotConfig) SetAccessToken(token string) {
 }
 
 type WeComConfig struct {
-	Enabled            bool `json:"enabled"                 env:"PICOCLAW_CHANNELS_WECOM_ENABLED"`
+	Enabled            bool `json:"enabled"                 env:"HALFMOON_CHANNELS_WECOM_ENABLED"`
 	token              string
 	encodingAESKey     string
-	WebhookURL         string              `json:"webhook_url"             env:"PICOCLAW_CHANNELS_WECOM_WEBHOOK_URL"`
-	WebhookHost        string              `json:"webhook_host"            env:"PICOCLAW_CHANNELS_WECOM_WEBHOOK_HOST"`
-	WebhookPort        int                 `json:"webhook_port"            env:"PICOCLAW_CHANNELS_WECOM_WEBHOOK_PORT"`
-	WebhookPath        string              `json:"webhook_path"            env:"PICOCLAW_CHANNELS_WECOM_WEBHOOK_PATH"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_WECOM_ALLOW_FROM"`
-	ReplyTimeout       int                 `json:"reply_timeout"           env:"PICOCLAW_CHANNELS_WECOM_REPLY_TIMEOUT"`
+	WebhookURL         string              `json:"webhook_url"             env:"HALFMOON_CHANNELS_WECOM_WEBHOOK_URL"`
+	WebhookHost        string              `json:"webhook_host"            env:"HALFMOON_CHANNELS_WECOM_WEBHOOK_HOST"`
+	WebhookPort        int                 `json:"webhook_port"            env:"HALFMOON_CHANNELS_WECOM_WEBHOOK_PORT"`
+	WebhookPath        string              `json:"webhook_path"            env:"HALFMOON_CHANNELS_WECOM_WEBHOOK_PATH"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_WECOM_ALLOW_FROM"`
+	ReplyTimeout       int                 `json:"reply_timeout"           env:"HALFMOON_CHANNELS_WECOM_REPLY_TIMEOUT"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_WECOM_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_WECOM_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -716,19 +716,19 @@ func (c *WeComConfig) SetEncodingAESKey(key string) {
 }
 
 type WeComAppConfig struct {
-	Enabled            bool   `json:"enabled"                 env:"PICOCLAW_CHANNELS_WECOM_APP_ENABLED"`
-	CorpID             string `json:"corp_id"                 env:"PICOCLAW_CHANNELS_WECOM_APP_CORP_ID"`
+	Enabled            bool   `json:"enabled"                 env:"HALFMOON_CHANNELS_WECOM_APP_ENABLED"`
+	CorpID             string `json:"corp_id"                 env:"HALFMOON_CHANNELS_WECOM_APP_CORP_ID"`
 	corpSecret         string
-	AgentID            int64 `json:"agent_id"                env:"PICOCLAW_CHANNELS_WECOM_APP_AGENT_ID"`
+	AgentID            int64 `json:"agent_id"                env:"HALFMOON_CHANNELS_WECOM_APP_AGENT_ID"`
 	token              string
 	encodingAESKey     string
-	WebhookHost        string              `json:"webhook_host"            env:"PICOCLAW_CHANNELS_WECOM_APP_WEBHOOK_HOST"`
-	WebhookPort        int                 `json:"webhook_port"            env:"PICOCLAW_CHANNELS_WECOM_APP_WEBHOOK_PORT"`
-	WebhookPath        string              `json:"webhook_path"            env:"PICOCLAW_CHANNELS_WECOM_APP_WEBHOOK_PATH"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_WECOM_APP_ALLOW_FROM"`
-	ReplyTimeout       int                 `json:"reply_timeout"           env:"PICOCLAW_CHANNELS_WECOM_APP_REPLY_TIMEOUT"`
+	WebhookHost        string              `json:"webhook_host"            env:"HALFMOON_CHANNELS_WECOM_APP_WEBHOOK_HOST"`
+	WebhookPort        int                 `json:"webhook_port"            env:"HALFMOON_CHANNELS_WECOM_APP_WEBHOOK_PORT"`
+	WebhookPath        string              `json:"webhook_path"            env:"HALFMOON_CHANNELS_WECOM_APP_WEBHOOK_PATH"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_WECOM_APP_ALLOW_FROM"`
+	ReplyTimeout       int                 `json:"reply_timeout"           env:"HALFMOON_CHANNELS_WECOM_APP_REPLY_TIMEOUT"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_WECOM_APP_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_WECOM_APP_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -766,18 +766,18 @@ func (c *WeComAppConfig) SetEncodingAESKey(key string) {
 }
 
 type WeComAIBotConfig struct {
-	Enabled            bool   `json:"enabled"                      env:"PICOCLAW_CHANNELS_WECOM_AIBOT_ENABLED"`
-	BotID              string `json:"bot_id,omitempty"             env:"PICOCLAW_CHANNELS_WECOM_AIBOT_BOT_ID"`
+	Enabled            bool   `json:"enabled"                      env:"HALFMOON_CHANNELS_WECOM_AIBOT_ENABLED"`
+	BotID              string `json:"bot_id,omitempty"             env:"HALFMOON_CHANNELS_WECOM_AIBOT_BOT_ID"`
 	secret             string
 	token              string
 	encodingAESKey     string
-	WebhookPath        string              `json:"webhook_path,omitempty"       env:"PICOCLAW_CHANNELS_WECOM_AIBOT_WEBHOOK_PATH"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"                   env:"PICOCLAW_CHANNELS_WECOM_AIBOT_ALLOW_FROM"`
-	ReplyTimeout       int                 `json:"reply_timeout"                env:"PICOCLAW_CHANNELS_WECOM_AIBOT_REPLY_TIMEOUT"`
-	MaxSteps           int                 `json:"max_steps"                    env:"PICOCLAW_CHANNELS_WECOM_AIBOT_MAX_STEPS"`       // Maximum streaming steps
-	WelcomeMessage     string              `json:"welcome_message"              env:"PICOCLAW_CHANNELS_WECOM_AIBOT_WELCOME_MESSAGE"` // Sent on enter_chat event; empty = no welcome
-	ProcessingMessage  string              `json:"processing_message,omitempty" env:"PICOCLAW_CHANNELS_WECOM_AIBOT_PROCESSING_MESSAGE"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"         env:"PICOCLAW_CHANNELS_WECOM_AIBOT_REASONING_CHANNEL_ID"`
+	WebhookPath        string              `json:"webhook_path,omitempty"       env:"HALFMOON_CHANNELS_WECOM_AIBOT_WEBHOOK_PATH"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"                   env:"HALFMOON_CHANNELS_WECOM_AIBOT_ALLOW_FROM"`
+	ReplyTimeout       int                 `json:"reply_timeout"                env:"HALFMOON_CHANNELS_WECOM_AIBOT_REPLY_TIMEOUT"`
+	MaxSteps           int                 `json:"max_steps"                    env:"HALFMOON_CHANNELS_WECOM_AIBOT_MAX_STEPS"`       // Maximum streaming steps
+	WelcomeMessage     string              `json:"welcome_message"              env:"HALFMOON_CHANNELS_WECOM_AIBOT_WELCOME_MESSAGE"` // Sent on enter_chat event; empty = no welcome
+	ProcessingMessage  string              `json:"processing_message,omitempty" env:"HALFMOON_CHANNELS_WECOM_AIBOT_PROCESSING_MESSAGE"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"         env:"HALFMOON_CHANNELS_WECOM_AIBOT_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -813,14 +813,14 @@ func (c *WeComAIBotConfig) SetSecret(secret string) {
 }
 
 type WeixinConfig struct {
-	Enabled            bool `json:"enabled"              env:"PICOCLAW_CHANNELS_WEIXIN_ENABLED"`
+	Enabled            bool `json:"enabled"              env:"HALFMOON_CHANNELS_WEIXIN_ENABLED"`
 	token              string
-	AccountID          string              `json:"account_id,omitempty" env:"PICOCLAW_CHANNELS_WEIXIN_ACCOUNT_ID"`
-	BaseURL            string              `json:"base_url"             env:"PICOCLAW_CHANNELS_WEIXIN_BASE_URL"`
-	CDNBaseURL         string              `json:"cdn_base_url"         env:"PICOCLAW_CHANNELS_WEIXIN_CDN_BASE_URL"`
-	Proxy              string              `json:"proxy"                env:"PICOCLAW_CHANNELS_WEIXIN_PROXY"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"PICOCLAW_CHANNELS_WEIXIN_ALLOW_FROM"`
-	ReasoningChannelID string              `json:"reasoning_channel_id" env:"PICOCLAW_CHANNELS_WEIXIN_REASONING_CHANNEL_ID"`
+	AccountID          string              `json:"account_id,omitempty" env:"HALFMOON_CHANNELS_WEIXIN_ACCOUNT_ID"`
+	BaseURL            string              `json:"base_url"             env:"HALFMOON_CHANNELS_WEIXIN_BASE_URL"`
+	CDNBaseURL         string              `json:"cdn_base_url"         env:"HALFMOON_CHANNELS_WEIXIN_CDN_BASE_URL"`
+	Proxy              string              `json:"proxy"                env:"HALFMOON_CHANNELS_WEIXIN_PROXY"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"HALFMOON_CHANNELS_WEIXIN_ALLOW_FROM"`
+	ReasoningChannelID string              `json:"reasoning_channel_id" env:"HALFMOON_CHANNELS_WEIXIN_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -835,7 +835,7 @@ func (c *WeixinConfig) SetToken(token string) *WeixinConfig {
 }
 
 type PicoConfig struct {
-	Enabled         bool `json:"enabled"                     env:"PICOCLAW_CHANNELS_PICO_ENABLED"`
+	Enabled         bool `json:"enabled"                     env:"HALFMOON_CHANNELS_PICO_ENABLED"`
 	token           string
 	AllowTokenQuery bool                `json:"allow_token_query,omitempty"`
 	AllowOrigins    []string            `json:"allow_origins,omitempty"`
@@ -843,7 +843,7 @@ type PicoConfig struct {
 	ReadTimeout     int                 `json:"read_timeout,omitempty"`
 	WriteTimeout    int                 `json:"write_timeout,omitempty"`
 	MaxConnections  int                 `json:"max_connections,omitempty"`
-	AllowFrom       FlexibleStringSlice `json:"allow_from"                  env:"PICOCLAW_CHANNELS_PICO_ALLOW_FROM"`
+	AllowFrom       FlexibleStringSlice `json:"allow_from"                  env:"HALFMOON_CHANNELS_PICO_ALLOW_FROM"`
 	Placeholder     PlaceholderConfig   `json:"placeholder,omitempty"`
 	secDirty        bool
 }
@@ -860,32 +860,32 @@ func (c *PicoConfig) SetToken(token string) {
 }
 
 type PicoClientConfig struct {
-	Enabled      bool                `json:"enabled"                 env:"PICOCLAW_CHANNELS_PICO_CLIENT_ENABLED"`
-	URL          string              `json:"url"                     env:"PICOCLAW_CHANNELS_PICO_CLIENT_URL"`
-	Token        string              `json:"token"                   env:"PICOCLAW_CHANNELS_PICO_CLIENT_TOKEN"`
+	Enabled      bool                `json:"enabled"                 env:"HALFMOON_CHANNELS_PICO_CLIENT_ENABLED"`
+	URL          string              `json:"url"                     env:"HALFMOON_CHANNELS_PICO_CLIENT_URL"`
+	Token        string              `json:"token"                   env:"HALFMOON_CHANNELS_PICO_CLIENT_TOKEN"`
 	SessionID    string              `json:"session_id,omitempty"`
 	PingInterval int                 `json:"ping_interval,omitempty"`
 	ReadTimeout  int                 `json:"read_timeout,omitempty"`
-	AllowFrom    FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_PICO_CLIENT_ALLOW_FROM"`
+	AllowFrom    FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_PICO_CLIENT_ALLOW_FROM"`
 }
 
 type IRCConfig struct {
-	Enabled            bool   `json:"enabled"                 env:"PICOCLAW_CHANNELS_IRC_ENABLED"`
-	Server             string `json:"server"                  env:"PICOCLAW_CHANNELS_IRC_SERVER"`
-	TLS                bool   `json:"tls"                     env:"PICOCLAW_CHANNELS_IRC_TLS"`
-	Nick               string `json:"nick"                    env:"PICOCLAW_CHANNELS_IRC_NICK"`
-	User               string `json:"user,omitempty"          env:"PICOCLAW_CHANNELS_IRC_USER"`
-	RealName           string `json:"real_name,omitempty"     env:"PICOCLAW_CHANNELS_IRC_REAL_NAME"`
+	Enabled            bool   `json:"enabled"                 env:"HALFMOON_CHANNELS_IRC_ENABLED"`
+	Server             string `json:"server"                  env:"HALFMOON_CHANNELS_IRC_SERVER"`
+	TLS                bool   `json:"tls"                     env:"HALFMOON_CHANNELS_IRC_TLS"`
+	Nick               string `json:"nick"                    env:"HALFMOON_CHANNELS_IRC_NICK"`
+	User               string `json:"user,omitempty"          env:"HALFMOON_CHANNELS_IRC_USER"`
+	RealName           string `json:"real_name,omitempty"     env:"HALFMOON_CHANNELS_IRC_REAL_NAME"`
 	password           string
 	nickServPassword   string
-	SASLUser           string `json:"sasl_user"               env:"PICOCLAW_CHANNELS_IRC_SASL_USER"`
+	SASLUser           string `json:"sasl_user"               env:"HALFMOON_CHANNELS_IRC_SASL_USER"`
 	saslPassword       string
-	Channels           FlexibleStringSlice `json:"channels"                env:"PICOCLAW_CHANNELS_IRC_CHANNELS"`
-	RequestCaps        FlexibleStringSlice `json:"request_caps,omitempty"  env:"PICOCLAW_CHANNELS_IRC_REQUEST_CAPS"`
-	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"PICOCLAW_CHANNELS_IRC_ALLOW_FROM"`
+	Channels           FlexibleStringSlice `json:"channels"                env:"HALFMOON_CHANNELS_IRC_CHANNELS"`
+	RequestCaps        FlexibleStringSlice `json:"request_caps,omitempty"  env:"HALFMOON_CHANNELS_IRC_REQUEST_CAPS"`
+	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_IRC_ALLOW_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
-	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"PICOCLAW_CHANNELS_IRC_REASONING_CHANNEL_ID"`
+	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_IRC_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
 
@@ -920,19 +920,19 @@ func (c *IRCConfig) SetSASLPassword(password string) {
 }
 
 type HeartbeatConfig struct {
-	Enabled  bool `json:"enabled"  env:"PICOCLAW_HEARTBEAT_ENABLED"`
-	Interval int  `json:"interval" env:"PICOCLAW_HEARTBEAT_INTERVAL"` // minutes, min 5
+	Enabled  bool `json:"enabled"  env:"HALFMOON_HEARTBEAT_ENABLED"`
+	Interval int  `json:"interval" env:"HALFMOON_HEARTBEAT_INTERVAL"` // minutes, min 5
 }
 
 type DevicesConfig struct {
-	Enabled    bool `json:"enabled"     env:"PICOCLAW_DEVICES_ENABLED"`
-	MonitorUSB bool `json:"monitor_usb" env:"PICOCLAW_DEVICES_MONITOR_USB"`
+	Enabled    bool `json:"enabled"     env:"HALFMOON_DEVICES_ENABLED"`
+	MonitorUSB bool `json:"monitor_usb" env:"HALFMOON_DEVICES_MONITOR_USB"`
 }
 
 type VoiceConfig struct {
-	ModelName         string `json:"model_name,omitempty"         env:"PICOCLAW_VOICE_MODEL_NAME"`
-	EchoTranscription bool   `json:"echo_transcription"           env:"PICOCLAW_VOICE_ECHO_TRANSCRIPTION"`
-	ElevenLabsAPIKey  string `json:"elevenlabs_api_key,omitempty" env:"PICOCLAW_VOICE_ELEVENLABS_API_KEY"`
+	ModelName         string `json:"model_name,omitempty"         env:"HALFMOON_VOICE_MODEL_NAME"`
+	EchoTranscription bool   `json:"echo_transcription"           env:"HALFMOON_VOICE_ECHO_TRANSCRIPTION"`
+	ElevenLabsAPIKey  string `json:"elevenlabs_api_key,omitempty" env:"HALFMOON_VOICE_ELEVENLABS_API_KEY"`
 }
 
 // ModelConfig represents a model-centric provider configuration.
@@ -999,18 +999,18 @@ func (c *ModelConfig) SetAPIKey(value string) {
 }
 
 type GatewayConfig struct {
-	Host      string `json:"host"                env:"PICOCLAW_GATEWAY_HOST"`
-	Port      int    `json:"port"                env:"PICOCLAW_GATEWAY_PORT"`
-	HotReload bool   `json:"hot_reload"          env:"PICOCLAW_GATEWAY_HOT_RELOAD"`
-	LogLevel  string `json:"log_level,omitempty" env:"PICOCLAW_LOG_LEVEL"`
+	Host      string `json:"host"                env:"HALFMOON_GATEWAY_HOST"`
+	Port      int    `json:"port"                env:"HALFMOON_GATEWAY_PORT"`
+	HotReload bool   `json:"hot_reload"          env:"HALFMOON_GATEWAY_HOT_RELOAD"`
+	LogLevel  string `json:"log_level,omitempty" env:"HALFMOON_LOG_LEVEL"`
 }
 
 type ToolDiscoveryConfig struct {
-	Enabled          bool `json:"enabled"            env:"PICOCLAW_TOOLS_DISCOVERY_ENABLED"`
-	TTL              int  `json:"ttl"                env:"PICOCLAW_TOOLS_DISCOVERY_TTL"`
-	MaxSearchResults int  `json:"max_search_results" env:"PICOCLAW_MAX_SEARCH_RESULTS"`
-	UseBM25          bool `json:"use_bm25"           env:"PICOCLAW_TOOLS_DISCOVERY_USE_BM25"`
-	UseRegex         bool `json:"use_regex"          env:"PICOCLAW_TOOLS_DISCOVERY_USE_REGEX"`
+	Enabled          bool `json:"enabled"            env:"HALFMOON_TOOLS_DISCOVERY_ENABLED"`
+	TTL              int  `json:"ttl"                env:"HALFMOON_TOOLS_DISCOVERY_TTL"`
+	MaxSearchResults int  `json:"max_search_results" env:"HALFMOON_MAX_SEARCH_RESULTS"`
+	UseBM25          bool `json:"use_bm25"           env:"HALFMOON_TOOLS_DISCOVERY_USE_BM25"`
+	UseRegex         bool `json:"use_regex"          env:"HALFMOON_TOOLS_DISCOVERY_USE_REGEX"`
 }
 
 type ToolConfig struct {
@@ -1018,10 +1018,10 @@ type ToolConfig struct {
 }
 
 type BraveConfig struct {
-	Enabled    bool `json:"enabled"     env:"PICOCLAW_TOOLS_WEB_BRAVE_ENABLED"`
+	Enabled    bool `json:"enabled"     env:"HALFMOON_TOOLS_WEB_BRAVE_ENABLED"`
 	apiKeys    []string
 	secDirty   bool
-	MaxResults int `json:"max_results" env:"PICOCLAW_TOOLS_WEB_BRAVE_MAX_RESULTS"`
+	MaxResults int `json:"max_results" env:"HALFMOON_TOOLS_WEB_BRAVE_MAX_RESULTS"`
 }
 
 // APIKey returns the Brave API key
@@ -1050,11 +1050,11 @@ func (c *BraveConfig) SetAPIKeys(keys []string) {
 }
 
 type TavilyConfig struct {
-	Enabled    bool `json:"enabled"     env:"PICOCLAW_TOOLS_WEB_TAVILY_ENABLED"`
+	Enabled    bool `json:"enabled"     env:"HALFMOON_TOOLS_WEB_TAVILY_ENABLED"`
 	apiKeys    []string
 	secDirty   bool
-	BaseURL    string `json:"base_url"    env:"PICOCLAW_TOOLS_WEB_TAVILY_BASE_URL"`
-	MaxResults int    `json:"max_results" env:"PICOCLAW_TOOLS_WEB_TAVILY_MAX_RESULTS"`
+	BaseURL    string `json:"base_url"    env:"HALFMOON_TOOLS_WEB_TAVILY_BASE_URL"`
+	MaxResults int    `json:"max_results" env:"HALFMOON_TOOLS_WEB_TAVILY_MAX_RESULTS"`
 }
 
 // APIKey returns the Tavily API key
@@ -1083,15 +1083,15 @@ func (c *TavilyConfig) SetAPIKeys(keys []string) {
 }
 
 type DuckDuckGoConfig struct {
-	Enabled    bool `json:"enabled"     env:"PICOCLAW_TOOLS_WEB_DUCKDUCKGO_ENABLED"`
-	MaxResults int  `json:"max_results" env:"PICOCLAW_TOOLS_WEB_DUCKDUCKGO_MAX_RESULTS"`
+	Enabled    bool `json:"enabled"     env:"HALFMOON_TOOLS_WEB_DUCKDUCKGO_ENABLED"`
+	MaxResults int  `json:"max_results" env:"HALFMOON_TOOLS_WEB_DUCKDUCKGO_MAX_RESULTS"`
 }
 
 type PerplexityConfig struct {
-	Enabled    bool `json:"enabled"     env:"PICOCLAW_TOOLS_WEB_PERPLEXITY_ENABLED"`
+	Enabled    bool `json:"enabled"     env:"HALFMOON_TOOLS_WEB_PERPLEXITY_ENABLED"`
 	apiKeys    []string
 	secDirty   bool
-	MaxResults int `json:"max_results" env:"PICOCLAW_TOOLS_WEB_PERPLEXITY_MAX_RESULTS"`
+	MaxResults int `json:"max_results" env:"HALFMOON_TOOLS_WEB_PERPLEXITY_MAX_RESULTS"`
 }
 
 // APIKey returns the Perplexity API key
@@ -1120,20 +1120,20 @@ func (c *PerplexityConfig) SetAPIKeys(keys []string) {
 }
 
 type SearXNGConfig struct {
-	Enabled    bool   `json:"enabled"     env:"PICOCLAW_TOOLS_WEB_SEARXNG_ENABLED"`
-	BaseURL    string `json:"base_url"    env:"PICOCLAW_TOOLS_WEB_SEARXNG_BASE_URL"`
-	MaxResults int    `json:"max_results" env:"PICOCLAW_TOOLS_WEB_SEARXNG_MAX_RESULTS"`
+	Enabled    bool   `json:"enabled"     env:"HALFMOON_TOOLS_WEB_SEARXNG_ENABLED"`
+	BaseURL    string `json:"base_url"    env:"HALFMOON_TOOLS_WEB_SEARXNG_BASE_URL"`
+	MaxResults int    `json:"max_results" env:"HALFMOON_TOOLS_WEB_SEARXNG_MAX_RESULTS"`
 }
 
 type GLMSearchConfig struct {
-	Enabled  bool `json:"enabled"  env:"PICOCLAW_TOOLS_WEB_GLM_ENABLED"`
+	Enabled  bool `json:"enabled"  env:"HALFMOON_TOOLS_WEB_GLM_ENABLED"`
 	apiKey   string
 	secDirty bool
-	BaseURL  string `json:"base_url" env:"PICOCLAW_TOOLS_WEB_GLM_BASE_URL"`
+	BaseURL  string `json:"base_url" env:"HALFMOON_TOOLS_WEB_GLM_BASE_URL"`
 	// SearchEngine specifies the search backend: "search_std" (default),
 	// "search_pro", "search_pro_sogou", or "search_pro_quark".
-	SearchEngine string `json:"search_engine" env:"PICOCLAW_TOOLS_WEB_GLM_SEARCH_ENGINE"`
-	MaxResults   int    `json:"max_results"   env:"PICOCLAW_TOOLS_WEB_GLM_MAX_RESULTS"`
+	SearchEngine string `json:"search_engine" env:"HALFMOON_TOOLS_WEB_GLM_SEARCH_ENGINE"`
+	MaxResults   int    `json:"max_results"   env:"HALFMOON_TOOLS_WEB_GLM_MAX_RESULTS"`
 }
 
 // APIKey returns the GLM search API key
@@ -1148,9 +1148,9 @@ func (c *GLMSearchConfig) SetAPIKey(key string) {
 }
 
 type BaiduSearchConfig struct {
-	Enabled    bool   `json:"enabled"     env:"PICOCLAW_TOOLS_WEB_BAIDU_ENABLED"`
-	BaseURL    string `json:"base_url"    env:"PICOCLAW_TOOLS_WEB_BAIDU_BASE_URL"`
-	MaxResults int    `json:"max_results" env:"PICOCLAW_TOOLS_WEB_BAIDU_MAX_RESULTS"`
+	Enabled    bool   `json:"enabled"     env:"HALFMOON_TOOLS_WEB_BAIDU_ENABLED"`
+	BaseURL    string `json:"base_url"    env:"HALFMOON_TOOLS_WEB_BAIDU_BASE_URL"`
+	MaxResults int    `json:"max_results" env:"HALFMOON_TOOLS_WEB_BAIDU_MAX_RESULTS"`
 	apiKey     string
 	secDirty   bool
 }
@@ -1166,7 +1166,7 @@ func (c *BaiduSearchConfig) SetAPIKey(key string) {
 }
 
 type WebToolsConfig struct {
-	ToolConfig  `                  envPrefix:"PICOCLAW_TOOLS_WEB_"`
+	ToolConfig  `                  envPrefix:"HALFMOON_TOOLS_WEB_"`
 	Brave       BraveConfig       `                                json:"brave"`
 	Tavily      TavilyConfig      `                                json:"tavily"`
 	DuckDuckGo  DuckDuckGoConfig  `                                json:"duckduckgo"`
@@ -1179,42 +1179,42 @@ type WebToolsConfig struct {
 	// the client-side web_search tool is hidden to avoid duplicate search surfaces,
 	// and the provider's built-in search is used instead. Falls back to client-side
 	// search when the provider does not support native search.
-	PreferNative bool `json:"prefer_native" env:"PICOCLAW_TOOLS_WEB_PREFER_NATIVE"`
+	PreferNative bool `json:"prefer_native" env:"HALFMOON_TOOLS_WEB_PREFER_NATIVE"`
 	// Proxy is an optional proxy URL for web tools (http/https/socks5/socks5h).
 	// For authenticated proxies, prefer HTTP_PROXY/HTTPS_PROXY env vars instead of embedding credentials in config.
-	Proxy                string              `json:"proxy,omitempty"                  env:"PICOCLAW_TOOLS_WEB_PROXY"`
-	FetchLimitBytes      int64               `json:"fetch_limit_bytes,omitempty"      env:"PICOCLAW_TOOLS_WEB_FETCH_LIMIT_BYTES"`
-	Format               string              `json:"format,omitempty"                 env:"PICOCLAW_TOOLS_WEB_FORMAT"`
-	PrivateHostWhitelist FlexibleStringSlice `json:"private_host_whitelist,omitempty" env:"PICOCLAW_TOOLS_WEB_PRIVATE_HOST_WHITELIST"`
+	Proxy                string              `json:"proxy,omitempty"                  env:"HALFMOON_TOOLS_WEB_PROXY"`
+	FetchLimitBytes      int64               `json:"fetch_limit_bytes,omitempty"      env:"HALFMOON_TOOLS_WEB_FETCH_LIMIT_BYTES"`
+	Format               string              `json:"format,omitempty"                 env:"HALFMOON_TOOLS_WEB_FORMAT"`
+	PrivateHostWhitelist FlexibleStringSlice `json:"private_host_whitelist,omitempty" env:"HALFMOON_TOOLS_WEB_PRIVATE_HOST_WHITELIST"`
 }
 
 type CronToolsConfig struct {
-	ToolConfig         `     envPrefix:"PICOCLAW_TOOLS_CRON_"`
-	ExecTimeoutMinutes int  `                                 env:"PICOCLAW_TOOLS_CRON_EXEC_TIMEOUT_MINUTES" json:"exec_timeout_minutes"` // 0 means no timeout
-	AllowCommand       bool `                                 env:"PICOCLAW_TOOLS_CRON_ALLOW_COMMAND"        json:"allow_command"`
+	ToolConfig         `     envPrefix:"HALFMOON_TOOLS_CRON_"`
+	ExecTimeoutMinutes int  `                                 env:"HALFMOON_TOOLS_CRON_EXEC_TIMEOUT_MINUTES" json:"exec_timeout_minutes"` // 0 means no timeout
+	AllowCommand       bool `                                 env:"HALFMOON_TOOLS_CRON_ALLOW_COMMAND"        json:"allow_command"`
 }
 
 type ExecConfig struct {
-	ToolConfig          `         envPrefix:"PICOCLAW_TOOLS_EXEC_"`
-	EnableDenyPatterns  bool     `                                 env:"PICOCLAW_TOOLS_EXEC_ENABLE_DENY_PATTERNS"  json:"enable_deny_patterns"`
-	AllowRemote         bool     `                                 env:"PICOCLAW_TOOLS_EXEC_ALLOW_REMOTE"          json:"allow_remote"`
-	CustomDenyPatterns  []string `                                 env:"PICOCLAW_TOOLS_EXEC_CUSTOM_DENY_PATTERNS"  json:"custom_deny_patterns"`
-	CustomAllowPatterns []string `                                 env:"PICOCLAW_TOOLS_EXEC_CUSTOM_ALLOW_PATTERNS" json:"custom_allow_patterns"`
-	TimeoutSeconds      int      `                                 env:"PICOCLAW_TOOLS_EXEC_TIMEOUT_SECONDS"       json:"timeout_seconds"` // 0 means use default (60s)
+	ToolConfig          `         envPrefix:"HALFMOON_TOOLS_EXEC_"`
+	EnableDenyPatterns  bool     `                                 env:"HALFMOON_TOOLS_EXEC_ENABLE_DENY_PATTERNS"  json:"enable_deny_patterns"`
+	AllowRemote         bool     `                                 env:"HALFMOON_TOOLS_EXEC_ALLOW_REMOTE"          json:"allow_remote"`
+	CustomDenyPatterns  []string `                                 env:"HALFMOON_TOOLS_EXEC_CUSTOM_DENY_PATTERNS"  json:"custom_deny_patterns"`
+	CustomAllowPatterns []string `                                 env:"HALFMOON_TOOLS_EXEC_CUSTOM_ALLOW_PATTERNS" json:"custom_allow_patterns"`
+	TimeoutSeconds      int      `                                 env:"HALFMOON_TOOLS_EXEC_TIMEOUT_SECONDS"       json:"timeout_seconds"` // 0 means use default (60s)
 }
 
 type SkillsToolsConfig struct {
-	ToolConfig            `                       envPrefix:"PICOCLAW_TOOLS_SKILLS_"`
+	ToolConfig            `                       envPrefix:"HALFMOON_TOOLS_SKILLS_"`
 	Registries            SkillsRegistriesConfig `                                   json:"registries"`
 	Github                SkillsGithubConfig     `                                   json:"github"`
-	MaxConcurrentSearches int                    `                                   json:"max_concurrent_searches" env:"PICOCLAW_TOOLS_SKILLS_MAX_CONCURRENT_SEARCHES"`
+	MaxConcurrentSearches int                    `                                   json:"max_concurrent_searches" env:"HALFMOON_TOOLS_SKILLS_MAX_CONCURRENT_SEARCHES"`
 	SearchCache           SearchCacheConfig      `                                   json:"search_cache"`
 }
 
 type MediaCleanupConfig struct {
-	ToolConfig `    envPrefix:"PICOCLAW_MEDIA_CLEANUP_"`
-	MaxAge     int `                                    env:"PICOCLAW_MEDIA_CLEANUP_MAX_AGE"  json:"max_age_minutes"`
-	Interval   int `                                    env:"PICOCLAW_MEDIA_CLEANUP_INTERVAL" json:"interval_minutes"`
+	ToolConfig `    envPrefix:"HALFMOON_MEDIA_CLEANUP_"`
+	MaxAge     int `                                    env:"HALFMOON_MEDIA_CLEANUP_MAX_AGE"  json:"max_age_minutes"`
+	Interval   int `                                    env:"HALFMOON_MEDIA_CLEANUP_INTERVAL" json:"interval_minutes"`
 }
 
 type ReadFileToolConfig struct {
@@ -1223,37 +1223,37 @@ type ReadFileToolConfig struct {
 }
 
 type ToolsConfig struct {
-	AllowReadPaths  []string `json:"allow_read_paths"  env:"PICOCLAW_TOOLS_ALLOW_READ_PATHS"`
-	AllowWritePaths []string `json:"allow_write_paths" env:"PICOCLAW_TOOLS_ALLOW_WRITE_PATHS"`
+	AllowReadPaths  []string `json:"allow_read_paths"  env:"HALFMOON_TOOLS_ALLOW_READ_PATHS"`
+	AllowWritePaths []string `json:"allow_write_paths" env:"HALFMOON_TOOLS_ALLOW_WRITE_PATHS"`
 	// FilterSensitiveData controls whether to filter sensitive values (API keys,
 	// tokens, secrets) from tool results before sending to the LLM.
 	// Default: true (enabled)
-	FilterSensitiveData bool `json:"filter_sensitive_data" env:"PICOCLAW_TOOLS_FILTER_SENSITIVE_DATA"`
+	FilterSensitiveData bool `json:"filter_sensitive_data" env:"HALFMOON_TOOLS_FILTER_SENSITIVE_DATA"`
 	// FilterMinLength is the minimum content length required for filtering.
 	// Content shorter than this will be returned unchanged for performance.
 	// Default: 8
-	FilterMinLength int                `json:"filter_min_length" env:"PICOCLAW_TOOLS_FILTER_MIN_LENGTH"`
+	FilterMinLength int                `json:"filter_min_length" env:"HALFMOON_TOOLS_FILTER_MIN_LENGTH"`
 	Web             WebToolsConfig     `json:"web"`
 	Cron            CronToolsConfig    `json:"cron"`
 	Exec            ExecConfig         `json:"exec"`
 	Skills          SkillsToolsConfig  `json:"skills"`
 	MediaCleanup    MediaCleanupConfig `json:"media_cleanup"`
 	MCP             MCPConfig          `json:"mcp"`
-	AppendFile      ToolConfig         `json:"append_file"                                              envPrefix:"PICOCLAW_TOOLS_APPEND_FILE_"`
-	EditFile        ToolConfig         `json:"edit_file"                                                envPrefix:"PICOCLAW_TOOLS_EDIT_FILE_"`
-	FindSkills      ToolConfig         `json:"find_skills"                                              envPrefix:"PICOCLAW_TOOLS_FIND_SKILLS_"`
-	I2C             ToolConfig         `json:"i2c"                                                      envPrefix:"PICOCLAW_TOOLS_I2C_"`
-	InstallSkill    ToolConfig         `json:"install_skill"                                            envPrefix:"PICOCLAW_TOOLS_INSTALL_SKILL_"`
-	ListDir         ToolConfig         `json:"list_dir"                                                 envPrefix:"PICOCLAW_TOOLS_LIST_DIR_"`
-	Message         ToolConfig         `json:"message"                                                  envPrefix:"PICOCLAW_TOOLS_MESSAGE_"`
-	ReadFile        ReadFileToolConfig `json:"read_file"                                                envPrefix:"PICOCLAW_TOOLS_READ_FILE_"`
-	SendFile        ToolConfig         `json:"send_file"                                                envPrefix:"PICOCLAW_TOOLS_SEND_FILE_"`
-	Spawn           ToolConfig         `json:"spawn"                                                    envPrefix:"PICOCLAW_TOOLS_SPAWN_"`
-	SpawnStatus     ToolConfig         `json:"spawn_status"                                             envPrefix:"PICOCLAW_TOOLS_SPAWN_STATUS_"`
-	SPI             ToolConfig         `json:"spi"                                                      envPrefix:"PICOCLAW_TOOLS_SPI_"`
-	Subagent        ToolConfig         `json:"subagent"                                                 envPrefix:"PICOCLAW_TOOLS_SUBAGENT_"`
-	WebFetch        ToolConfig         `json:"web_fetch"                                                envPrefix:"PICOCLAW_TOOLS_WEB_FETCH_"`
-	WriteFile       ToolConfig         `json:"write_file"                                               envPrefix:"PICOCLAW_TOOLS_WRITE_FILE_"`
+	AppendFile      ToolConfig         `json:"append_file"                                              envPrefix:"HALFMOON_TOOLS_APPEND_FILE_"`
+	EditFile        ToolConfig         `json:"edit_file"                                                envPrefix:"HALFMOON_TOOLS_EDIT_FILE_"`
+	FindSkills      ToolConfig         `json:"find_skills"                                              envPrefix:"HALFMOON_TOOLS_FIND_SKILLS_"`
+	I2C             ToolConfig         `json:"i2c"                                                      envPrefix:"HALFMOON_TOOLS_I2C_"`
+	InstallSkill    ToolConfig         `json:"install_skill"                                            envPrefix:"HALFMOON_TOOLS_INSTALL_SKILL_"`
+	ListDir         ToolConfig         `json:"list_dir"                                                 envPrefix:"HALFMOON_TOOLS_LIST_DIR_"`
+	Message         ToolConfig         `json:"message"                                                  envPrefix:"HALFMOON_TOOLS_MESSAGE_"`
+	ReadFile        ReadFileToolConfig `json:"read_file"                                                envPrefix:"HALFMOON_TOOLS_READ_FILE_"`
+	SendFile        ToolConfig         `json:"send_file"                                                envPrefix:"HALFMOON_TOOLS_SEND_FILE_"`
+	Spawn           ToolConfig         `json:"spawn"                                                    envPrefix:"HALFMOON_TOOLS_SPAWN_"`
+	SpawnStatus     ToolConfig         `json:"spawn_status"                                             envPrefix:"HALFMOON_TOOLS_SPAWN_STATUS_"`
+	SPI             ToolConfig         `json:"spi"                                                      envPrefix:"HALFMOON_TOOLS_SPI_"`
+	Subagent        ToolConfig         `json:"subagent"                                                 envPrefix:"HALFMOON_TOOLS_SUBAGENT_"`
+	WebFetch        ToolConfig         `json:"web_fetch"                                                envPrefix:"HALFMOON_TOOLS_WEB_FETCH_"`
+	WriteFile       ToolConfig         `json:"write_file"                                               envPrefix:"HALFMOON_TOOLS_WRITE_FILE_"`
 }
 
 // IsFilterSensitiveDataEnabled returns true if sensitive data filtering is enabled
@@ -1270,8 +1270,8 @@ func (c *ToolsConfig) GetFilterMinLength() int {
 }
 
 type SearchCacheConfig struct {
-	MaxSize    int `json:"max_size"    env:"PICOCLAW_SKILLS_SEARCH_CACHE_MAX_SIZE"`
-	TTLSeconds int `json:"ttl_seconds" env:"PICOCLAW_SKILLS_SEARCH_CACHE_TTL_SECONDS"`
+	MaxSize    int `json:"max_size"    env:"HALFMOON_SKILLS_SEARCH_CACHE_MAX_SIZE"`
+	TTLSeconds int `json:"ttl_seconds" env:"HALFMOON_SKILLS_SEARCH_CACHE_TTL_SECONDS"`
 }
 
 type SkillsRegistriesConfig struct {
@@ -1281,7 +1281,7 @@ type SkillsRegistriesConfig struct {
 type SkillsGithubConfig struct {
 	token    string
 	secDirty bool
-	Proxy    string `json:"proxy,omitempty" env:"PICOCLAW_TOOLS_SKILLS_GITHUB_PROXY"`
+	Proxy    string `json:"proxy,omitempty" env:"HALFMOON_TOOLS_SKILLS_GITHUB_PROXY"`
 }
 
 // Token returns the GitHub token
@@ -1296,16 +1296,16 @@ func (c *SkillsGithubConfig) SetToken(token string) {
 }
 
 type ClawHubRegistryConfig struct {
-	Enabled         bool   `json:"enabled"           env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_ENABLED"`
-	BaseURL         string `json:"base_url"          env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_BASE_URL"`
+	Enabled         bool   `json:"enabled"           env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_ENABLED"`
+	BaseURL         string `json:"base_url"          env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_BASE_URL"`
 	authToken       string
 	secDirty        bool
-	SearchPath      string `json:"search_path"       env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_SEARCH_PATH"`
-	SkillsPath      string `json:"skills_path"       env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_SKILLS_PATH"`
-	DownloadPath    string `json:"download_path"     env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_DOWNLOAD_PATH"`
-	Timeout         int    `json:"timeout"           env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_TIMEOUT"`
-	MaxZipSize      int    `json:"max_zip_size"      env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_MAX_ZIP_SIZE"`
-	MaxResponseSize int    `json:"max_response_size" env:"PICOCLAW_SKILLS_REGISTRIES_CLAWHUB_MAX_RESPONSE_SIZE"`
+	SearchPath      string `json:"search_path"       env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_SEARCH_PATH"`
+	SkillsPath      string `json:"skills_path"       env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_SKILLS_PATH"`
+	DownloadPath    string `json:"download_path"     env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_DOWNLOAD_PATH"`
+	Timeout         int    `json:"timeout"           env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_TIMEOUT"`
+	MaxZipSize      int    `json:"max_zip_size"      env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_MAX_ZIP_SIZE"`
+	MaxResponseSize int    `json:"max_response_size" env:"HALFMOON_SKILLS_REGISTRIES_CLAWHUB_MAX_RESPONSE_SIZE"`
 }
 
 // AuthToken returns the ClawHub auth token
@@ -1345,7 +1345,7 @@ type MCPServerConfig struct {
 
 // MCPConfig defines configuration for all MCP servers
 type MCPConfig struct {
-	ToolConfig `                    envPrefix:"PICOCLAW_TOOLS_MCP_"`
+	ToolConfig `                    envPrefix:"HALFMOON_TOOLS_MCP_"`
 	Discovery  ToolDiscoveryConfig `                                json:"discovery"`
 	// Servers is a map of server name to server configuration
 	Servers map[string]MCPServerConfig `json:"servers,omitempty"`
@@ -1425,7 +1425,7 @@ func LoadConfig(path string) (*Config, error) {
 			for _, k := range m.apiKeys {
 				if k != "" && !strings.HasPrefix(k, "enc://") && !strings.HasPrefix(k, "file://") {
 					fmt.Fprintf(os.Stderr,
-						"picoclaw: warning: model %q has a plaintext api_key; call SaveConfig to encrypt it\n",
+						"halfmoon: warning: model %q has a plaintext api_key; call SaveConfig to encrypt it\n",
 						m.ModelName)
 					break // Only warn once per model
 				}
@@ -1460,10 +1460,10 @@ func LoadConfig(path string) (*Config, error) {
 	// Ensure Workspace has a default if not set
 	if cfg.Agents.Defaults.Workspace == "" {
 		homePath, _ := os.UserHomeDir()
-		if picoclawHome := os.Getenv(EnvHome); picoclawHome != "" {
-			homePath = picoclawHome
+		if halfmoonHome := os.Getenv(EnvHome); halfmoonHome != "" {
+			homePath = halfmoonHome
 		} else if homePath != "" {
-			homePath = filepath.Join(homePath, pkg.DefaultPicoClawHome)
+			homePath = filepath.Join(homePath, pkg.DefaultHalfmoonHome)
 		}
 		cfg.Agents.Defaults.Workspace = filepath.Join(homePath, pkg.WorkspaceName)
 	}

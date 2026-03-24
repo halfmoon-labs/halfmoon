@@ -1,7 +1,7 @@
 package providers
 
 import (
-	"github.com/sipeed/picoclaw/pkg/auth"
+	"github.com/halfmoon-labs/halfmoon/pkg/auth"
 )
 
 var getCredential = auth.GetCredential

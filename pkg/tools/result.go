@@ -3,7 +3,7 @@ package tools
 import (
 	"encoding/json"
 
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers"
 )
 
 // ToolResult represents the structured return value from tool execution.

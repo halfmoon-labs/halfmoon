@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/fileutil"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/skills"
-	"github.com/sipeed/picoclaw/pkg/utils"
+	"github.com/halfmoon-labs/halfmoon/pkg/fileutil"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/skills"
+	"github.com/halfmoon-labs/halfmoon/pkg/utils"
 )
 
 // InstallSkillTool allows the LLM agent to install skills from registries.

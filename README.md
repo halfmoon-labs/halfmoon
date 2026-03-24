@@ -1,15 +1,15 @@
 <div align="center">
-<img src="assets/logo.webp" alt="PicoClaw" width="512">
+<img src="assets/logo.webp" alt="Halfmoon" width="512">
 
-<h1>PicoClaw: Ultra-Efficient AI Assistant in Go</h1>
+<h1>Halfmoon: Ultra-Efficient AI Assistant in Go</h1>
 
-<h3>$10 Hardware · 10MB RAM · ms Boot · Let's Go, PicoClaw!</h3>
+<h3>$10 Hardware · 10MB RAM · ms Boot · Let's Go, Halfmoon!</h3>
   <p>
     <img src="https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
     <img src="https://img.shields.io/badge/Arch-x86__64%2C%20ARM64%2C%20MIPS%2C%20RISC--V%2C%20LoongArch-blue" alt="Hardware">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
     <br>
-    <a href="https://picoclaw.io"><img src="https://img.shields.io/badge/Website-picoclaw.io-blue?style=flat&logo=google-chrome&logoColor=white" alt="Website"></a>
+    <a href="https://halfmoon.io"><img src="https://img.shields.io/badge/Website-halfmoon.io-blue?style=flat&logo=google-chrome&logoColor=white" alt="Website"></a>
     <a href="https://docs.picoclaw.io/"><img src="https://img.shields.io/badge/Docs-Official-007acc?style=flat&logo=read-the-docs&logoColor=white" alt="Docs"></a>
     <a href="https://deepwiki.com/sipeed/picoclaw"><img src="https://img.shields.io/badge/Wiki-DeepWiki-FFA500?style=flat&logo=wikipedia&logoColor=white" alt="Wiki"></a>
     <br>
@@ -24,9 +24,9 @@
 
 ---
 
-> **PicoClaw** is an independent open-source project initiated by [Sipeed](https://sipeed.com), written entirely in **Go** from scratch — not a fork of OpenClaw, NanoBot, or any other project.
+> **Halfmoon** is an independent open-source project initiated by [Sipeed](https://sipeed.com), written entirely in **Go** from scratch — not a fork of OpenClaw, NanoBot, or any other project.
 
-**PicoClaw** is an ultra-lightweight personal AI assistant inspired by [NanoBot](https://github.com/HKUDS/nanobot). It was rebuilt from the ground up in **Go** through a "self-bootstrapping" process — the AI Agent itself drove the architecture migration and code optimization.
+**Halfmoon** is an ultra-lightweight personal AI assistant inspired by [NanoBot](https://github.com/HKUDS/nanobot). It was rebuilt from the ground up in **Go** through a "self-bootstrapping" process — the AI Agent itself drove the architecture migration and code optimization.
 
 **Runs on $10 hardware with <10MB RAM** — that's 99% less memory than OpenClaw and 98% cheaper than a Mac mini!
 
@@ -34,7 +34,7 @@
 <tr align="center">
 <td align="center" valign="top">
 <p align="center">
-<img src="assets/picoclaw_mem.gif" width="360" height="240">
+<img src="assets/halfmoon_mem.gif" width="360" height="240">
 </p>
 </td>
 <td align="center" valign="top">
@@ -48,30 +48,30 @@
 > [!CAUTION]
 > **Security Notice**
 >
-> * **NO CRYPTO:** PicoClaw has **not** issued any official tokens or cryptocurrency. All claims on `pump.fun` or other trading platforms are **scams**.
-> * **OFFICIAL DOMAIN:** The **ONLY** official website is **[picoclaw.io](https://picoclaw.io)**, and company website is **[sipeed.com](https://sipeed.com)**
+> * **NO CRYPTO:** Halfmoon has **not** issued any official tokens or cryptocurrency. All claims on `pump.fun` or other trading platforms are **scams**.
+> * **OFFICIAL DOMAIN:** The **ONLY** official website is **[halfmoon.io](https://halfmoon.io)**, and company website is **[sipeed.com](https://sipeed.com)**
 > * **BEWARE:** Many `.ai/.org/.com/.net/...` domains have been registered by third parties. Do not trust them.
-> * **NOTE:** PicoClaw is in early rapid development. There may be unresolved security issues. Do not deploy to production before v1.0.
-> * **NOTE:** PicoClaw has recently merged many PRs. Recent builds may use 10-20MB RAM. Resource optimization is planned after feature stabilization.
+> * **NOTE:** Halfmoon is in early rapid development. There may be unresolved security issues. Do not deploy to production before v1.0.
+> * **NOTE:** Halfmoon has recently merged many PRs. Recent builds may use 10-20MB RAM. Resource optimization is planned after feature stabilization.
 
 ## 📢 News
 
-2026-03-17 🚀 **v0.2.3 Released!** System tray UI (Windows & Linux), sub-agent status query (`spawn_status`), experimental Gateway hot-reload, Cron security gating, and 2 security fixes. PicoClaw has reached **25K Stars**!
+2026-03-17 🚀 **v0.2.3 Released!** System tray UI (Windows & Linux), sub-agent status query (`spawn_status`), experimental Gateway hot-reload, Cron security gating, and 2 security fixes. Halfmoon has reached **25K Stars**!
 
 2026-03-09 🎉 **v0.2.1 — Biggest update yet!** MCP protocol support, 4 new channels (Matrix/IRC/WeCom/Discord Proxy), 3 new providers (Kimi/Minimax/Avian), vision pipeline, JSONL memory store, model routing.
 
 2026-02-28 📦 **v0.2.0** released with Docker Compose and Web UI Launcher support.
 
-2026-02-26 🎉 PicoClaw hits **20K Stars** in just 17 days! Channel auto-orchestration and capability interfaces are live.
+2026-02-26 🎉 Halfmoon hits **20K Stars** in just 17 days! Channel auto-orchestration and capability interfaces are live.
 
 <details>
 <summary>Earlier news...</summary>
 
-2026-02-16 🎉 PicoClaw breaks 12K Stars in one week! Community maintainer roles and [Roadmap](ROADMAP.md) officially launched.
+2026-02-16 🎉 Halfmoon breaks 12K Stars in one week! Community maintainer roles and [Roadmap](ROADMAP.md) officially launched.
 
-2026-02-13 🎉 PicoClaw breaks 5000 Stars in 4 days! Project roadmap and developer groups in progress.
+2026-02-13 🎉 Halfmoon breaks 5000 Stars in 4 days! Project roadmap and developer groups in progress.
 
-2026-02-09 🎉 **PicoClaw Released!** Built in 1 day to bring AI Agents to $10 hardware with <10MB RAM. Let's Go, PicoClaw!
+2026-02-09 🎉 **Halfmoon Released!** Built in 1 day to bring AI Agents to $10 hardware with <10MB RAM. Let's Go, Halfmoon!
 
 </details>
 
@@ -97,21 +97,21 @@ _*Recent builds may use 10-20MB due to rapid PR merges. Resource optimization is
 
 <div align="center">
 
-|                                | OpenClaw      | NanoBot                  | **PicoClaw**                           |
+|                                | OpenClaw      | NanoBot                  | **Halfmoon**                           |
 | ------------------------------ | ------------- | ------------------------ | -------------------------------------- |
 | **Language**                   | TypeScript    | Python                   | **Go**                                 |
 | **RAM**                        | >1GB          | >100MB                   | **< 10MB***                            |
 | **Boot time**</br>(0.8GHz core) | >500s         | >30s                     | **<1s**                                |
 | **Cost**                       | Mac Mini $599 | Most Linux boards ~$50   | **Any Linux board**</br>**from $10**   |
 
-<img src="assets/compare.jpg" alt="PicoClaw" width="512">
+<img src="assets/compare.jpg" alt="Halfmoon" width="512">
 
 </div>
 
 > **[Hardware Compatibility List](docs/hardware-compatibility.md)** — See all tested boards, from $5 RISC-V to Raspberry Pi to Android phones. Your board not listed? Submit a PR!
 
 <p align="center">
-<img src="assets/hardware-banner.jpg" alt="PicoClaw Hardware Compatibility" width="100%">
+<img src="assets/hardware-banner.jpg" alt="Halfmoon Hardware Compatibility" width="100%">
 </p>
 
 ## 🦾 Demonstration
@@ -125,9 +125,9 @@ _*Recent builds may use 10-20MB due to rapid PR merges. Resource optimization is
 <th><p align="center">Web Search & Learning</p></th>
 </tr>
 <tr>
-<td align="center"><p align="center"><img src="assets/picoclaw_code.gif" width="240" height="180"></p></td>
-<td align="center"><p align="center"><img src="assets/picoclaw_memory.gif" width="240" height="180"></p></td>
-<td align="center"><p align="center"><img src="assets/picoclaw_search.gif" width="240" height="180"></p></td>
+<td align="center"><p align="center"><img src="assets/halfmoon_code.gif" width="240" height="180"></p></td>
+<td align="center"><p align="center"><img src="assets/halfmoon_memory.gif" width="240" height="180"></p></td>
+<td align="center"><p align="center"><img src="assets/halfmoon_search.gif" width="240" height="180"></p></td>
 </tr>
 <tr>
 <td align="center">Develop · Deploy · Scale</td>
@@ -138,7 +138,7 @@ _*Recent builds may use 10-20MB due to rapid PR merges. Resource optimization is
 
 ### 🐜 Innovative Low-Footprint Deployment
 
-PicoClaw can be deployed on virtually any Linux device!
+Halfmoon can be deployed on virtually any Linux device!
 
 - $9.9 [LicheeRV-Nano](https://www.aliexpress.com/item/1005006519668532.html) E(Ethernet) or W(WiFi6) edition, for a minimal home assistant
 - $30~50 [NanoKVM](https://www.aliexpress.com/item/1005007369816019.html), or $100 [NanoKVM-Pro](https://www.aliexpress.com/item/1005010048471263.html), for automated server operations
@@ -150,9 +150,9 @@ PicoClaw can be deployed on virtually any Linux device!
 
 ## 📦 Install
 
-### Download from picoclaw.io (Recommended)
+### Download from halfmoon.io (Recommended)
 
-Visit **[picoclaw.io](https://picoclaw.io)** — the official website auto-detects your platform and provides one-click download. No need to manually pick an architecture.
+Visit **[halfmoon.io](https://halfmoon.io)** — the official website auto-detects your platform and provides one-click download. No need to manually pick an architecture.
 
 ### Download precompiled binary
 
@@ -163,7 +163,7 @@ Alternatively, download the binary for your platform from the [GitHub Releases](
 ```bash
 git clone https://github.com/sipeed/picoclaw.git
 
-cd picoclaw
+cd halfmoon
 make deps
 
 # Build core binary
@@ -192,19 +192,19 @@ The WebUI Launcher provides a browser-based interface for configuration and chat
 
 **Option 1: Double-click (Desktop)**
 
-After downloading from [picoclaw.io](https://picoclaw.io), double-click `picoclaw-launcher` (or `picoclaw-launcher.exe` on Windows). Your browser will open automatically at `http://localhost:18800`.
+After downloading from [halfmoon.io](https://halfmoon.io), double-click `halfmoon-launcher` (or `halfmoon-launcher.exe` on Windows). Your browser will open automatically at `http://localhost:18800`.
 
 **Option 2: Command line**
 
 ```bash
-picoclaw-launcher
+halfmoon-launcher
 # Open http://localhost:18800 in your browser
 ```
 
 > [!TIP]
 > **Remote access / Docker / VM:** Add the `-public` flag to listen on all interfaces:
 > ```bash
-> picoclaw-launcher -public
+> halfmoon-launcher -public
 > ```
 
 <p align="center">
@@ -223,7 +223,7 @@ For detailed WebUI documentation, see [docs.picoclaw.io](https://docs.picoclaw.i
 ```bash
 # 1. Clone this repo
 git clone https://github.com/sipeed/picoclaw.git
-cd picoclaw
+cd halfmoon
 
 # 2. First run — auto-generates docker/data/config.json then exits
 #    (only triggers when both config.json and workspace/ are missing)
@@ -238,7 +238,7 @@ docker compose -f docker/docker-compose.yml --profile launcher up -d
 # Open http://localhost:18800
 ```
 
-> **Docker / VM users:** The Gateway listens on `127.0.0.1` by default. Set `PICOCLAW_GATEWAY_HOST=0.0.0.0` or use the `-public` flag to make it accessible from the host.
+> **Docker / VM users:** The Gateway listens on `127.0.0.1` by default. Set `HALFMOON_GATEWAY_HOST=0.0.0.0` or use the `-public` flag to make it accessible from the host.
 
 ```bash
 # Check logs
@@ -259,7 +259,7 @@ docker compose -f docker/docker-compose.yml --profile launcher up -d
 The TUI (Terminal UI) Launcher provides a full-featured terminal interface for configuration and management. Ideal for servers, Raspberry Pi, and other headless environments.
 
 ```bash
-picoclaw-launcher-tui
+halfmoon-launcher-tui
 ```
 
 <p align="center">
@@ -274,7 +274,7 @@ For detailed TUI documentation, see [docs.picoclaw.io](https://docs.picoclaw.io)
 
 ### 📱 Android
 
-Give your decade-old phone a second life! Turn it into a smart AI Assistant with PicoClaw.
+Give your decade-old phone a second life! Turn it into a smart AI Assistant with Halfmoon.
 
 **Option 1: Termux (available now)**
 
@@ -284,14 +284,14 @@ Give your decade-old phone a second life! Turn it into a smart AI Assistant with
 ```bash
 # Download the latest release
 wget https://github.com/sipeed/picoclaw/releases/latest/download/picoclaw_Linux_arm64.tar.gz
-tar xzf picoclaw_Linux_arm64.tar.gz
+tar xzf halfmoon_Linux_arm64.tar.gz
 pkg install proot
-termux-chroot ./picoclaw onboard   # chroot provides a standard Linux filesystem layout
+termux-chroot ./halfmoon onboard   # chroot provides a standard Linux filesystem layout
 ```
 
 Then follow the Terminal Launcher section below to complete configuration.
 
-<img src="assets/termux.jpg" alt="PicoClaw on Termux" width="512">
+<img src="assets/termux.jpg" alt="Halfmoon on Termux" width="512">
 
 **Option 2: APK Install (coming soon)**
 
@@ -300,17 +300,17 @@ A standalone Android APK with built-in WebUI is in development. Stay tuned!
 <details>
 <summary><b>Terminal Launcher (for resource-constrained environments)</b></summary>
 
-For minimal environments where only the `picoclaw` core binary is available (no Launcher UI), you can configure everything via the command line and a JSON config file.
+For minimal environments where only the `halfmoon` core binary is available (no Launcher UI), you can configure everything via the command line and a JSON config file.
 
 **1. Initialize**
 
 ```bash
-picoclaw onboard
+halfmoon onboard
 ```
 
-This creates `~/.picoclaw/config.json` and the workspace directory.
+This creates `~/.halfmoon/config.json` and the workspace directory.
 
-**2. Configure** (`~/.picoclaw/config.json`)
+**2. Configure** (`~/.halfmoon/config.json`)
 
 ```json
 {
@@ -335,20 +335,20 @@ This creates `~/.picoclaw/config.json` and the workspace directory.
 
 ```bash
 # One-shot question
-picoclaw agent -m "What is 2+2?"
+halfmoon agent -m "What is 2+2?"
 
 # Interactive mode
-picoclaw agent
+halfmoon agent
 
 # Start gateway for chat app integration
-picoclaw gateway
+halfmoon gateway
 ```
 
 </details>
 
 ## 🔌 Providers (LLM)
 
-PicoClaw supports 30+ LLM providers through the `model_list` configuration. Use the `protocol/model` format:
+Halfmoon supports 30+ LLM providers through the `model_list` configuration. Use the `protocol/model` format:
 
 | Provider | Protocol | API Key | Notes |
 |----------|----------|---------|-------|
@@ -412,7 +412,7 @@ For full provider configuration details, see [Providers & Models](docs/providers
 
 ## 💬 Channels (Chat Apps)
 
-Talk to your PicoClaw through 17+ messaging platforms:
+Talk to your Halfmoon through 17+ messaging platforms:
 
 | Channel | Setup | Protocol | Docs |
 |---------|-------|----------|------|
@@ -443,7 +443,7 @@ For detailed channel setup instructions, see [Chat Apps Configuration](docs/chat
 
 ### 🔍 Web Search
 
-PicoClaw can search the web to provide up-to-date information. Configure in `tools.web`:
+Halfmoon can search the web to provide up-to-date information. Configure in `tools.web`:
 
 | Search Engine | API Key | Free Tier | Link |
 |--------------|---------|-----------|------|
@@ -457,7 +457,7 @@ PicoClaw can search the web to provide up-to-date information. Configure in `too
 
 ### ⚙️ Other Tools
 
-PicoClaw includes built-in tools for file operations, code execution, scheduling, and more. See [Tools Configuration](docs/tools_configuration.md) for details.
+Halfmoon includes built-in tools for file operations, code execution, scheduling, and more. See [Tools Configuration](docs/tools_configuration.md) for details.
 
 ## 🎯 Skills
 
@@ -466,8 +466,8 @@ Skills are modular capabilities that extend your Agent. They are loaded from `SK
 **Install skills from ClawHub:**
 
 ```bash
-picoclaw skills search "web scraping"
-picoclaw skills install <skill-name>
+halfmoon skills search "web scraping"
+halfmoon skills install <skill-name>
 ```
 
 **Configure ClawHub token** (optional, for higher rate limits):
@@ -491,7 +491,7 @@ For more details, see [Tools Configuration - Skills](docs/tools_configuration.md
 
 ## 🔗 MCP (Model Context Protocol)
 
-PicoClaw natively supports [MCP](https://modelcontextprotocol.io/) — connect any MCP server to extend your Agent's capabilities with external tools and data sources.
+Halfmoon natively supports [MCP](https://modelcontextprotocol.io/) — connect any MCP server to extend your Agent's capabilities with external tools and data sources.
 
 ```json
 {
@@ -514,7 +514,7 @@ For full MCP configuration (stdio, SSE, HTTP transports, Tool Discovery), see [T
 
 ## <img src="assets/clawdchat-icon.png" width="24" height="24" alt="ClawdChat"> Join the Agent Social Network
 
-Connect PicoClaw to the Agent Social Network simply by sending a single message via the CLI or any integrated Chat App.
+Connect Halfmoon to the Agent Social Network simply by sending a single message via the CLI or any integrated Chat App.
 
 **Read `https://clawdchat.ai/skill.md` and follow the instructions to join [ClawdChat.ai](https://clawdchat.ai)**
 
@@ -522,26 +522,26 @@ Connect PicoClaw to the Agent Social Network simply by sending a single message 
 
 | Command                   | Description                      |
 | ------------------------- | -------------------------------- |
-| `picoclaw onboard`        | Initialize config & workspace    |
-| `picoclaw auth weixin` | Connect WeChat account via QR |
-| `picoclaw agent -m "..."` | Chat with the agent              |
-| `picoclaw agent`          | Interactive chat mode            |
-| `picoclaw gateway`        | Start the gateway                |
-| `picoclaw status`         | Show status                      |
-| `picoclaw version`        | Show version info                |
-| `picoclaw model`          | View or switch the default model |
-| `picoclaw cron list`      | List all scheduled jobs          |
-| `picoclaw cron add ...`   | Add a scheduled job              |
-| `picoclaw cron disable`   | Disable a scheduled job          |
-| `picoclaw cron remove`    | Remove a scheduled job           |
-| `picoclaw skills list`    | List installed skills            |
-| `picoclaw skills install` | Install a skill                  |
-| `picoclaw migrate`        | Migrate data from older versions |
-| `picoclaw auth login`     | Authenticate with providers      |
+| `halfmoon onboard`        | Initialize config & workspace    |
+| `halfmoon auth weixin` | Connect WeChat account via QR |
+| `halfmoon agent -m "..."` | Chat with the agent              |
+| `halfmoon agent`          | Interactive chat mode            |
+| `halfmoon gateway`        | Start the gateway                |
+| `halfmoon status`         | Show status                      |
+| `halfmoon version`        | Show version info                |
+| `halfmoon model`          | View or switch the default model |
+| `halfmoon cron list`      | List all scheduled jobs          |
+| `halfmoon cron add ...`   | Add a scheduled job              |
+| `halfmoon cron disable`   | Disable a scheduled job          |
+| `halfmoon cron remove`    | Remove a scheduled job           |
+| `halfmoon skills list`    | List installed skills            |
+| `halfmoon skills install` | Install a skill                  |
+| `halfmoon migrate`        | Migrate data from older versions |
+| `halfmoon auth login`     | Authenticate with providers      |
 
 ### ⏰ Scheduled Tasks / Reminders
 
-PicoClaw supports scheduled reminders and recurring tasks through the `cron` tool:
+Halfmoon supports scheduled reminders and recurring tasks through the `cron` tool:
 
 * **One-time reminders**: "Remind me in 10 minutes" -> triggers once after 10min
 * **Recurring tasks**: "Remind me every 2 hours" -> triggers every 2 hours

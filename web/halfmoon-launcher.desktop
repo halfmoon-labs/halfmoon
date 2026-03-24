@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Halfmoon Launcher
+Comment=Web-based configuration and management UI for Halfmoon
+Exec=halfmoon-launcher
+Icon=halfmoon-launcher
+Terminal=true
+Type=Application
+Categories=Utility;Network;
+Keywords=halfmoon;ai;agent;bot;

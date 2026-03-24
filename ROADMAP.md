@@ -1,5 +1,5 @@
 
-# 🦐 PicoClaw Roadmap
+# 🦐 Halfmoon Roadmap
 
 > **Vision**: To build the ultimate lightweight, secure, and fully autonomous AI Agent infrastructure.automate the mundane, unleash your creativity
 
@@ -7,7 +7,7 @@
 
 ## 🚀 1. Core Optimization: Extreme Lightweight
 
-*Our defining characteristic. We fight software bloat to ensure PicoClaw runs smoothly on the smallest embedded devices.*
+*Our defining characteristic. We fight software bloat to ensure Halfmoon runs smoothly on the smallest embedded devices.*
 
 * [**Memory Footprint Reduction**](https://github.com/sipeed/picoclaw/issues/346) 
   * **Goal**: Run smoothly on 64MB RAM embedded boards (e.g., low-end RISC-V SBCs) with the core process consuming < 20MB.
