@@ -24,11 +24,15 @@
 
 ---
 
-> **Halfmoon** is an independent open-source project initiated by [Sipeed](https://sipeed.com), written entirely in **Go** from scratch — not a fork of OpenClaw, NanoBot, or any other project.
+> **Halfmoon** is a fork of [PicoClaw](https://github.com/sipeed/picoclaw), the ultra-lightweight personal AI assistant written in **Go**. Halfmoon focuses on **security hardening**, **more frequent releases**, and **faster development** while staying upstream-compatible.
 
-**Halfmoon** is an ultra-lightweight personal AI assistant inspired by [NanoBot](https://github.com/HKUDS/nanobot). It was rebuilt from the ground up in **Go** through a "self-bootstrapping" process — the AI Agent itself drove the architecture migration and code optimization.
+**Halfmoon** builds on PicoClaw's proven foundation — an ultra-lightweight AI assistant that runs on $10 hardware with <10MB RAM — and adds a stronger emphasis on security, stability, and a faster release cadence.
 
-**Runs on $10 hardware with <10MB RAM** — that's 99% less memory than OpenClaw and 98% cheaper than a Mac mini!
+### Why Halfmoon?
+
+- **Security-first**: Proactive vulnerability patching, hardened defaults, and regular security audits
+- **Faster releases**: More frequent releases with smaller, well-tested changesets
+- **Active development**: Rapid iteration on features, bug fixes, and community contributions
 
 <table align="center">
 <tr align="center">
