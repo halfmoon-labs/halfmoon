@@ -137,7 +137,6 @@ dockers_v2:
       - halfmoon
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/halfmoon"
-      - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
     tags:
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}{{ .Tag }}{{ end }}'
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}latest{{ end }}'
@@ -154,7 +153,6 @@ dockers_v2:
       - halfmoon-launcher-tui
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/halfmoon"
-      - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
     tags:
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}{{ .Tag }}-launcher{{ end }}'
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}launcher{{ end }}'
