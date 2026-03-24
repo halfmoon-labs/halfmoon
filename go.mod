@@ -27,7 +27,7 @@ require (
 	github.com/openai/openai-go/v3 v3.22.0
 	github.com/rivo/tview v0.42.0
 	github.com/rs/zerolog v1.34.0
-	github.com/slack-go/slack v0.17.3
+	github.com/slack-go/slack v0.20.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/tencent-connect/botgo v0.2.1
@@ -39,6 +39,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	maunium.net/go/mautrix v0.26.4
 	modernc.org/sqlite v1.46.1
+	rsc.io/qr v0.2.0
 )
 
 require (
@@ -83,7 +84,6 @@ require (
 	modernc.org/libc v1.67.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	rsc.io/qr v0.2.0 // indirect
 )
 
 require (
