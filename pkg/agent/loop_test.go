@@ -2156,26 +2156,26 @@ func (m *modelRecordingProvider) GetDefaultModel() string {
 
 func TestProcessHeartbeat_ModelSelection(t *testing.T) {
 	tests := []struct {
-		name          string
+		name           string
 		heartbeatModel string
-		provider      string
-		wantModel     string
+		provider       string
+		wantModel      string
 	}{
 		{
-			name:          "empty model uses default",
+			name:           "empty model uses default",
 			heartbeatModel: "",
-			wantModel:     "default-model",
+			wantModel:      "default-model",
 		},
 		{
-			name:          "explicit model override",
+			name:           "explicit model override",
 			heartbeatModel: "openai/gpt-4o-mini",
-			provider:      "openai",
-			wantModel:     "gpt-4o-mini",
+			provider:       "openai",
+			wantModel:      "gpt-4o-mini",
 		},
 		{
-			name:          "unresolvable model passed through",
+			name:           "unresolvable model passed through",
 			heartbeatModel: "nonexistent-model",
-			wantModel:     "nonexistent-model",
+			wantModel:      "nonexistent-model",
 		},
 	}
 
