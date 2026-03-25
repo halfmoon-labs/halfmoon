@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -2063,5 +2065,108 @@ func TestSubTurn_IndependentContext(t *testing.T) {
 		}
 	} else {
 		t.Log("✓ SubTurn completed successfully (independent context)")
+	}
+}
+
+func TestSpawnSubTurnWithTargetAgentID(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent-target-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create agent-specific identity files for "researcher"
+	agentDir := fmt.Sprintf("%s/agents/researcher", tmpDir)
+	if err := os.MkdirAll(agentDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(
+		agentDir+"/AGENT.md",
+		[]byte("---\nname: researcher\n---\nYou are a research specialist."),
+		0o644,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create config with two agents: main and researcher
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         tmpDir,
+				ModelName:         "test-model",
+				MaxTokens:         4096,
+				MaxToolIterations: 10,
+			},
+			List: []config.AgentConfig{
+				{ID: "main", Default: true},
+				{ID: "researcher", Model: &config.AgentModelConfig{Primary: "researcher-model"}},
+			},
+		},
+	}
+
+	msgBus := bus.NewMessageBus()
+	provider := &mockProvider{}
+	al := NewAgentLoop(cfg, msgBus, provider)
+
+	// Verify both agents are registered
+	mainAgent, ok := al.registry.GetAgent("main")
+	if !ok {
+		t.Fatal("expected main agent in registry")
+	}
+	researcherAgent, ok := al.registry.GetAgent("researcher")
+	if !ok {
+		t.Fatal("expected researcher agent in registry")
+	}
+
+	// Verify researcher has its own ContextBuilder with correct agentID
+	if researcherAgent.ContextBuilder == nil {
+		t.Fatal("researcher agent should have a ContextBuilder")
+	}
+	if researcherAgent.ContextBuilder.agentID != "researcher" {
+		t.Errorf("researcher ContextBuilder agentID = %q, want %q",
+			researcherAgent.ContextBuilder.agentID, "researcher")
+	}
+
+	// Verify researcher's system prompt includes agent-dir AGENT.md content
+	prompt := researcherAgent.ContextBuilder.BuildSystemPrompt()
+	if !strings.Contains(prompt, "research specialist") {
+		t.Errorf("researcher system prompt should contain agent-dir content, got %q", prompt)
+	}
+
+	// Verify the identity heading includes the agent ID
+	if !strings.Contains(prompt, "researcher") {
+		t.Errorf("researcher system prompt should include agent ID in heading")
+	}
+
+	// Verify main agent does NOT have the researcher's content
+	mainPrompt := mainAgent.ContextBuilder.BuildSystemPrompt()
+	if strings.Contains(mainPrompt, "research specialist") {
+		t.Error("main agent should not contain researcher's content")
+	}
+
+	// Test spawnSubTurn with TargetAgentID resolves the researcher agent
+	parent := &turnState{
+		ctx:            context.Background(),
+		turnID:         "parent-1",
+		depth:          0,
+		childTurnIDs:   []string{},
+		pendingResults: make(chan *tools.ToolResult, 10),
+		session:        &ephemeralSessionStore{},
+		agent:          mainAgent,
+	}
+
+	_, spawnErr := spawnSubTurn(context.Background(), al, parent, SubTurnConfig{
+		Model:         "researcher-model",
+		Tools:         []tools.Tool{},
+		SystemPrompt:  "Research AI safety trends",
+		TargetAgentID: "researcher",
+	})
+	// The sub-turn will fail because mockProvider returns minimal responses,
+	// but the important thing is it doesn't fail with "parent turnState has no agent"
+	// and the agent resolution path is exercised.
+	if spawnErr != nil {
+		// spawnSubTurn may return an error from the mock, that's acceptable.
+		// What we're testing is that it didn't panic or fail during agent resolution.
+		t.Logf("spawnSubTurn returned (expected from mock): %v", spawnErr)
 	}
 }

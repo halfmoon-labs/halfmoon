@@ -305,7 +305,11 @@ func TestLoadAgentDefinitionWithAgentDirectory(t *testing.T) {
 	// Create agent-specific directory with its own AGENT.md and SOUL.md
 	agentDir := filepath.Join(tmpDir, "agents", "researcher")
 	os.MkdirAll(agentDir, 0o755)
-	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("---\nname: researcher\n---\nResearcher agent body"), 0o644)
+	os.WriteFile(
+		filepath.Join(agentDir, "AGENT.md"),
+		[]byte("---\nname: researcher\n---\nResearcher agent body"),
+		0o644,
+	)
 	os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("Researcher soul content"), 0o644)
 
 	cb := NewContextBuilder(tmpDir, "researcher")

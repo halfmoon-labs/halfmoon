@@ -736,7 +736,11 @@ func TestCacheInvalidatesOnAgentDirFileChange(t *testing.T) {
 	// Create agent-specific directory with AGENT.md
 	agentDir := filepath.Join(tmpDir, "agents", "researcher")
 	os.MkdirAll(agentDir, 0o755)
-	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("---\nname: researcher\n---\nOriginal researcher body"), 0o644)
+	os.WriteFile(
+		filepath.Join(agentDir, "AGENT.md"),
+		[]byte("---\nname: researcher\n---\nOriginal researcher body"),
+		0o644,
+	)
 
 	cb := NewContextBuilder(tmpDir, "researcher")
 
@@ -747,7 +751,11 @@ func TestCacheInvalidatesOnAgentDirFileChange(t *testing.T) {
 	}
 
 	// Modify agent-dir AGENT.md with future mtime
-	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("---\nname: researcher\n---\nUpdated researcher body"), 0o644)
+	os.WriteFile(
+		filepath.Join(agentDir, "AGENT.md"),
+		[]byte("---\nname: researcher\n---\nUpdated researcher body"),
+		0o644,
+	)
 	future := time.Now().Add(2 * time.Second)
 	os.Chtimes(filepath.Join(agentDir, "AGENT.md"), future, future)
 

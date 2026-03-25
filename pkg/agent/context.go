@@ -459,7 +459,10 @@ func (cb *ContextBuilder) LoadBootstrapFiles() string {
 		fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "USER.md", agentDefinition.User.Content)
 	}
 
-	if agentDefinition.Source != AgentDefinitionSourceAgent {
+	// Load workspace-root IDENTITY.md as a legacy fallback, but only when the agent
+	// definition was NOT loaded from a per-agent directory (which handles its own
+	// IDENTITY.md fallback). Per-agent files fully replace workspace-level equivalents.
+	if agentDefinition.Source != AgentDefinitionSourceAgent && !agentDefinition.isFromAgentDir(cb.workspace) {
 		filePath := filepath.Join(cb.workspace, "IDENTITY.md")
 		if data, err := os.ReadFile(filePath); err == nil {
 			fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "IDENTITY.md", data)
