@@ -95,27 +95,16 @@ func loadAgentDefinition(workspace, agentID string) AgentContextDefinition {
 	return loadAgentDefinitionFromWorkspace(workspace, definition)
 }
 
-// loadAgentDefinitionFromDir attempts to load AGENT.md (or IDENTITY.md as legacy fallback)
-// and SOUL.md from the given directory. Returns true if an agent definition was found.
+// loadAgentDefinitionFromDir attempts to load AGENT.md and SOUL.md from the
+// given agent directory. Returns true if an AGENT.md was found. IDENTITY.md
+// in the agent directory is NOT loaded here — it is handled as a supplementary
+// section in LoadBootstrapFiles, matching the workspace-root behavior.
 func loadAgentDefinitionFromDir(dir string, definition *AgentContextDefinition) bool {
 	agentPath := filepath.Join(dir, string(AgentDefinitionSourceAgent))
 	if content, err := os.ReadFile(agentPath); err == nil {
 		prompt := parseAgentPromptDefinition(agentPath, string(content))
 		definition.Source = AgentDefinitionSourceAgent
 		definition.Agent = &prompt
-		loadSoulDefinition(dir, definition)
-		return true
-	}
-
-	// Legacy fallback: IDENTITY.md in agent directory
-	identityPath := filepath.Join(dir, "IDENTITY.md")
-	if content, err := os.ReadFile(identityPath); err == nil {
-		definition.Source = AgentDefinitionSourceAgents
-		definition.Agent = &AgentPromptDefinition{
-			Path: identityPath,
-			Raw:  string(content),
-			Body: string(content),
-		}
 		loadSoulDefinition(dir, definition)
 		return true
 	}
@@ -157,16 +146,6 @@ func loadAgentDefinitionFromWorkspace(workspace string, definition AgentContextD
 	}
 
 	return definition
-}
-
-// isFromAgentDir returns true when the agent definition was loaded from a
-// per-agent directory (workspace/agents/{id}/) rather than the workspace root.
-func (definition AgentContextDefinition) isFromAgentDir(workspace string) bool {
-	if definition.Agent == nil {
-		return false
-	}
-	agentsDir := filepath.Join(workspace, "agents") + string(filepath.Separator)
-	return strings.HasPrefix(definition.Agent.Path, agentsDir)
 }
 
 func (definition AgentContextDefinition) trackedPaths(workspace, agentID string) []string {
