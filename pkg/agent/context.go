@@ -22,6 +22,7 @@ import (
 
 type ContextBuilder struct {
 	workspace          string
+	agentID            string
 	skillsLoader       *skills.SkillsLoader
 	memory             *MemoryStore
 	toolDiscoveryBM25  bool
@@ -63,7 +64,7 @@ func getGlobalConfigDir() string {
 	return filepath.Join(home, pkg.DefaultHalfmoonHome)
 }
 
-func NewContextBuilder(workspace string) *ContextBuilder {
+func NewContextBuilder(workspace, agentID string) *ContextBuilder {
 	// builtin skills: skills directory in current project
 	// Use the skills/ directory under the current working directory
 	builtinSkillsDir := strings.TrimSpace(os.Getenv(config.EnvBuiltinSkills))
@@ -75,6 +76,7 @@ func NewContextBuilder(workspace string) *ContextBuilder {
 
 	return &ContextBuilder{
 		workspace:    workspace,
+		agentID:      agentID,
 		skillsLoader: skills.NewSkillsLoader(workspace, globalSkillsDir, builtinSkillsDir),
 		memory:       NewMemoryStore(workspace),
 	}
@@ -85,8 +87,13 @@ func (cb *ContextBuilder) getIdentity() string {
 	toolDiscovery := cb.getDiscoveryRule()
 	version := config.FormatVersion()
 
+	heading := fmt.Sprintf("# halfmoon 🌙 (%s)", version)
+	if cb.agentID != "" && cb.agentID != "main" {
+		heading = fmt.Sprintf("# halfmoon 🌙 (%s) — %s", version, cb.agentID)
+	}
+
 	return fmt.Sprintf(
-		`# halfmoon 🌙 (%s)
+		`%s
 
 You are halfmoon, a helpful AI assistant.
 
@@ -107,7 +114,7 @@ Your workspace is at: %s
 4. **Context summaries** - Conversation summaries provided as context are approximate references only. They may be incomplete or outdated. Always defer to explicit user instructions over summary content.
 
 %s`,
-		version, workspacePath, workspacePath, workspacePath, workspacePath, workspacePath, toolDiscovery)
+		heading, workspacePath, workspacePath, workspacePath, workspacePath, workspacePath, toolDiscovery)
 }
 
 func (cb *ContextBuilder) getDiscoveryRule() string {
@@ -224,7 +231,7 @@ func (cb *ContextBuilder) InvalidateCache() {
 // because they require both directory-level and recursive file-level checks.
 func (cb *ContextBuilder) sourcePaths() []string {
 	agentDefinition := cb.LoadAgentDefinition()
-	paths := agentDefinition.trackedPaths(cb.workspace)
+	paths := agentDefinition.trackedPaths(cb.workspace, cb.agentID)
 	paths = append(paths, filepath.Join(cb.workspace, "memory", "MEMORY.md"))
 	return uniquePaths(paths)
 }

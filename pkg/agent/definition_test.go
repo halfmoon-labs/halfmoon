@@ -34,7 +34,7 @@ Act directly and use tools first.
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	definition := cb.LoadAgentDefinition()
 
 	if definition.Source != AgentDefinitionSourceAgent {
@@ -86,7 +86,7 @@ func TestLoadAgentDefinitionFallsBackToLegacyAgentsMarkdown(t *testing.T) {
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	definition := cb.LoadAgentDefinition()
 
 	if definition.Source != AgentDefinitionSourceAgents {
@@ -113,7 +113,7 @@ func TestLoadAgentDefinitionLoadsWorkspaceUserMarkdown(t *testing.T) {
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	definition := cb.LoadAgentDefinition()
 
 	if definition.User == nil {
@@ -142,7 +142,7 @@ Keep going.
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	definition := cb.LoadAgentDefinition()
 
 	if definition.Agent == nil {
@@ -178,7 +178,7 @@ Follow the body prompt.
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	bootstrap := cb.LoadBootstrapFiles()
 
 	if !strings.Contains(bootstrap, "Follow the body prompt") {
@@ -209,7 +209,7 @@ func TestLoadBootstrapFilesIncludesWorkspaceUserMarkdown(t *testing.T) {
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	bootstrap := cb.LoadBootstrapFiles()
 
 	if !strings.Contains(bootstrap, "Shared profile") {
@@ -228,7 +228,7 @@ func TestStructuredAgentIgnoresIdentityChanges(t *testing.T) {
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	promptV1 := cb.BuildSystemPromptWithCache()
 	if strings.Contains(promptV1, "Legacy identity") {
@@ -265,7 +265,7 @@ func TestStructuredAgentUserChangesInvalidateCache(t *testing.T) {
 	})
 	defer cleanupWorkspace(t, tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	promptV1 := cb.BuildSystemPromptWithCache()
 	if !strings.Contains(promptV1, "Initial workspace preferences") {
@@ -291,6 +291,148 @@ func TestStructuredAgentUserChangesInvalidateCache(t *testing.T) {
 	promptV2 := cb.BuildSystemPromptWithCache()
 	if !strings.Contains(promptV2, "Updated workspace preferences") {
 		t.Fatalf("expected updated workspace USER.md in prompt, got %q", promptV2)
+	}
+}
+
+// ==================== Per-Agent Directory Tests ====================
+
+func TestLoadAgentDefinitionWithAgentDirectory(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create workspace-root AGENT.md (should NOT be used)
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte("---\nname: main\n---\nMain agent body"), 0o644)
+
+	// Create agent-specific directory with its own AGENT.md and SOUL.md
+	agentDir := filepath.Join(tmpDir, "agents", "researcher")
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("---\nname: researcher\n---\nResearcher agent body"), 0o644)
+	os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("Researcher soul content"), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "researcher")
+	def := cb.LoadAgentDefinition()
+
+	if def.Agent == nil {
+		t.Fatal("expected agent definition to be loaded")
+	}
+	if def.Agent.Frontmatter.Name != "researcher" {
+		t.Errorf("expected agent name 'researcher', got %q", def.Agent.Frontmatter.Name)
+	}
+	if !strings.Contains(def.Agent.Body, "Researcher agent body") {
+		t.Errorf("expected researcher body, got %q", def.Agent.Body)
+	}
+	if def.Soul == nil || !strings.Contains(def.Soul.Content, "Researcher soul content") {
+		t.Error("expected researcher SOUL.md content")
+	}
+}
+
+func TestLoadAgentDefinitionAgentDirFullReplace(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Both workspace-root and agent-dir have SOUL.md
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte("---\nname: main\n---\nMain"), 0o644)
+	os.WriteFile(filepath.Join(tmpDir, "SOUL.md"), []byte("Workspace soul"), 0o644)
+
+	agentDir := filepath.Join(tmpDir, "agents", "coder")
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("---\nname: coder\n---\nCoder agent"), 0o644)
+	os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("Coder soul"), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "coder")
+	def := cb.LoadAgentDefinition()
+
+	// Agent-dir SOUL.md should fully replace workspace SOUL.md
+	if def.Soul == nil || def.Soul.Content != "Coder soul" {
+		content := ""
+		if def.Soul != nil {
+			content = def.Soul.Content
+		}
+		t.Errorf("expected agent-dir SOUL.md to fully replace workspace, got %q", content)
+	}
+}
+
+func TestLoadAgentDefinitionAgentDirFallsBackToWorkspace(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Only workspace-root has AGENT.md — no agents/ directory
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte("---\nname: main\n---\nWorkspace agent"), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "researcher")
+	def := cb.LoadAgentDefinition()
+
+	if def.Agent == nil {
+		t.Fatal("expected fallback to workspace AGENT.md")
+	}
+	if !strings.Contains(def.Agent.Body, "Workspace agent") {
+		t.Errorf("expected workspace body, got %q", def.Agent.Body)
+	}
+}
+
+func TestLoadAgentDefinitionAgentDirSharesUserMd(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	agentDir := filepath.Join(tmpDir, "agents", "researcher")
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte("---\nname: researcher\n---\nResearcher"), 0o644)
+	os.WriteFile(filepath.Join(tmpDir, "USER.md"), []byte("Shared user context"), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "researcher")
+	def := cb.LoadAgentDefinition()
+
+	// USER.md should come from workspace root, not agent dir
+	if def.User == nil || !strings.Contains(def.User.Content, "Shared user context") {
+		t.Error("expected USER.md from workspace root")
+	}
+}
+
+func TestLoadAgentDefinitionEmptyAgentID(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte("---\nname: main\n---\nMain agent"), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "")
+	def := cb.LoadAgentDefinition()
+
+	if def.Agent == nil {
+		t.Fatal("expected agent definition")
+	}
+	if def.Agent.Frontmatter.Name != "main" {
+		t.Errorf("expected name 'main', got %q", def.Agent.Frontmatter.Name)
+	}
+}
+
+func TestLoadAgentDefinitionAgentDirIdentityMdFallback(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Agent dir has IDENTITY.md but no AGENT.md
+	agentDir := filepath.Join(tmpDir, "agents", "researcher")
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(filepath.Join(agentDir, "IDENTITY.md"), []byte("Researcher identity via legacy fallback"), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "researcher")
+	def := cb.LoadAgentDefinition()
+
+	if def.Agent == nil {
+		t.Fatal("expected IDENTITY.md legacy fallback in agent dir")
+	}
+	if !strings.Contains(def.Agent.Body, "Researcher identity via legacy fallback") {
+		t.Errorf("expected IDENTITY.md content, got %q", def.Agent.Body)
+	}
+}
+
+func TestTrackedPathsIncludesAgentDir(t *testing.T) {
+	def := AgentContextDefinition{Source: AgentDefinitionSourceAgent}
+	paths := def.trackedPaths("/workspace", "researcher")
+
+	agentAgentMd := filepath.Join("/workspace", "agents", "researcher", "AGENT.md")
+	found := false
+	for _, p := range paths {
+		if p == filepath.Clean(agentAgentMd) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected tracked paths to include agent-dir AGENT.md, got %v", paths)
 	}
 }
 

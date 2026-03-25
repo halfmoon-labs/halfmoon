@@ -79,7 +79,6 @@ type processOptions struct {
 	SenderDisplayName       string              // Current sender display name for dynamic context
 	UserMessage             string              // User message content (may include prefix)
 	ForcedSkills            []string            // Skills explicitly requested for this message
-	SystemPromptOverride    string              // Override the default system prompt (Used by SubTurns)
 	Media                   []string            // media:// refs from inbound message
 	InitialSteeringMessages []providers.Message // Steering messages from refactor/agent
 	DefaultResponse         string              // Response when LLM returns empty
@@ -324,13 +323,7 @@ func registerSharedTools(
 					}
 				}
 
-				// 3. System Prompt
-				systemPrompt := "You are a subagent. Complete the given task independently and report the result.\n" +
-					"You have access to tools - use them as needed to complete your task.\n" +
-					"After completing the task, provide a clear summary of what was done.\n\n" +
-					"Task: " + task
-
-				// 4. Resolve Model
+				// 3. Resolve Model from target agent if specified
 				modelToUse := agent.Model
 				if targetAgentID != "" {
 					if targetAgent, ok := al.GetRegistry().GetAgent(targetAgentID); ok {
@@ -338,17 +331,21 @@ func registerSharedTools(
 					}
 				}
 
-				// 5. Build SubTurnConfig
+				// 4. Build SubTurnConfig
+				// The task becomes the user message. The sub-agent's identity (system prompt)
+				// comes from its own ContextBuilder via BuildSystemPrompt(), which loads
+				// identity files from workspace/agents/{agentID}/ when available.
 				cfg := SubTurnConfig{
-					Model:        modelToUse,
-					Tools:        tlSlice,
-					SystemPrompt: systemPrompt,
+					Model:         modelToUse,
+					Tools:         tlSlice,
+					SystemPrompt:  task,
+					TargetAgentID: targetAgentID,
 				}
 				if hasMaxTokens {
 					cfg.MaxTokens = maxTokens
 				}
 
-				// 6. Spawn SubTurn
+				// 5. Spawn SubTurn
 				return spawnSubTurn(ctx, al, parentTS, cfg)
 			})
 

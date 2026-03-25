@@ -102,12 +102,6 @@ func NewAgentInstance(
 	sessionsDir := filepath.Join(workspace, "sessions")
 	sessions := initSessionStore(sessionsDir)
 
-	mcpDiscoveryActive := cfg.Tools.MCP.Enabled && cfg.Tools.MCP.Discovery.Enabled
-	contextBuilder := NewContextBuilder(workspace).WithToolDiscovery(
-		mcpDiscoveryActive && cfg.Tools.MCP.Discovery.UseBM25,
-		mcpDiscoveryActive && cfg.Tools.MCP.Discovery.UseRegex,
-	)
-
 	agentID := routing.DefaultAgentID
 	agentName := ""
 	var subagents *config.SubagentsConfig
@@ -119,6 +113,12 @@ func NewAgentInstance(
 		subagents = agentCfg.Subagents
 		skillsFilter = agentCfg.Skills
 	}
+
+	mcpDiscoveryActive := cfg.Tools.MCP.Enabled && cfg.Tools.MCP.Discovery.Enabled
+	contextBuilder := NewContextBuilder(workspace, agentID).WithToolDiscovery(
+		mcpDiscoveryActive && cfg.Tools.MCP.Discovery.UseBM25,
+		mcpDiscoveryActive && cfg.Tools.MCP.Discovery.UseRegex,
+	)
 
 	maxIter := defaults.MaxToolIterations
 	if maxIter == 0 {
@@ -209,17 +209,13 @@ func NewAgentInstance(
 }
 
 // resolveAgentWorkspace determines the workspace directory for an agent.
+// All agents share the default workspace unless an explicit workspace is configured.
+// Per-agent identity is handled via workspace/agents/{agentID}/ directories.
 func resolveAgentWorkspace(agentCfg *config.AgentConfig, defaults *config.AgentDefaults) string {
 	if agentCfg != nil && strings.TrimSpace(agentCfg.Workspace) != "" {
 		return expandHome(strings.TrimSpace(agentCfg.Workspace))
 	}
-	// Use the configured default workspace (respects HALFMOON_HOME)
-	if agentCfg == nil || agentCfg.Default || agentCfg.ID == "" || routing.NormalizeAgentID(agentCfg.ID) == "main" {
-		return expandHome(defaults.Workspace)
-	}
-	// For named agents without explicit workspace, use default workspace with agent ID suffix
-	id := routing.NormalizeAgentID(agentCfg.ID)
-	return filepath.Join(expandHome(defaults.Workspace), "..", "workspace-"+id)
+	return expandHome(defaults.Workspace)
 }
 
 // resolveAgentModel resolves the primary model for an agent.
