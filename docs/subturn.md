@@ -280,7 +280,6 @@ When `TargetAgentID` is set, the sub-turn uses the target agent's `AgentInstance
 |:---------|:---------|
 | `AGENT.md` | Per-agent — loaded from `agents/{id}/AGENT.md`, falls back to workspace root |
 | `SOUL.md` | Per-agent — loaded from `agents/{id}/SOUL.md`, falls back to workspace root |
-| `IDENTITY.md` | Per-agent — legacy fallback within agent directory |
 | `USER.md` | Shared — always loaded from workspace root |
 | Memory (`MEMORY.md`) | Shared — all agents read/write the same memory |
 | Skills | Shared — filtered per agent via `AgentConfig.Skills` in config |

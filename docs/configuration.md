@@ -40,8 +40,7 @@ Halfmoon stores data in your configured workspace (default: `~/.halfmoon/workspa
 ├── agents/            # Per-agent identity overrides (see below)
 │   └── {agent-id}/
 │       ├── AGENT.md   # Agent-specific identity (overrides workspace AGENT.md)
-│       ├── SOUL.md    # Agent-specific soul (overrides workspace SOUL.md)
-│       └── IDENTITY.md # Legacy fallback for AGENT.md
+│       └── SOUL.md    # Agent-specific soul (overrides workspace SOUL.md)
 ├── sessions/          # Conversation sessions and history
 ├── memory/           # Long-term memory (MEMORY.md) — shared across all agents
 ├── state/            # Persistent state (last channel, etc.)
@@ -66,7 +65,6 @@ When multiple agents are configured in `agents.list`, each agent can have its ow
 |------|---------------|----------|
 | `AGENT.md` | `agents/{id}/AGENT.md` | `workspace/AGENT.md` |
 | `SOUL.md` | `agents/{id}/SOUL.md` | `workspace/SOUL.md` |
-| `IDENTITY.md` | `agents/{id}/IDENTITY.md` | `workspace/IDENTITY.md` |
 | `USER.md` | — (always shared) | `workspace/USER.md` |
 | Memory | — (always shared) | `workspace/memory/` |
 | Skills | — (always shared, filtered per agent) | `workspace/skills/` |

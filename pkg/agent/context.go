@@ -459,16 +459,10 @@ func (cb *ContextBuilder) LoadBootstrapFiles() string {
 		fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "USER.md", agentDefinition.User.Content)
 	}
 
-	// Load IDENTITY.md as a supplementary section. For sub-agents with a per-agent
-	// directory, load from agents/{id}/IDENTITY.md. For the main agent, load from
-	// workspace root. In both cases, IDENTITY.md is only loaded when the agent
-	// definition uses the legacy format (not AGENT.md) — matching original behavior.
-	if cb.agentID != "" {
-		agentIdentityPath := filepath.Join(cb.workspace, "agents", cb.agentID, "IDENTITY.md")
-		if data, err := os.ReadFile(agentIdentityPath); err == nil {
-			fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "IDENTITY.md", data)
-		}
-	} else if agentDefinition.Source != AgentDefinitionSourceAgent {
+	// Load workspace-root IDENTITY.md for the main agent only, and only when using
+	// the legacy format (AGENTS.md). Sub-agents do not use IDENTITY.md — their
+	// identity is fully defined by AGENT.md + SOUL.md in the agent directory.
+	if cb.agentID == "" && agentDefinition.Source != AgentDefinitionSourceAgent {
 		filePath := filepath.Join(cb.workspace, "IDENTITY.md")
 		if data, err := os.ReadFile(filePath); err == nil {
 			fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "IDENTITY.md", data)

@@ -161,12 +161,12 @@ func (definition AgentContextDefinition) trackedPaths(workspace, agentID string)
 		)
 	}
 	// Track agent-specific identity files for cache invalidation.
+	// Sub-agents use only AGENT.md and SOUL.md — no IDENTITY.md.
 	if agentID != "" {
 		agentDir := filepath.Join(workspace, "agents", agentID)
 		paths = append(paths,
 			filepath.Join(agentDir, string(AgentDefinitionSourceAgent)),
 			filepath.Join(agentDir, "SOUL.md"),
-			filepath.Join(agentDir, "IDENTITY.md"),
 		)
 	}
 	return uniquePaths(paths)

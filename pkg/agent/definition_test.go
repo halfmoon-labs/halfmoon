@@ -404,10 +404,10 @@ func TestLoadAgentDefinitionEmptyAgentID(t *testing.T) {
 	}
 }
 
-func TestLoadAgentDefinitionAgentDirIdentityMdIsSupplementary(t *testing.T) {
+func TestLoadAgentDefinitionAgentDirIgnoresIdentityMd(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	// Agent dir has both AGENT.md and IDENTITY.md
+	// Agent dir has AGENT.md and IDENTITY.md
 	agentDir := filepath.Join(tmpDir, "agents", "researcher")
 	os.MkdirAll(agentDir, 0o755)
 	os.WriteFile(
@@ -417,57 +417,19 @@ func TestLoadAgentDefinitionAgentDirIdentityMdIsSupplementary(t *testing.T) {
 	)
 	os.WriteFile(
 		filepath.Join(agentDir, "IDENTITY.md"),
-		[]byte("Supplementary identity for researcher"),
+		[]byte("Should not appear in sub-agent bootstrap"),
 		0o644,
 	)
 
 	cb := NewContextBuilder(tmpDir, "researcher")
-
-	// IDENTITY.md should NOT be the agent definition
-	def := cb.LoadAgentDefinition()
-	if def.Agent == nil {
-		t.Fatal("expected AGENT.md to be loaded")
-	}
-	if def.Agent.Frontmatter.Name != "researcher" {
-		t.Errorf("expected agent name 'researcher', got %q", def.Agent.Frontmatter.Name)
-	}
-
-	// IDENTITY.md should appear as a supplementary section in bootstrap files
 	bootstrap := cb.LoadBootstrapFiles()
-	if !strings.Contains(bootstrap, "Supplementary identity for researcher") {
-		t.Error("expected IDENTITY.md to appear as supplementary section in bootstrap")
+
+	// Sub-agents do not use IDENTITY.md — identity is fully in AGENT.md + SOUL.md
+	if strings.Contains(bootstrap, "Should not appear") {
+		t.Error("sub-agent bootstrap should not include IDENTITY.md")
 	}
 	if !strings.Contains(bootstrap, "Researcher agent body") {
-		t.Error("expected AGENT.md body in bootstrap alongside IDENTITY.md")
-	}
-}
-
-func TestLoadAgentDefinitionAgentDirIdentityMdOnlyFallsBackToWorkspace(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	// Agent dir has IDENTITY.md but no AGENT.md — should fall back to workspace root
-	agentDir := filepath.Join(tmpDir, "agents", "researcher")
-	os.MkdirAll(agentDir, 0o755)
-	os.WriteFile(filepath.Join(agentDir, "IDENTITY.md"), []byte("Agent-dir identity"), 0o644)
-
-	// Workspace root has AGENT.md
-	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte("---\nname: main\n---\nWorkspace agent"), 0o644)
-
-	cb := NewContextBuilder(tmpDir, "researcher")
-	def := cb.LoadAgentDefinition()
-
-	// Should fall back to workspace AGENT.md since agent dir has no AGENT.md
-	if def.Agent == nil {
-		t.Fatal("expected fallback to workspace AGENT.md")
-	}
-	if !strings.Contains(def.Agent.Body, "Workspace agent") {
-		t.Errorf("expected workspace body as fallback, got %q", def.Agent.Body)
-	}
-
-	// But IDENTITY.md from agent dir should still appear as supplementary in bootstrap
-	bootstrap := cb.LoadBootstrapFiles()
-	if !strings.Contains(bootstrap, "Agent-dir identity") {
-		t.Error("expected agent-dir IDENTITY.md as supplementary in bootstrap even without agent-dir AGENT.md")
+		t.Error("expected AGENT.md body in bootstrap")
 	}
 }
 
