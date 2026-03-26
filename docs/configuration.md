@@ -85,10 +85,22 @@ When multiple agents are configured in `agents.list`, each agent can have its ow
    }
    ```
 2. Create its identity files:
-   ```
+   ```bash
    mkdir -p ~/.halfmoon/workspace/agents/researcher
-   echo "You are a research specialist..." > ~/.halfmoon/workspace/agents/researcher/AGENT.md
    ```
+   Then create `~/.halfmoon/workspace/agents/researcher/AGENT.md` with YAML frontmatter:
+   ```markdown
+   ---
+   name: Research Specialist
+   description: Finds and analyzes information from the web and local files
+   ---
+
+   You are a research specialist. Focus on accuracy, cite sources, and provide
+   comprehensive answers. Use web_search and web_fetch tools to find information.
+   ```
+   The `name` and `description` fields in the frontmatter are used to describe this agent
+   to other agents that can delegate to it. The markdown body below the frontmatter defines
+   the agent's behavior and instructions.
 
 ### Skill Sources
 
