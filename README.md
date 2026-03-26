@@ -49,6 +49,8 @@
 
 🧠 **Smart routing**: Rule-based model routing — simple queries go to lightweight models, saving API costs.
 
+🤝 **Multi-agent orchestration**: Configure specialized sub-agents with their own identity (`AGENT.md`, `SOUL.md`), models, and skills. Agents automatically know who they can delegate to and when, using `spawn` (async) or `subagent` (sync) tools.
+
 _*Recent builds may use 10-20MB due to rapid PR merges. Resource optimization is planned._
 
 <div align="center">
