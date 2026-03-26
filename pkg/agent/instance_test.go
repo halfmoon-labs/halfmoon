@@ -280,3 +280,28 @@ func TestNewAgentInstance_InvalidExecConfigDoesNotExit(t *testing.T) {
 		t.Fatal("read_file tool should still be registered")
 	}
 }
+
+func TestResolveAgentWorkspaceSharedForAllAgents(t *testing.T) {
+	defaults := &config.AgentDefaults{Workspace: "/home/user/.halfmoon/workspace"}
+
+	// Named agent without explicit workspace should use default workspace
+	namedCfg := &config.AgentConfig{ID: "researcher"}
+	ws := resolveAgentWorkspace(namedCfg, defaults)
+	if ws != "/home/user/.halfmoon/workspace" {
+		t.Errorf("expected default workspace, got %q", ws)
+	}
+
+	// Main agent should use default workspace
+	mainCfg := &config.AgentConfig{ID: "main", Default: true}
+	ws = resolveAgentWorkspace(mainCfg, defaults)
+	if ws != "/home/user/.halfmoon/workspace" {
+		t.Errorf("expected default workspace for main, got %q", ws)
+	}
+
+	// Agent with explicit workspace should use it
+	explicitCfg := &config.AgentConfig{ID: "isolated", Workspace: "/custom/workspace"}
+	ws = resolveAgentWorkspace(explicitCfg, defaults)
+	if ws != "/custom/workspace" {
+		t.Errorf("expected explicit workspace, got %q", ws)
+	}
+}

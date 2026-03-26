@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -79,7 +80,6 @@ type processOptions struct {
 	SenderDisplayName       string              // Current sender display name for dynamic context
 	UserMessage             string              // User message content (may include prefix)
 	ForcedSkills            []string            // Skills explicitly requested for this message
-	SystemPromptOverride    string              // Override the default system prompt (Used by SubTurns)
 	Media                   []string            // media:// refs from inbound message
 	InitialSteeringMessages []providers.Message // Steering messages from refactor/agent
 	DefaultResponse         string              // Response when LLM returns empty
@@ -142,7 +142,73 @@ func NewAgentLoop(
 	// Register shared tools to all agents (now that al is created)
 	registerSharedTools(al, cfg, msgBus, registry, provider)
 
+	// Populate each agent's available sub-agents so the LLM knows who it can delegate to.
+	populateAvailableAgents(registry)
+
 	return al
+}
+
+// populateAvailableAgents sets the available sub-agents on each agent's ContextBuilder
+// so the LLM knows which agents it can delegate to via spawn/subagent tools.
+func populateAvailableAgents(registry *AgentRegistry) {
+	registry.mu.RLock()
+	defer registry.mu.RUnlock()
+
+	for _, agent := range registry.agents {
+		if agent.Subagents == nil || len(agent.Subagents.AllowAgents) == 0 {
+			continue
+		}
+
+		seen := make(map[string]bool)
+		var available []AvailableAgent
+		for _, allowedID := range agent.Subagents.AllowAgents {
+			if allowedID == "*" {
+				// Wildcard: add all other agents not already added.
+				for id, target := range registry.agents {
+					if id == agent.ID || seen[id] {
+						continue
+					}
+					seen[id] = true
+					available = append(available, buildAvailableAgent(target))
+				}
+				break
+			}
+			normalizedID := routing.NormalizeAgentID(allowedID)
+			if seen[normalizedID] {
+				continue
+			}
+			if target, ok := registry.agents[normalizedID]; ok {
+				seen[normalizedID] = true
+				available = append(available, buildAvailableAgent(target))
+			}
+		}
+
+		// Sort for deterministic prompt output (important for prompt caching).
+		slices.SortFunc(available, func(a, b AvailableAgent) int {
+			return strings.Compare(a.ID, b.ID)
+		})
+
+		if len(available) > 0 {
+			agent.ContextBuilder.WithAvailableAgents(available)
+		}
+	}
+}
+
+func buildAvailableAgent(agent *AgentInstance) AvailableAgent {
+	info := AvailableAgent{
+		ID:    agent.ID,
+		Name:  agent.Name,
+		Model: agent.Model,
+	}
+	// Read description from the agent's AGENT.md frontmatter if available.
+	def := agent.ContextBuilder.LoadAgentDefinition()
+	if def.Agent != nil {
+		info.Description = def.Agent.Frontmatter.Description
+		if info.Name == "" {
+			info.Name = def.Agent.Frontmatter.Name
+		}
+	}
+	return info
 }
 
 // registerSharedTools registers tools that are shared across all agents (web, message, spawn).
@@ -324,13 +390,7 @@ func registerSharedTools(
 					}
 				}
 
-				// 3. System Prompt
-				systemPrompt := "You are a subagent. Complete the given task independently and report the result.\n" +
-					"You have access to tools - use them as needed to complete your task.\n" +
-					"After completing the task, provide a clear summary of what was done.\n\n" +
-					"Task: " + task
-
-				// 4. Resolve Model
+				// 3. Resolve Model from target agent if specified
 				modelToUse := agent.Model
 				if targetAgentID != "" {
 					if targetAgent, ok := al.GetRegistry().GetAgent(targetAgentID); ok {
@@ -338,17 +398,21 @@ func registerSharedTools(
 					}
 				}
 
-				// 5. Build SubTurnConfig
+				// 4. Build SubTurnConfig
+				// The task becomes the user message. The sub-agent's identity (system prompt)
+				// comes from its own ContextBuilder via BuildSystemPrompt(), which loads
+				// identity files from workspace/agents/{agentID}/ when available.
 				cfg := SubTurnConfig{
-					Model:        modelToUse,
-					Tools:        tlSlice,
-					SystemPrompt: systemPrompt,
+					Model:         modelToUse,
+					Tools:         tlSlice,
+					SystemPrompt:  task,
+					TargetAgentID: targetAgentID,
 				}
 				if hasMaxTokens {
 					cfg.MaxTokens = maxTokens
 				}
 
-				// 6. Spawn SubTurn
+				// 5. Spawn SubTurn
 				return spawnSubTurn(ctx, al, parentTS, cfg)
 			})
 

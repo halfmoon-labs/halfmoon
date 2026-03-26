@@ -37,19 +37,70 @@ Halfmoon stores data in your configured workspace (default: `~/.halfmoon/workspa
 
 ```
 ~/.halfmoon/workspace/
+├── agents/            # Per-agent identity overrides (see below)
+│   └── {agent-id}/
+│       ├── AGENT.md   # Agent-specific identity (overrides workspace AGENT.md)
+│       └── SOUL.md    # Agent-specific soul (overrides workspace SOUL.md)
 ├── sessions/          # Conversation sessions and history
-├── memory/           # Long-term memory (MEMORY.md)
+├── memory/           # Long-term memory (MEMORY.md) — shared across all agents
 ├── state/            # Persistent state (last channel, etc.)
 ├── cron/             # Scheduled jobs database
-├── skills/           # Custom skills
-├── AGENT.md          # Agent behavior guide
+├── skills/           # Custom skills — shared across all agents
+├── AGENT.md          # Default agent behavior guide
 ├── HEARTBEAT.md      # Periodic task prompts (checked every 30 min)
-├── IDENTITY.md       # Agent identity
-├── SOUL.md           # Agent soul
-└── USER.md           # User preferences
+├── IDENTITY.md       # Default agent identity (legacy fallback)
+├── SOUL.md           # Default agent soul
+└── USER.md           # User preferences — shared across all agents
 ```
 
-> **Note:** Changes to `AGENT.md`, `SOUL.md`, `USER.md` and `memory/MEMORY.md` are automatically detected at runtime via file modification time (mtime) tracking. You do **not** need to restart the gateway after editing these files — the agent picks up the new content on the next request.
+> **Note:** Changes to `AGENT.md`, `SOUL.md`, `USER.md` and `memory/MEMORY.md` are automatically detected at runtime via file modification time (mtime) tracking. You do **not** need to restart the gateway after editing these files — the agent picks up the new content on the next request. This also applies to agent-specific files in `agents/{id}/`.
+
+### Per-Agent Identity
+
+When multiple agents are configured in `agents.list`, each agent can have its own identity files in `workspace/agents/{agent-id}/`. Files in the agent directory **fully replace** workspace-level equivalents (no merging).
+
+**Resolution order per agent:**
+
+| File | Agent-specific | Fallback |
+|------|---------------|----------|
+| `AGENT.md` | `agents/{id}/AGENT.md` | `workspace/AGENT.md` |
+| `SOUL.md` | `agents/{id}/SOUL.md` | `workspace/SOUL.md` |
+| `USER.md` | — (always shared) | `workspace/USER.md` |
+| Memory | — (always shared) | `workspace/memory/` |
+| Skills | — (always shared, filtered per agent) | `workspace/skills/` |
+
+**Important:** Agents must be declared in `config.json` under `agents.list`. The `agents/` directory is not auto-discovered — it only provides identity files for explicitly configured agents.
+
+**Example:** To give a `researcher` agent its own identity:
+
+1. Add it to `config.json`:
+   ```json
+   {
+     "agents": {
+       "list": [
+         { "id": "main", "default": true },
+         { "id": "researcher", "model": {"primary": "gpt-4o"}, "skills": ["web_search"] }
+       ]
+     }
+   }
+   ```
+2. Create its identity files:
+   ```bash
+   mkdir -p ~/.halfmoon/workspace/agents/researcher
+   ```
+   Then create `~/.halfmoon/workspace/agents/researcher/AGENT.md` with YAML frontmatter:
+   ```markdown
+   ---
+   name: Research Specialist
+   description: Finds and analyzes information from the web and local files
+   ---
+
+   You are a research specialist. Focus on accuracy, cite sources, and provide
+   comprehensive answers. Use web_search and web_fetch tools to find information.
+   ```
+   The `name` and `description` fields in the frontmatter are used to describe this agent
+   to other agents that can delegate to it. The markdown body below the frontmatter defines
+   the agent's behavior and instructions.
 
 ### Skill Sources
 

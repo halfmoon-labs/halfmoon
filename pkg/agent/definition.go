@@ -73,24 +73,52 @@ type AgentContextDefinition struct {
 // structured files are absent, it falls back to the legacy AGENTS.md layout so
 // the current runtime can transition incrementally.
 func (cb *ContextBuilder) LoadAgentDefinition() AgentContextDefinition {
-	return loadAgentDefinition(cb.workspace)
+	return loadAgentDefinition(cb.workspace, cb.agentID)
 }
 
-func loadAgentDefinition(workspace string) AgentContextDefinition {
+func loadAgentDefinition(workspace, agentID string) AgentContextDefinition {
 	definition := AgentContextDefinition{}
-	definition.User = loadUserDefinition(workspace)
+	definition.User = loadUserDefinition(workspace) // USER.md always from workspace root
+
+	// When an agent ID is specified, try loading identity files from workspace/agents/{agentID}/ first.
+	// Files found in the agent directory fully replace workspace-level equivalents (no merge).
+	if agentID != "" {
+		agentDir := filepath.Join(workspace, "agents", agentID)
+		if dirExists(agentDir) {
+			if loaded := loadAgentDefinitionFromDir(agentDir, &definition); loaded {
+				return definition
+			}
+		}
+	}
+
+	// Fall back to workspace root (existing behavior).
+	return loadAgentDefinitionFromWorkspace(workspace, definition)
+}
+
+// loadAgentDefinitionFromDir attempts to load AGENT.md and SOUL.md from the
+// given agent directory. Returns true if an AGENT.md was found. IDENTITY.md
+// is not used for sub-agents — their identity is fully defined by AGENT.md + SOUL.md.
+func loadAgentDefinitionFromDir(dir string, definition *AgentContextDefinition) bool {
+	agentPath := filepath.Join(dir, string(AgentDefinitionSourceAgent))
+	if content, err := os.ReadFile(agentPath); err == nil {
+		prompt := parseAgentPromptDefinition(agentPath, string(content))
+		definition.Source = AgentDefinitionSourceAgent
+		definition.Agent = &prompt
+		loadSoulDefinition(dir, definition)
+		return true
+	}
+
+	return false
+}
+
+// loadAgentDefinitionFromWorkspace loads agent definition from the workspace root (original behavior).
+func loadAgentDefinitionFromWorkspace(workspace string, definition AgentContextDefinition) AgentContextDefinition {
 	agentPath := filepath.Join(workspace, string(AgentDefinitionSourceAgent))
 	if content, err := os.ReadFile(agentPath); err == nil {
 		prompt := parseAgentPromptDefinition(agentPath, string(content))
 		definition.Source = AgentDefinitionSourceAgent
 		definition.Agent = &prompt
-		soulPath := filepath.Join(workspace, "SOUL.md")
-		if content, err := os.ReadFile(soulPath); err == nil {
-			definition.Soul = &SoulDefinition{
-				Path:    soulPath,
-				Content: string(content),
-			}
-		}
+		loadSoulDefinition(workspace, &definition)
 		return definition
 	}
 
@@ -104,6 +132,8 @@ func loadAgentDefinition(workspace string) AgentContextDefinition {
 		}
 	}
 
+	// For workspace root, also load SOUL.md as a standalone file when no AGENT.md
+	// was found but a legacy source or standalone SOUL.md exists.
 	defaultSoulPath := filepath.Join(workspace, "SOUL.md")
 	if definition.Source != "" || fileExists(defaultSoulPath) {
 		if content, err := os.ReadFile(defaultSoulPath); err == nil {
@@ -117,7 +147,7 @@ func loadAgentDefinition(workspace string) AgentContextDefinition {
 	return definition
 }
 
-func (definition AgentContextDefinition) trackedPaths(workspace string) []string {
+func (definition AgentContextDefinition) trackedPaths(workspace, agentID string) []string {
 	paths := []string{
 		filepath.Join(workspace, string(AgentDefinitionSourceAgent)),
 		filepath.Join(workspace, "SOUL.md"),
@@ -129,7 +159,24 @@ func (definition AgentContextDefinition) trackedPaths(workspace string) []string
 			filepath.Join(workspace, "IDENTITY.md"),
 		)
 	}
+	// Track agent-specific identity files for cache invalidation.
+	// Sub-agents use only AGENT.md and SOUL.md — no IDENTITY.md.
+	if agentID != "" {
+		agentDir := filepath.Join(workspace, "agents", agentID)
+		paths = append(paths,
+			filepath.Join(agentDir, string(AgentDefinitionSourceAgent)),
+			filepath.Join(agentDir, "SOUL.md"),
+		)
+	}
 	return uniquePaths(paths)
+}
+
+// loadSoulDefinition loads SOUL.md from the given directory into the definition.
+func loadSoulDefinition(dir string, definition *AgentContextDefinition) {
+	soulPath := filepath.Join(dir, "SOUL.md")
+	if content, err := os.ReadFile(soulPath); err == nil {
+		definition.Soul = &SoulDefinition{Path: soulPath, Content: string(content)}
+	}
 }
 
 func loadUserDefinition(workspace string) *UserDefinition {
@@ -252,4 +299,9 @@ func uniquePaths(paths []string) []string {
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }

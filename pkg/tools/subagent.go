@@ -27,7 +27,7 @@ type SubTurnConfig struct {
 	Critical           bool          // continue running after parent finishes gracefully
 	Timeout            time.Duration // 0 = use default (5 minutes)
 	MaxContextRunes    int           // 0 = auto, -1 = no limit, >0 = explicit limit
-	ActualSystemPrompt string
+	TargetAgentID      string        // If set, use this agent's identity instead of parent's
 	InitialMessages    []providers.Message
 	InitialTokenBudget *atomic.Int64 // Shared token budget for team members; nil if no budget
 }
@@ -373,30 +373,12 @@ func (t *SubagentTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 
 	label, _ := args["label"].(string)
 
-	// Build system prompt for subagent
-	systemPrompt := fmt.Sprintf(
-		`You are a subagent. Complete the given task independently and provide a clear, concise result.
-
-Task: %s`,
-		task,
-	)
-
-	if label != "" {
-		systemPrompt = fmt.Sprintf(
-			`You are a subagent labeled "%s". Complete the given task independently and provide a clear, concise result.
-
-Task: %s`,
-			label,
-			task,
-		)
-	}
-
 	// Use spawner if available (direct SpawnSubTurn call)
 	if t.spawner != nil {
 		result, err := t.spawner.SpawnSubTurn(ctx, SubTurnConfig{
 			Model:        t.defaultModel,
 			Tools:        nil, // Will inherit from parent via context
-			SystemPrompt: systemPrompt,
+			SystemPrompt: task,
 			MaxTokens:    t.maxTokens,
 			Temperature:  t.temperature,
 			Async:        false, // Synchronous execution

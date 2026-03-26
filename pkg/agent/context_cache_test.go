@@ -41,7 +41,7 @@ func TestSingleSystemMessage(t *testing.T) {
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	tests := []struct {
 		name    string
@@ -132,7 +132,7 @@ func TestBuildMessages_CurrentSenderDynamicContext(t *testing.T) {
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	tests := []struct {
 		name              string
@@ -221,7 +221,7 @@ func TestMtimeAutoInvalidation(t *testing.T) {
 			tmpDir := setupWorkspace(t, map[string]string{tt.file: tt.contentV1})
 			defer os.RemoveAll(tmpDir)
 
-			cb := NewContextBuilder(tmpDir)
+			cb := NewContextBuilder(tmpDir, "")
 
 			sp1 := cb.BuildSystemPromptWithCache()
 
@@ -257,7 +257,7 @@ func TestMtimeAutoInvalidation(t *testing.T) {
 		tmpDir := setupWorkspace(t, nil)
 		defer os.RemoveAll(tmpDir)
 
-		cb := NewContextBuilder(tmpDir)
+		cb := NewContextBuilder(tmpDir, "")
 		_ = cb.BuildSystemPromptWithCache() // populate cache
 
 		// Touch skills directory (simulate new skill installed)
@@ -284,7 +284,7 @@ func TestExplicitInvalidateCache(t *testing.T) {
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	sp1 := cb.BuildSystemPromptWithCache()
 	cb.InvalidateCache()
@@ -312,7 +312,7 @@ func TestCacheStability(t *testing.T) {
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	results := make([]string, 5)
 	for i := range results {
@@ -361,7 +361,7 @@ func TestNewFileCreationInvalidatesCache(t *testing.T) {
 			tmpDir := setupWorkspace(t, nil)
 			defer os.RemoveAll(tmpDir)
 
-			cb := NewContextBuilder(tmpDir)
+			cb := NewContextBuilder(tmpDir, "")
 
 			// Populate cache — file does not exist yet
 			sp1 := cb.BuildSystemPromptWithCache()
@@ -406,7 +406,7 @@ Original content.`
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	// Populate cache
 	sp1 := cb.BuildSystemPromptWithCache()
@@ -467,7 +467,7 @@ description: global-v1
 		t.Fatal(err)
 	}
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	sp1 := cb.BuildSystemPromptWithCache()
 	if !strings.Contains(sp1, "global-v1") {
 		t.Fatal("expected initial prompt to contain global skill description")
@@ -527,7 +527,7 @@ description: builtin-v1
 		t.Fatal(err)
 	}
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	sp1 := cb.BuildSystemPromptWithCache()
 	if !strings.Contains(sp1, "builtin-v1") {
 		t.Fatal("expected initial prompt to contain builtin skill description")
@@ -574,7 +574,7 @@ description: delete-me-v1
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	sp1 := cb.BuildSystemPromptWithCache()
 	if !strings.Contains(sp1, "delete-me-v1") {
 		t.Fatal("expected initial prompt to contain skill description")
@@ -614,7 +614,7 @@ func TestConcurrentBuildSystemPromptWithCache(t *testing.T) {
 	})
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	const goroutines = 20
 	const iterations = 50
@@ -677,7 +677,7 @@ func TestEmptyWorkspaceBaselineDetectsNewFiles(t *testing.T) {
 	tmpDir := setupWorkspace(t, nil)
 	defer os.RemoveAll(tmpDir)
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 
 	// Build cache — all tracked files are absent, maxMtime falls back to epoch.
 	sp1 := cb.BuildSystemPromptWithCache()
@@ -718,7 +718,7 @@ func BenchmarkBuildMessagesWithCache(b *testing.B) {
 		os.WriteFile(filepath.Join(tmpDir, name), []byte(strings.Repeat("Content.\n", 10)), 0o644)
 	}
 
-	cb := NewContextBuilder(tmpDir)
+	cb := NewContextBuilder(tmpDir, "")
 	history := []providers.Message{
 		{Role: "user", Content: "previous message"},
 		{Role: "assistant", Content: "previous response"},
@@ -727,5 +727,125 @@ func BenchmarkBuildMessagesWithCache(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = cb.BuildMessages(history, "summary", "new message", nil, "cli", "test", "", "")
+	}
+}
+
+func TestCacheInvalidatesOnAgentDirFileChange(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create agent-specific directory with AGENT.md
+	agentDir := filepath.Join(tmpDir, "agents", "researcher")
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(
+		filepath.Join(agentDir, "AGENT.md"),
+		[]byte("---\nname: researcher\n---\nOriginal researcher body"),
+		0o644,
+	)
+
+	cb := NewContextBuilder(tmpDir, "researcher")
+
+	// Build initial cache
+	prompt1 := cb.BuildSystemPromptWithCache()
+	if !strings.Contains(prompt1, "Original researcher body") {
+		t.Fatalf("expected original body in prompt, got %q", prompt1)
+	}
+
+	// Modify agent-dir AGENT.md with future mtime
+	os.WriteFile(
+		filepath.Join(agentDir, "AGENT.md"),
+		[]byte("---\nname: researcher\n---\nUpdated researcher body"),
+		0o644,
+	)
+	future := time.Now().Add(2 * time.Second)
+	os.Chtimes(filepath.Join(agentDir, "AGENT.md"), future, future)
+
+	// Cache should detect the change
+	cb.systemPromptMutex.RLock()
+	changed := cb.sourceFilesChangedLocked()
+	cb.systemPromptMutex.RUnlock()
+	if !changed {
+		t.Fatal("agent-dir AGENT.md change should invalidate cache")
+	}
+
+	prompt2 := cb.BuildSystemPromptWithCache()
+	if !strings.Contains(prompt2, "Updated researcher body") {
+		t.Fatalf("expected updated body in prompt, got %q", prompt2)
+	}
+}
+
+func TestBuildSystemPromptIncludesAvailableAgents(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	cb := NewContextBuilder(tmpDir, "")
+	cb.WithAvailableAgents([]AvailableAgent{
+		{ID: "researcher", Name: "Research Bot", Description: "Finds information", Model: "gpt-4o"},
+		{ID: "coder", Description: "Writes code"},
+	})
+
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "# Available Agents") {
+		t.Fatal("expected Available Agents section in prompt")
+	}
+	if !strings.Contains(prompt, "**researcher** (Research Bot): Finds information [model: gpt-4o]") {
+		t.Errorf("expected full researcher line, got prompt: %s", prompt)
+	}
+	if !strings.Contains(prompt, "**coder**: Writes code") {
+		t.Errorf("expected coder line without name, got prompt: %s", prompt)
+	}
+	if !strings.Contains(prompt, "spawn or subagent tools") {
+		t.Error("expected delegation instructions in prompt")
+	}
+}
+
+func TestBuildSystemPromptNoAvailableAgentsSection(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	cb := NewContextBuilder(tmpDir, "")
+
+	prompt := cb.BuildSystemPrompt()
+
+	if strings.Contains(prompt, "Available Agents") {
+		t.Error("should not include Available Agents section when none configured")
+	}
+}
+
+func TestAvailableAgentsInvalidatesCache(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	cb := NewContextBuilder(tmpDir, "")
+	prompt1 := cb.BuildSystemPromptWithCache()
+
+	if strings.Contains(prompt1, "Available Agents") {
+		t.Fatal("should not have agents section initially")
+	}
+
+	cb.WithAvailableAgents([]AvailableAgent{
+		{ID: "researcher", Description: "Research specialist"},
+	})
+
+	prompt2 := cb.BuildSystemPromptWithCache()
+
+	if !strings.Contains(prompt2, "researcher") {
+		t.Fatal("expected agents section after WithAvailableAgents")
+	}
+}
+
+func TestAvailableAgentMinimalFields(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	cb := NewContextBuilder(tmpDir, "")
+	cb.WithAvailableAgents([]AvailableAgent{
+		{ID: "worker"},
+	})
+
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "- **worker**") {
+		t.Error("expected agent with only ID")
+	}
+	// Should not have empty parens, colon, or brackets
+	if strings.Contains(prompt, "()") || strings.Contains(prompt, "[model: ]") {
+		t.Error("should not render empty optional fields")
 	}
 }

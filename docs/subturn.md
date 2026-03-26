@@ -25,8 +25,8 @@ When spawning a SubTurn, you must provide a `SubTurnConfig`:
 | :--- | :--- | :--- |
 | `Model` | `string` | The LLM model to use for the sub-turn (e.g., `gpt-4o-mini`). **Required.** |
 | `Tools` | `[]tools.Tool` | Tools granted to the sub-turn. If empty, it inherits the parent's tools. |
-| `SystemPrompt` | `string` | The task description for the sub-turn. Sent as the first user message to the LLM (not as a system prompt override). |
-| `ActualSystemPrompt` | `string` | Optional explicit system prompt to replace the agent's default. Leave empty to inherit the parent agent's system prompt. |
+| `SystemPrompt` | `string` | The task description for the sub-turn. Sent as the first user message to the LLM. |
+| `TargetAgentID` | `string` | If set, use the target agent's identity (ContextBuilder, model, tools) instead of the parent's. The target agent must be declared in `config.json`. |
 | `MaxTokens` | `int` | Maximum tokens for the generated response. |
 | `Async` | `bool` | Controls the result delivery mode (Synchronous vs. Asynchronous). |
 | `Critical` | `bool` | If `true`, the sub-turn continues running even if the parent finishes gracefully. |
@@ -264,6 +264,43 @@ cfg := agent.SubTurnConfig{
     Tools: []tools.Tool{readOnlyTool}, // Only read-only access
     SystemPrompt: "Analyze the file structure...",
 }
+```
+
+## Sub-Agent Identity
+
+Sub-agents can have their own identity files, separate from the parent agent. This is controlled by the `TargetAgentID` field on `SubTurnConfig`.
+
+### How it works
+
+When `TargetAgentID` is set, the sub-turn uses the target agent's `AgentInstance` from the `AgentRegistry` instead of shallow-copying the parent. The target agent has its own `ContextBuilder` that loads identity files from `workspace/agents/{agent-id}/`.
+
+### Shared vs. per-agent
+
+| Resource | Behavior |
+|:---------|:---------|
+| `AGENT.md` | Per-agent — loaded from `agents/{id}/AGENT.md`, falls back to workspace root |
+| `SOUL.md` | Per-agent — loaded from `agents/{id}/SOUL.md`, falls back to workspace root |
+| `USER.md` | Shared — always loaded from workspace root |
+| Memory (`MEMORY.md`) | Shared — all agents read/write the same memory |
+| Skills | Shared — filtered per agent via `AgentConfig.Skills` in config |
+| Sessions | Isolated — sub-agents always use ephemeral (in-memory) sessions |
+
+### Requirements
+
+- The target agent **must** be declared in `config.json` under `agents.list`
+- The parent agent must have the target in its `subagents.allow_agents` list
+- Agent-specific files fully replace workspace-level equivalents (no merging)
+- The `agents/` directory is not auto-discovered — only explicitly configured agents are available
+
+### Example
+
+```go
+cfg := agent.SubTurnConfig{
+    Model:         "gpt-4o",
+    SystemPrompt:  "Research the latest trends in AI safety",
+    TargetAgentID: "researcher", // Uses researcher's own AGENT.md, SOUL.md
+}
+result, err := agent.SpawnSubTurn(ctx, cfg)
 ```
 
 ## Reference

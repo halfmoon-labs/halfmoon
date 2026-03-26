@@ -106,6 +106,11 @@ type SubTurnConfig struct {
 	SystemPrompt string
 	MaxTokens    int
 
+	// TargetAgentID, when set, causes the sub-turn to use the target agent's
+	// AgentInstance (with its own ContextBuilder and identity files) instead
+	// of shallow-copying the parent agent.
+	TargetAgentID string
+
 	// Async controls the result delivery mechanism:
 	//
 	// When Async = false (synchronous sub-turn):
@@ -157,10 +162,6 @@ type SubTurnConfig struct {
 	// hard context window limit. When exceeded, older messages are intelligently
 	// truncated while preserving system messages and recent context.
 	MaxContextRunes int
-
-	// ActualSystemPrompt is injected as the true 'system' role message for the childAgent.
-	// The legacy SystemPrompt field is actually used as the first 'user' message (task description).
-	ActualSystemPrompt string
 
 	// InitialMessages preloads the ephemeral session history before the agent loop starts.
 	// Used by evaluator-optimizer patterns to pass the full worker context across multiple iterations.
@@ -222,7 +223,7 @@ func (s *AgentLoopSpawner) SpawnSubTurn(
 		Model:              cfg.Model,
 		Tools:              cfg.Tools,
 		SystemPrompt:       cfg.SystemPrompt,
-		ActualSystemPrompt: cfg.ActualSystemPrompt,
+		TargetAgentID:      cfg.TargetAgentID,
 		InitialMessages:    cfg.InitialMessages,
 		InitialTokenBudget: cfg.InitialTokenBudget,
 		MaxTokens:          cfg.MaxTokens,
@@ -331,10 +332,15 @@ func spawnSubTurn(
 
 	childID := al.generateSubTurnID()
 
-	// Get the agent instance from parent, falling back to the default agent.
-	// Wrap it in a shallow copy that uses an ephemeral (in-memory only) session store
-	// so that child turns never pollute or persist to the parent's session history.
+	// Resolve the agent instance for the sub-turn. When a target agent ID is specified,
+	// use that agent's AgentInstance (with its own ContextBuilder and identity files).
+	// Otherwise fall back to the parent's agent, then the default agent.
 	baseAgent := parentTS.agent
+	if cfg.TargetAgentID != "" {
+		if targetAgent, ok := al.registry.GetAgent(cfg.TargetAgentID); ok {
+			baseAgent = targetAgent
+		}
+	}
 	if baseAgent == nil {
 		baseAgent = al.registry.GetDefaultAgent()
 	}
@@ -358,7 +364,6 @@ func spawnSubTurn(
 		SenderID:                parentTS.opts.SenderID,
 		SenderDisplayName:       parentTS.opts.SenderDisplayName,
 		UserMessage:             cfg.SystemPrompt, // Task description becomes the first user message
-		SystemPromptOverride:    cfg.ActualSystemPrompt,
 		Media:                   nil,
 		InitialSteeringMessages: cfg.InitialMessages,
 		DefaultResponse:         "",

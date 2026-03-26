@@ -20,8 +20,18 @@ import (
 	"github.com/halfmoon-labs/halfmoon/pkg/utils"
 )
 
+// AvailableAgent describes a sub-agent that this agent can delegate to via spawn/subagent tools.
+type AvailableAgent struct {
+	ID          string
+	Name        string
+	Description string
+	Model       string
+}
+
 type ContextBuilder struct {
 	workspace          string
+	agentID            string
+	availableAgents    []AvailableAgent
 	skillsLoader       *skills.SkillsLoader
 	memory             *MemoryStore
 	toolDiscoveryBM25  bool
@@ -46,6 +56,12 @@ type ContextBuilder struct {
 	skillFilesAtCache map[string]time.Time
 }
 
+func (cb *ContextBuilder) WithAvailableAgents(agents []AvailableAgent) *ContextBuilder {
+	cb.availableAgents = agents
+	cb.InvalidateCache()
+	return cb
+}
+
 func (cb *ContextBuilder) WithToolDiscovery(useBM25, useRegex bool) *ContextBuilder {
 	cb.toolDiscoveryBM25 = useBM25
 	cb.toolDiscoveryRegex = useRegex
@@ -63,7 +79,7 @@ func getGlobalConfigDir() string {
 	return filepath.Join(home, pkg.DefaultHalfmoonHome)
 }
 
-func NewContextBuilder(workspace string) *ContextBuilder {
+func NewContextBuilder(workspace, agentID string) *ContextBuilder {
 	// builtin skills: skills directory in current project
 	// Use the skills/ directory under the current working directory
 	builtinSkillsDir := strings.TrimSpace(os.Getenv(config.EnvBuiltinSkills))
@@ -75,6 +91,7 @@ func NewContextBuilder(workspace string) *ContextBuilder {
 
 	return &ContextBuilder{
 		workspace:    workspace,
+		agentID:      agentID,
 		skillsLoader: skills.NewSkillsLoader(workspace, globalSkillsDir, builtinSkillsDir),
 		memory:       NewMemoryStore(workspace),
 	}
@@ -85,8 +102,13 @@ func (cb *ContextBuilder) getIdentity() string {
 	toolDiscovery := cb.getDiscoveryRule()
 	version := config.FormatVersion()
 
+	heading := fmt.Sprintf("# halfmoon 🌙 (%s)", version)
+	if cb.agentID != "" && cb.agentID != "main" {
+		heading = fmt.Sprintf("# halfmoon 🌙 (%s) — %s", version, cb.agentID)
+	}
+
 	return fmt.Sprintf(
-		`# halfmoon 🌙 (%s)
+		`%s
 
 You are halfmoon, a helpful AI assistant.
 
@@ -107,7 +129,7 @@ Your workspace is at: %s
 4. **Context summaries** - Conversation summaries provided as context are approximate references only. They may be incomplete or outdated. Always defer to explicit user instructions over summary content.
 
 %s`,
-		version, workspacePath, workspacePath, workspacePath, workspacePath, workspacePath, toolDiscovery)
+		heading, workspacePath, workspacePath, workspacePath, workspacePath, workspacePath, toolDiscovery)
 }
 
 func (cb *ContextBuilder) getDiscoveryRule() string {
@@ -149,6 +171,19 @@ func (cb *ContextBuilder) BuildSystemPrompt() string {
 The following skills extend your capabilities. To use a skill, read its SKILL.md file using the read_file tool.
 
 %s`, skillsSummary))
+	}
+
+	// Available sub-agents
+	if len(cb.availableAgents) > 0 {
+		agentLines := make([]string, 0, len(cb.availableAgents))
+		for _, a := range cb.availableAgents {
+			agentLines = append(agentLines, formatAgentLine(a))
+		}
+		parts = append(parts, fmt.Sprintf(`# Available Agents
+
+You can delegate tasks to these specialized agents using the spawn or subagent tools with the agent_id parameter.
+
+%s`, strings.Join(agentLines, "\n")))
 	}
 
 	// Memory context
@@ -224,7 +259,7 @@ func (cb *ContextBuilder) InvalidateCache() {
 // because they require both directory-level and recursive file-level checks.
 func (cb *ContextBuilder) sourcePaths() []string {
 	agentDefinition := cb.LoadAgentDefinition()
-	paths := agentDefinition.trackedPaths(cb.workspace)
+	paths := agentDefinition.trackedPaths(cb.workspace, cb.agentID)
 	paths = append(paths, filepath.Join(cb.workspace, "memory", "MEMORY.md"))
 	return uniquePaths(paths)
 }
@@ -452,7 +487,10 @@ func (cb *ContextBuilder) LoadBootstrapFiles() string {
 		fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "USER.md", agentDefinition.User.Content)
 	}
 
-	if agentDefinition.Source != AgentDefinitionSourceAgent {
+	// Load workspace-root IDENTITY.md for the main agent only, and only when using
+	// the legacy format (AGENTS.md). Sub-agents do not use IDENTITY.md — their
+	// identity is fully defined by AGENT.md + SOUL.md in the agent directory.
+	if cb.agentID == "" && agentDefinition.Source != AgentDefinitionSourceAgent {
 		filePath := filepath.Join(cb.workspace, "IDENTITY.md")
 		if data, err := os.ReadFile(filePath); err == nil {
 			fmt.Fprintf(&sb, "## %s\n\n%s\n\n", "IDENTITY.md", data)
@@ -470,6 +508,25 @@ func (cb *ContextBuilder) LoadBootstrapFiles() string {
 //
 // See: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
 // See: https://platform.openai.com/docs/guides/prompt-caching
+
+// formatAgentLine renders a single AvailableAgent as a markdown list item.
+// Only non-empty optional fields (Name, Description, Model) are included.
+func formatAgentLine(a AvailableAgent) string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "- **%s**", a.ID)
+	if a.Name != "" {
+		fmt.Fprintf(&sb, " (%s)", a.Name)
+	}
+	if a.Description != "" {
+		sb.WriteString(": ")
+		sb.WriteString(a.Description)
+	}
+	if a.Model != "" {
+		fmt.Fprintf(&sb, " [model: %s]", a.Model)
+	}
+	return sb.String()
+}
+
 func formatCurrentSenderLine(senderID, senderDisplayName string) string {
 	senderID = strings.TrimSpace(senderID)
 	senderDisplayName = strings.TrimSpace(senderDisplayName)
