@@ -2170,3 +2170,85 @@ func TestSpawnSubTurnWithTargetAgentID(t *testing.T) {
 		t.Logf("spawnSubTurn returned (expected from mock): %v", spawnErr)
 	}
 }
+
+func TestPopulateAvailableAgents(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent-populate-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create agent-specific AGENT.md for researcher
+	agentDir := fmt.Sprintf("%s/agents/researcher", tmpDir)
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(
+		agentDir+"/AGENT.md",
+		[]byte("---\nname: Research Bot\ndescription: Finds and analyzes information\n---\nResearch body"),
+		0o644,
+	)
+
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         tmpDir,
+				ModelName:         "default-model",
+				MaxTokens:         4096,
+				MaxToolIterations: 10,
+			},
+			List: []config.AgentConfig{
+				{
+					ID:      "main",
+					Default: true,
+					Subagents: &config.SubagentsConfig{
+						AllowAgents: []string{"researcher"},
+					},
+				},
+				{
+					ID:    "researcher",
+					Model: &config.AgentModelConfig{Primary: "research-model"},
+				},
+			},
+		},
+	}
+
+	provider := &mockProvider{}
+	registry := NewAgentRegistry(cfg, provider)
+	populateAvailableAgents(registry)
+
+	mainAgent, _ := registry.GetAgent("main")
+	if mainAgent.ContextBuilder.availableAgents == nil {
+		t.Fatal("expected main agent to have available agents populated")
+	}
+	if len(mainAgent.ContextBuilder.availableAgents) != 1 {
+		t.Fatalf("expected 1 available agent, got %d", len(mainAgent.ContextBuilder.availableAgents))
+	}
+
+	aa := mainAgent.ContextBuilder.availableAgents[0]
+	if aa.ID != "researcher" {
+		t.Errorf("expected agent ID 'researcher', got %q", aa.ID)
+	}
+	if aa.Name != "Research Bot" {
+		t.Errorf("expected name 'Research Bot', got %q", aa.Name)
+	}
+	if aa.Description != "Finds and analyzes information" {
+		t.Errorf("expected description from frontmatter, got %q", aa.Description)
+	}
+	if aa.Model != "research-model" {
+		t.Errorf("expected model 'research-model', got %q", aa.Model)
+	}
+
+	// Verify the system prompt includes the agents section
+	prompt := mainAgent.ContextBuilder.BuildSystemPrompt()
+	if !strings.Contains(prompt, "# Available Agents") {
+		t.Error("expected Available Agents section in main agent prompt")
+	}
+	if !strings.Contains(prompt, "researcher") {
+		t.Error("expected researcher in available agents")
+	}
+
+	// Researcher should NOT have available agents (no subagents config)
+	researcherAgent, _ := registry.GetAgent("researcher")
+	if len(researcherAgent.ContextBuilder.availableAgents) > 0 {
+		t.Error("researcher should not have available agents")
+	}
+}

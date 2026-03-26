@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -141,7 +142,73 @@ func NewAgentLoop(
 	// Register shared tools to all agents (now that al is created)
 	registerSharedTools(al, cfg, msgBus, registry, provider)
 
+	// Populate each agent's available sub-agents so the LLM knows who it can delegate to.
+	populateAvailableAgents(registry)
+
 	return al
+}
+
+// populateAvailableAgents sets the available sub-agents on each agent's ContextBuilder
+// so the LLM knows which agents it can delegate to via spawn/subagent tools.
+func populateAvailableAgents(registry *AgentRegistry) {
+	registry.mu.RLock()
+	defer registry.mu.RUnlock()
+
+	for _, agent := range registry.agents {
+		if agent.Subagents == nil || len(agent.Subagents.AllowAgents) == 0 {
+			continue
+		}
+
+		seen := make(map[string]bool)
+		var available []AvailableAgent
+		for _, allowedID := range agent.Subagents.AllowAgents {
+			if allowedID == "*" {
+				// Wildcard: add all other agents not already added.
+				for id, target := range registry.agents {
+					if id == agent.ID || seen[id] {
+						continue
+					}
+					seen[id] = true
+					available = append(available, buildAvailableAgent(target))
+				}
+				break
+			}
+			normalizedID := routing.NormalizeAgentID(allowedID)
+			if seen[normalizedID] {
+				continue
+			}
+			if target, ok := registry.agents[normalizedID]; ok {
+				seen[normalizedID] = true
+				available = append(available, buildAvailableAgent(target))
+			}
+		}
+
+		// Sort for deterministic prompt output (important for prompt caching).
+		slices.SortFunc(available, func(a, b AvailableAgent) int {
+			return strings.Compare(a.ID, b.ID)
+		})
+
+		if len(available) > 0 {
+			agent.ContextBuilder.WithAvailableAgents(available)
+		}
+	}
+}
+
+func buildAvailableAgent(agent *AgentInstance) AvailableAgent {
+	info := AvailableAgent{
+		ID:    agent.ID,
+		Name:  agent.Name,
+		Model: agent.Model,
+	}
+	// Read description from the agent's AGENT.md frontmatter if available.
+	def := agent.ContextBuilder.LoadAgentDefinition()
+	if def.Agent != nil {
+		info.Description = def.Agent.Frontmatter.Description
+		if info.Name == "" {
+			info.Name = def.Agent.Frontmatter.Name
+		}
+	}
+	return info
 }
 
 // registerSharedTools registers tools that are shared across all agents (web, message, spawn).

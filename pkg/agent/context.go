@@ -20,9 +20,18 @@ import (
 	"github.com/halfmoon-labs/halfmoon/pkg/utils"
 )
 
+// AvailableAgent describes a sub-agent that this agent can delegate to via spawn/subagent tools.
+type AvailableAgent struct {
+	ID          string
+	Name        string
+	Description string
+	Model       string
+}
+
 type ContextBuilder struct {
 	workspace          string
 	agentID            string
+	availableAgents    []AvailableAgent
 	skillsLoader       *skills.SkillsLoader
 	memory             *MemoryStore
 	toolDiscoveryBM25  bool
@@ -45,6 +54,12 @@ type ContextBuilder struct {
 	// build time. This catches nested file creations/deletions/mtime changes
 	// that may not update the top-level skill root directory mtime.
 	skillFilesAtCache map[string]time.Time
+}
+
+func (cb *ContextBuilder) WithAvailableAgents(agents []AvailableAgent) *ContextBuilder {
+	cb.availableAgents = agents
+	cb.InvalidateCache()
+	return cb
 }
 
 func (cb *ContextBuilder) WithToolDiscovery(useBM25, useRegex bool) *ContextBuilder {
@@ -156,6 +171,19 @@ func (cb *ContextBuilder) BuildSystemPrompt() string {
 The following skills extend your capabilities. To use a skill, read its SKILL.md file using the read_file tool.
 
 %s`, skillsSummary))
+	}
+
+	// Available sub-agents
+	if len(cb.availableAgents) > 0 {
+		agentLines := make([]string, 0, len(cb.availableAgents))
+		for _, a := range cb.availableAgents {
+			agentLines = append(agentLines, formatAgentLine(a))
+		}
+		parts = append(parts, fmt.Sprintf(`# Available Agents
+
+You can delegate tasks to these specialized agents using the spawn or subagent tools with the agent_id parameter.
+
+%s`, strings.Join(agentLines, "\n")))
 	}
 
 	// Memory context
@@ -480,6 +508,25 @@ func (cb *ContextBuilder) LoadBootstrapFiles() string {
 //
 // See: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
 // See: https://platform.openai.com/docs/guides/prompt-caching
+
+// formatAgentLine renders a single AvailableAgent as a markdown list item.
+// Only non-empty optional fields (Name, Description, Model) are included.
+func formatAgentLine(a AvailableAgent) string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "- **%s**", a.ID)
+	if a.Name != "" {
+		fmt.Fprintf(&sb, " (%s)", a.Name)
+	}
+	if a.Description != "" {
+		sb.WriteString(": ")
+		sb.WriteString(a.Description)
+	}
+	if a.Model != "" {
+		fmt.Fprintf(&sb, " [model: %s]", a.Model)
+	}
+	return sb.String()
+}
+
 func formatCurrentSenderLine(senderID, senderDisplayName string) string {
 	senderID = strings.TrimSpace(senderID)
 	senderDisplayName = strings.TrimSpace(senderDisplayName)
