@@ -97,8 +97,7 @@ func loadAgentDefinition(workspace, agentID string) AgentContextDefinition {
 
 // loadAgentDefinitionFromDir attempts to load AGENT.md and SOUL.md from the
 // given agent directory. Returns true if an AGENT.md was found. IDENTITY.md
-// in the agent directory is NOT loaded here — it is handled as a supplementary
-// section in LoadBootstrapFiles, matching the workspace-root behavior.
+// is not used for sub-agents — their identity is fully defined by AGENT.md + SOUL.md.
 func loadAgentDefinitionFromDir(dir string, definition *AgentContextDefinition) bool {
 	agentPath := filepath.Join(dir, string(AgentDefinitionSourceAgent))
 	if content, err := os.ReadFile(agentPath); err == nil {
