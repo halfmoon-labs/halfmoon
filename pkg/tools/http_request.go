@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/halfmoon-labs/halfmoon/pkg/config"
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 	"github.com/halfmoon-labs/halfmoon/pkg/utils"
 )
 
@@ -242,6 +243,17 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 		req.Header.Set(authProfile.Key, authProfile.Value)
 	}
 
+	// Audit log: request initiated.
+	logFields := map[string]any{
+		"method": method,
+		"host":   hostname,
+		"path":   parsedURL.Path,
+	}
+	if authProfile != nil {
+		logFields["auth_profile"] = args["auth"]
+	}
+	logger.DebugCF("tool", "http_request executing", logFields)
+
 	// Execute request.
 	resp, err := t.client.Do(req)
 	if err != nil {
@@ -251,9 +263,19 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 			strings.EqualFold(authProfile.Type, "query") {
 			errMsg = redactQueryParam(errMsg, authProfile.Key)
 		}
+		logger.WarnCF("tool", "http_request failed", map[string]any{
+			"method": method,
+			"host":   hostname,
+		})
 		return ErrorResult(fmt.Sprintf("request failed: %s", errMsg))
 	}
 	defer resp.Body.Close()
+
+	logger.InfoCF("tool", "http_request completed", map[string]any{
+		"method": method,
+		"host":   hostname,
+		"status": resp.StatusCode,
+	})
 
 	// Read response with size cap.
 	limitedBody := http.MaxBytesReader(nil, resp.Body, t.maxResponseBytes)
