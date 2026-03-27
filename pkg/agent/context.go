@@ -102,15 +102,32 @@ func (cb *ContextBuilder) getIdentity() string {
 	toolDiscovery := cb.getDiscoveryRule()
 	version := config.FormatVersion()
 
-	heading := fmt.Sprintf("# halfmoon 🌙 (%s)", version)
+	// Read agent name and description from AGENT.md frontmatter.
+	// These define who the agent is — never hardcoded.
+	agentName := "halfmoon"
+	agentDescription := ""
+	def := loadAgentDefinition(cb.workspace, cb.agentID)
+	if def.Agent != nil {
+		if def.Agent.Frontmatter.Name != "" {
+			agentName = def.Agent.Frontmatter.Name
+		}
+		agentDescription = def.Agent.Frontmatter.Description
+	}
+
+	heading := fmt.Sprintf("# %s (%s)", agentName, version)
 	if cb.agentID != "" && cb.agentID != "main" {
-		heading = fmt.Sprintf("# halfmoon 🌙 (%s) — %s", version, cb.agentID)
+		heading = fmt.Sprintf("# %s (%s) — %s", agentName, version, cb.agentID)
+	}
+
+	intro := fmt.Sprintf("You are %s.", agentName)
+	if agentDescription != "" {
+		intro = fmt.Sprintf("You are %s — %s", agentName, agentDescription)
 	}
 
 	return fmt.Sprintf(
 		`%s
 
-You are halfmoon, a helpful AI assistant.
+%s
 
 ## Workspace
 Your workspace is at: %s
@@ -129,7 +146,7 @@ Your workspace is at: %s
 4. **Context summaries** - Conversation summaries provided as context are approximate references only. They may be incomplete or outdated. Always defer to explicit user instructions over summary content.
 
 %s`,
-		heading, workspacePath, workspacePath, workspacePath, workspacePath, workspacePath, toolDiscovery)
+		heading, intro, workspacePath, workspacePath, workspacePath, workspacePath, workspacePath, toolDiscovery)
 }
 
 func (cb *ContextBuilder) getDiscoveryRule() string {

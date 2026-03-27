@@ -831,6 +831,113 @@ func TestAvailableAgentsInvalidatesCache(t *testing.T) {
 	}
 }
 
+func TestGetIdentityUsesAgentMdFrontmatter(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte(`---
+name: Orion
+description: A research assistant for scientific papers
+---
+You help with research.`), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "")
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "# Orion") {
+		t.Error("expected heading to use agent name from frontmatter")
+	}
+	if !strings.Contains(prompt, "You are Orion") {
+		t.Error("expected intro to use agent name from frontmatter")
+	}
+	if !strings.Contains(prompt, "A research assistant for scientific papers") {
+		t.Error("expected description from frontmatter in intro")
+	}
+	// Should NOT contain hardcoded halfmoon identity
+	if strings.Contains(prompt, "You are halfmoon") {
+		t.Error("should not contain hardcoded 'You are halfmoon'")
+	}
+}
+
+func TestGetIdentityFallsBackWhenNoAgentMd(t *testing.T) {
+	tmpDir := t.TempDir()
+	// No AGENT.md at all
+
+	cb := NewContextBuilder(tmpDir, "")
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "# halfmoon") {
+		t.Error("expected fallback heading 'halfmoon' when no AGENT.md")
+	}
+	if !strings.Contains(prompt, "You are halfmoon.") {
+		t.Error("expected fallback intro when no AGENT.md")
+	}
+}
+
+func TestGetIdentityWithNameButNoDescription(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte(`---
+name: Atlas
+---
+You help with maps.`), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "")
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "# Atlas") {
+		t.Error("expected heading with name")
+	}
+	if !strings.Contains(prompt, "You are Atlas.") {
+		t.Error("expected intro with name only (no description dash)")
+	}
+	// Should end with period, not dash
+	if strings.Contains(prompt, "You are Atlas —") {
+		t.Error("should not have description dash when description is empty")
+	}
+}
+
+func TestGetIdentityNoFrontmatterUsesDefault(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// AGENT.md exists but has no frontmatter
+	os.WriteFile(filepath.Join(tmpDir, "AGENT.md"), []byte("Just a plain agent file."), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "")
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "# halfmoon") {
+		t.Error("expected fallback heading when frontmatter has no name")
+	}
+	if !strings.Contains(prompt, "You are halfmoon.") {
+		t.Error("expected fallback intro when frontmatter has no name")
+	}
+}
+
+func TestGetIdentitySubAgentIncludesAgentID(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	agentDir := filepath.Join(tmpDir, "agents", "researcher")
+	os.MkdirAll(agentDir, 0o755)
+	os.WriteFile(filepath.Join(agentDir, "AGENT.md"), []byte(`---
+name: Research Bot
+description: Finds and analyzes information
+---
+You research things.`), 0o644)
+
+	cb := NewContextBuilder(tmpDir, "researcher")
+	prompt := cb.BuildSystemPrompt()
+
+	if !strings.Contains(prompt, "# Research Bot") {
+		t.Error("expected sub-agent name from frontmatter")
+	}
+	if !strings.Contains(prompt, "— researcher") {
+		t.Error("expected agent ID in heading for sub-agents")
+	}
+	if !strings.Contains(prompt, "You are Research Bot — Finds and analyzes information") {
+		t.Error("expected sub-agent intro with name and description")
+	}
+}
+
 func TestAvailableAgentMinimalFields(t *testing.T) {
 	tmpDir := t.TempDir()
 
