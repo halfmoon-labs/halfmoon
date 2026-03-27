@@ -15,6 +15,7 @@ import (
 	anthropicmessages "github.com/halfmoon-labs/halfmoon/pkg/providers/anthropic_messages"
 	"github.com/halfmoon-labs/halfmoon/pkg/providers/azure"
 	"github.com/halfmoon-labs/halfmoon/pkg/providers/bedrock"
+	"github.com/halfmoon-labs/halfmoon/pkg/providers/openai_compat"
 )
 
 // createClaudeAuthProvider creates a Claude provider using OAuth credentials from auth store.
@@ -174,6 +175,7 @@ func CreateProviderFromConfig(cfg *config.ModelConfig) (LLMProvider, string, err
 			cfg.MaxTokensField,
 			cfg.RequestTimeout,
 			cfg.ExtraBody,
+			openai_compat.WithProtocol(protocol),
 		), modelID, nil
 
 	case "minimax":

@@ -33,6 +33,7 @@ type (
 type Provider struct {
 	apiKey         string
 	apiBase        string
+	protocol       string // Original protocol prefix (e.g., "litellm", "openrouter", "groq")
 	maxTokensField string // Field name for max tokens (e.g., "max_completion_tokens" for o1/glm models)
 	httpClient     *http.Client
 	extraBody      map[string]any // Additional fields to inject into request body
@@ -59,6 +60,14 @@ func WithRequestTimeout(timeout time.Duration) Option {
 func WithExtraBody(extraBody map[string]any) Option {
 	return func(p *Provider) {
 		p.extraBody = extraBody
+	}
+}
+
+// WithProtocol sets the original protocol prefix so normalizeModel can
+// skip stripping for proxy providers (e.g., litellm, openrouter).
+func WithProtocol(protocol string) Option {
+	return func(p *Provider) {
+		p.protocol = protocol
 	}
 }
 
@@ -99,7 +108,7 @@ func NewProviderWithMaxTokensFieldAndTimeout(
 func (p *Provider) buildRequestBody(
 	messages []Message, tools []ToolDefinition, model string, options map[string]any,
 ) map[string]any {
-	model = normalizeModel(model, p.apiBase)
+	model = normalizeModel(model, p.protocol)
 
 	requestBody := map[string]any{
 		"model":    model,
@@ -386,16 +395,24 @@ func parseStreamResponse(
 	}, nil
 }
 
-func normalizeModel(model, apiBase string) string {
+func normalizeModel(model, protocol string) string {
 	before, after, ok := strings.Cut(model, "/")
 	if !ok {
 		return model
 	}
 
-	if strings.Contains(strings.ToLower(apiBase), "openrouter.ai") {
+	// Proxy providers manage their own model routing — the model name
+	// (including any provider prefix like "moonshot/kimi-k2.5") is the
+	// actual identifier on the proxy and must be passed through as-is.
+	switch protocol {
+	case "litellm", "openrouter":
 		return model
 	}
 
+	// Direct providers: strip the provider prefix so the downstream API
+	// receives just the model name (e.g., "deepseek/deepseek-chat" → "deepseek-chat").
+	// This also handles the fallback case where a model string from one provider
+	// lands on another provider's HTTP client.
 	prefix := strings.ToLower(before)
 	switch prefix {
 	case "litellm", "moonshot", "nvidia", "groq", "ollama", "deepseek", "google",
