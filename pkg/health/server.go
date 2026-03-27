@@ -199,7 +199,9 @@ func (s *Server) readyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // RegisterOnMux registers /health, /ready and /reload handlers onto the given mux.
-// This allows the health endpoints to be served by a shared HTTP server.
+// This allows the health endpoints to be served by a shared HTTP server
+// (e.g., the channel manager's HTTP server) instead of the health server's own listener.
+// The caller must call SetReady(true) once the application is fully initialized.
 func (s *Server) RegisterOnMux(mux *http.ServeMux) {
 	mux.HandleFunc("/health", s.healthHandler)
 	mux.HandleFunc("/ready", s.readyHandler)
