@@ -1206,10 +1206,11 @@ type ExecConfig struct {
 
 // HTTPRequestConfig stores settings for the http_request tool.
 type HTTPRequestConfig struct {
-	ToolConfig       `envPrefix:"HALFMOON_TOOLS_HTTP_REQUEST_"`
+	ToolConfig `envPrefix:"HALFMOON_TOOLS_HTTP_REQUEST_"`
+
 	AllowedDomains   []string `json:"allowed_domains,omitempty" env:"HALFMOON_TOOLS_HTTP_REQUEST_ALLOWED_DOMAINS"`
-	MaxResponseBytes int64    `json:"max_response_bytes" env:"HALFMOON_TOOLS_HTTP_REQUEST_MAX_RESPONSE_BYTES"`
-	TimeoutSeconds   int      `json:"timeout_seconds" env:"HALFMOON_TOOLS_HTTP_REQUEST_TIMEOUT_SECONDS"`
+	MaxResponseBytes int64    `json:"max_response_bytes"        env:"HALFMOON_TOOLS_HTTP_REQUEST_MAX_RESPONSE_BYTES"`
+	TimeoutSeconds   int      `json:"timeout_seconds"           env:"HALFMOON_TOOLS_HTTP_REQUEST_TIMEOUT_SECONDS"`
 
 	// authProfiles is populated from .security.yml via applySecurityConfig.
 	// Maps profile name -> HTTPAuthProfile. Never serialized to JSON.

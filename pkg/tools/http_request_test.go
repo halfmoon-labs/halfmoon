@@ -553,7 +553,7 @@ func TestHTTPRequest_BlockedHeaders(t *testing.T) {
 			"Authorization":     "Bearer stolen",
 			"Transfer-Encoding": "chunked",
 			"Content-Length":    "999",
-			"X-Custom":         "allowed",
+			"X-Custom":          "allowed",
 		},
 	})
 

@@ -191,7 +191,7 @@ type HTTPRequestSecurity struct {
 }
 
 type HTTPRequestAuthProfileSecurity struct {
-	Type  string `yaml:"type"`  // "header" or "query"
+	Type  string `yaml:"type"` // "header" or "query"
 	Key   string `yaml:"key"`
 	Value string `yaml:"value"`
 }
