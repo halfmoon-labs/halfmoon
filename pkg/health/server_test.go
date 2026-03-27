@@ -71,25 +71,28 @@ func TestReadyEndpointAfterSetReady(t *testing.T) {
 	}
 }
 
-func TestRegisterOnMuxSetsReady(t *testing.T) {
+func TestRegisterOnMuxDoesNotSetReady(t *testing.T) {
 	s := NewServer("127.0.0.1", 0)
 
-	// Before RegisterOnMux, should not be ready
-	req := httptest.NewRequest(http.MethodGet, "/ready", nil)
-	w := httptest.NewRecorder()
-	s.readyHandler(w, req)
-	if w.Code != http.StatusServiceUnavailable {
-		t.Fatalf("expected 503 before RegisterOnMux, got %d", w.Code)
-	}
-
-	// RegisterOnMux should mark as ready
+	// RegisterOnMux registers handlers but does NOT set ready.
+	// The caller (gateway) is responsible for calling SetReady(true)
+	// after full initialization.
 	mux := http.NewServeMux()
 	s.RegisterOnMux(mux)
+
+	w := httptest.NewRecorder()
+	s.readyHandler(w, httptest.NewRequest(http.MethodGet, "/ready", nil))
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503 after RegisterOnMux (caller must SetReady), got %d", w.Code)
+	}
+
+	// Caller sets ready after initialization
+	s.SetReady(true)
 
 	w = httptest.NewRecorder()
 	s.readyHandler(w, httptest.NewRequest(http.MethodGet, "/ready", nil))
 	if w.Code != http.StatusOK {
-		t.Fatalf("expected 200 after RegisterOnMux, got %d", w.Code)
+		t.Fatalf("expected 200 after SetReady(true), got %d", w.Code)
 	}
 }
 

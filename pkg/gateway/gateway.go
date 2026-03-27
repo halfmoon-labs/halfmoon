@@ -158,6 +158,7 @@ func Run(debug bool, homePath, configPath string, allowEmptyStartup bool) error 
 	runningServices.HealthServer.SetReloadFunc(reloadTrigger)
 	agentLoop.SetReloadFunc(reloadTrigger)
 
+	runningServices.HealthServer.SetReady(true)
 	fmt.Printf("✓ Gateway started on %s:%d\n", cfg.Gateway.Host, cfg.Gateway.Port)
 	fmt.Println("Press Ctrl+C to stop")
 
