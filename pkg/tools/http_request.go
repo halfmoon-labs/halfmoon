@@ -20,6 +20,16 @@ const (
 	httpRequestDefaultMaxBytes = int64(1 << 20) // 1MB
 )
 
+// blockedRequestHeaders are headers the LLM must not set directly via
+// the "headers" parameter. Auth must go through profiles; Host and
+// transport headers could enable request smuggling or domain bypass.
+var blockedRequestHeaders = map[string]bool{
+	"host":              true,
+	"authorization":     true,
+	"transfer-encoding": true,
+	"content-length":    true,
+}
+
 var allowedHTTPMethods = map[string]bool{
 	"GET":    true,
 	"POST":   true,
@@ -34,7 +44,6 @@ var allowedHTTPMethods = map[string]bool{
 type HTTPRequestTool struct {
 	allowedDomains   []string
 	maxResponseBytes int64
-	timeout          time.Duration
 	authProfiles     map[string]config.HTTPAuthProfile
 	client           *http.Client
 	whitelist        *privateHostWhitelist
@@ -76,7 +85,6 @@ func NewHTTPRequestTool(cfg *config.Config) (*HTTPRequestTool, error) {
 	tool := &HTTPRequestTool{
 		allowedDomains:   httpCfg.AllowedDomains,
 		maxResponseBytes: maxBytes,
-		timeout:          timeout,
 		authProfiles:     httpCfg.AuthProfiles(),
 		client:           client,
 		whitelist:        whitelist,
@@ -177,23 +185,30 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 		return ErrorResult("requests to private or local network hosts are not allowed")
 	}
 
-	// Apply auth profile if specified.
-	authName, _ := args["auth"].(string)
-	if authName != "" {
+	// Resolve auth profile if specified.
+	var authProfile *config.HTTPAuthProfile
+	if authName, _ := args["auth"].(string); authName != "" {
 		profile, ok := t.authProfiles[authName]
 		if !ok {
 			return ErrorResult(fmt.Sprintf("auth profile not found: %s", authName))
 		}
-		switch strings.ToLower(profile.Type) {
-		case "header":
-			// Will be set on the request below.
-		case "query":
+		if profile.Key == "" {
+			return ErrorResult(fmt.Sprintf(
+				"auth profile %q has an empty key", authName,
+			))
+		}
+		authType := strings.ToLower(profile.Type)
+		if authType != "header" && authType != "query" {
+			return ErrorResult(fmt.Sprintf(
+				"unsupported auth type: %s (allowed: header, query)", profile.Type,
+			))
+		}
+		authProfile = &profile
+		if authType == "query" {
 			q := parsedURL.Query()
 			q.Set(profile.Key, profile.Value)
 			parsedURL.RawQuery = q.Encode()
 			urlStr = parsedURL.String()
-		default:
-			return ErrorResult(fmt.Sprintf("unsupported auth type: %s (allowed: header, query)", profile.Type))
 		}
 	}
 
@@ -210,9 +225,12 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 
 	req.Header.Set("User-Agent", fmt.Sprintf(userAgentHonest, config.Version))
 
-	// Apply custom headers.
+	// Apply custom headers, blocking sensitive ones.
 	if headers, ok := args["headers"].(map[string]any); ok {
 		for k, v := range headers {
+			if blockedRequestHeaders[strings.ToLower(k)] {
+				continue
+			}
 			if s, ok := v.(string); ok {
 				req.Header.Set(k, s)
 			}
@@ -220,16 +238,20 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 	}
 
 	// Apply header auth after custom headers (auth takes precedence).
-	if authName != "" {
-		if profile, ok := t.authProfiles[authName]; ok && strings.EqualFold(profile.Type, "header") {
-			req.Header.Set(profile.Key, profile.Value)
-		}
+	if authProfile != nil && strings.EqualFold(authProfile.Type, "header") {
+		req.Header.Set(authProfile.Key, authProfile.Value)
 	}
 
 	// Execute request.
 	resp, err := t.client.Do(req)
 	if err != nil {
-		return ErrorResult(fmt.Sprintf("request failed: %v", err))
+		errMsg := err.Error()
+		// Redact query-auth token from error messages if present.
+		if authProfile != nil &&
+			strings.EqualFold(authProfile.Type, "query") {
+			errMsg = redactQueryParam(errMsg, authProfile.Key)
+		}
+		return ErrorResult(fmt.Sprintf("request failed: %s", errMsg))
 	}
 	defer resp.Body.Close()
 
@@ -239,12 +261,14 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 
 	// Format response for LLM.
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Status: %s\n", resp.Status))
+	fmt.Fprintf(&sb, "Status: %s\n", resp.Status)
 
 	// Include useful response headers.
-	for _, h := range []string{"Content-Type", "Content-Length", "Location", "Retry-After"} {
+	for _, h := range []string{
+		"Content-Type", "Content-Length", "Location", "Retry-After",
+	} {
 		if v := resp.Header.Get(h); v != "" {
-			sb.WriteString(fmt.Sprintf("%s: %s\n", h, v))
+			fmt.Fprintf(&sb, "%s: %s\n", h, v)
 		}
 	}
 	sb.WriteString("\n")
@@ -254,7 +278,7 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 			sb.Write(bodyBytes)
 			sb.WriteString("\n\n[Response truncated: exceeded size limit]")
 		} else if readErr != nil {
-			sb.WriteString(fmt.Sprintf("[Error reading response body: %v]", readErr))
+			fmt.Fprintf(&sb, "[Error reading response body: %v]", readErr)
 		} else {
 			sb.Write(bodyBytes)
 		}
@@ -265,16 +289,13 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 
 // isDomainAllowed checks if hostname is in the allowed domains list.
 // Returns false if no domains are configured (deny-by-default).
+// Callers must pass a bare hostname without port (e.g. from url.URL.Hostname()).
 func (t *HTTPRequestTool) isDomainAllowed(hostname string) bool {
 	if len(t.allowedDomains) == 0 {
 		return false
 	}
 
-	// Strip port if present.
 	h := strings.ToLower(strings.TrimSpace(hostname))
-	if host, _, err := net.SplitHostPort(h); err == nil {
-		h = host
-	}
 
 	for _, domain := range t.allowedDomains {
 		d := strings.ToLower(strings.TrimSpace(domain))
@@ -294,4 +315,22 @@ func (t *HTTPRequestTool) isDomainAllowed(hostname string) bool {
 	}
 
 	return false
+}
+
+// redactQueryParam replaces the value of a specific query parameter
+// in a string (typically an error message) with "[REDACTED]".
+// This prevents auth tokens injected via query-type auth profiles
+// from leaking into LLM-visible error messages.
+func redactQueryParam(s, key string) string {
+	encoded := url.QueryEscape(key) + "="
+	idx := strings.Index(s, encoded)
+	if idx == -1 {
+		return s
+	}
+	start := idx + len(encoded)
+	end := strings.IndexAny(s[start:], "&# ")
+	if end == -1 {
+		return s[:start] + "[REDACTED]"
+	}
+	return s[:start] + "[REDACTED]" + s[start+end:]
 }

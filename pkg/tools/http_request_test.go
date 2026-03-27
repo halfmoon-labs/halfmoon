@@ -521,7 +521,6 @@ func TestHTTPRequest_IsDomainAllowed(t *testing.T) {
 		{"empty domains", nil, "anything.com", false},
 		{"empty domain entry", []string{""}, "anything.com", false},
 		{"case insensitive", []string{"API.GitHub.COM"}, "api.github.com", true},
-		{"with port", []string{"api.github.com"}, "api.github.com:443", true},
 		{"multiple domains first match", []string{"a.com", "b.com"}, "b.com", true},
 	}
 
@@ -529,6 +528,103 @@ func TestHTTPRequest_IsDomainAllowed(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tool := &HTTPRequestTool{allowedDomains: tt.domains}
 			assert.Equal(t, tt.want, tool.isDomainAllowed(tt.hostname))
+		})
+	}
+}
+
+func TestHTTPRequest_BlockedHeaders(t *testing.T) {
+	withPrivateWebFetchHostsAllowed(t)
+
+	var receivedHeaders http.Header
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedHeaders = r.Header
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	host := testServerHost(server.URL)
+	tool := newTestHTTPRequestTool(t, []string{host}, nil)
+
+	result := tool.Execute(context.Background(), map[string]any{
+		"method": "GET",
+		"url":    server.URL,
+		"headers": map[string]any{
+			"Host":              "evil.com",
+			"Authorization":     "Bearer stolen",
+			"Transfer-Encoding": "chunked",
+			"Content-Length":    "999",
+			"X-Custom":         "allowed",
+		},
+	})
+
+	assert.False(t, result.IsError, "got error: %s", result.ForLLM)
+	assert.Equal(t, "allowed", receivedHeaders.Get("X-Custom"))
+	assert.Empty(t, receivedHeaders.Get("Authorization"))
+	assert.NotEqual(t, "evil.com", receivedHeaders.Get("Host"))
+}
+
+func TestHTTPRequest_Auth_EmptyKey(t *testing.T) {
+	profiles := map[string]config.HTTPAuthProfile{
+		"bad": {Type: "header", Key: "", Value: "token"},
+	}
+	tool := newTestHTTPRequestTool(t, []string{"example.com"}, profiles)
+
+	result := tool.Execute(context.Background(), map[string]any{
+		"method": "GET",
+		"url":    "https://example.com/api",
+		"auth":   "bad",
+	})
+
+	assert.True(t, result.IsError)
+	assert.Contains(t, result.ForLLM, "empty key")
+}
+
+func TestHTTPRequest_Auth_UnsupportedType(t *testing.T) {
+	profiles := map[string]config.HTTPAuthProfile{
+		"bad": {Type: "bearer", Key: "Authorization", Value: "token"},
+	}
+	tool := newTestHTTPRequestTool(t, []string{"example.com"}, profiles)
+
+	result := tool.Execute(context.Background(), map[string]any{
+		"method": "GET",
+		"url":    "https://example.com/api",
+		"auth":   "bad",
+	})
+
+	assert.True(t, result.IsError)
+	assert.Contains(t, result.ForLLM, "unsupported auth type")
+}
+
+func TestRedactQueryParam(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		key  string
+		want string
+	}{
+		{
+			"redacts value",
+			"https://api.example.com?appid=secret123&foo=bar",
+			"appid",
+			"https://api.example.com?appid=[REDACTED]&foo=bar",
+		},
+		{
+			"redacts at end of string",
+			"https://api.example.com?appid=secret123",
+			"appid",
+			"https://api.example.com?appid=[REDACTED]",
+		},
+		{
+			"no match returns unchanged",
+			"https://api.example.com?other=val",
+			"appid",
+			"https://api.example.com?other=val",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, redactQueryParam(tt.s, tt.key))
 		})
 	}
 }
