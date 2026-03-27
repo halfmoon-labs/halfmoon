@@ -10,6 +10,9 @@ Halfmoon's tools configuration is located in the `tools` field of `config.json`.
     "web": {
       ...
     },
+    "http_request": {
+      ...
+    },
     "mcp": {
       ...
     },
@@ -218,6 +221,91 @@ as containers, VMs, or an approval flow around build-and-run commands.
     }
   }
 }
+```
+
+## HTTP Request Tool
+
+The HTTP request tool allows the agent to make raw HTTP requests to external APIs. It is **deny-by-default** — requests are only allowed to explicitly configured domains. This tool is primarily used by skills that need to communicate with external services.
+
+Unlike `web_fetch` (which extracts readable text from HTML pages), `http_request` returns the raw response body, making it suitable for API communication.
+
+### Configuration
+
+| Config               | Type     | Default   | Description                                           |
+|----------------------|----------|-----------|-------------------------------------------------------|
+| `enabled`            | bool     | `false`   | Enable the HTTP request tool                          |
+| `allowed_domains`    | string[] | `[]`      | Domains the tool is allowed to call (deny-by-default) |
+| `max_response_bytes` | int      | `1048576` | Maximum response body size in bytes (default 1MB)     |
+| `timeout_seconds`    | int      | `30`      | Request timeout in seconds                            |
+
+### Domain Allowlist
+
+The `allowed_domains` list controls which hosts the agent can reach. If the list is empty or the tool is disabled, all requests are denied.
+
+- **Exact match**: `"api.github.com"` — allows requests to `api.github.com` only
+- **Wildcard subdomain**: `"*.slack.com"` — matches `hooks.slack.com`, `api.slack.com`, etc., but not `slack.com` itself
+- Matching is **case-insensitive**
+- Redirects are also validated — the agent cannot follow a redirect to a domain not in the list
+
+### Authentication Profiles
+
+Auth profiles let the agent reference credentials by name without ever seeing the actual tokens. Profiles are configured in `.security.yml`:
+
+```yaml
+web:
+  http_request:
+    auth_profiles:
+      github:
+        type: header
+        key: "Authorization"
+        value: "Bearer ghp_your_token_here"
+      weatherapi:
+        type: query
+        key: "appid"
+        value: "your_api_key_here"
+```
+
+| Field   | Type   | Description                                                      |
+|---------|--------|------------------------------------------------------------------|
+| `type`  | string | Auth injection method: `header` (set a request header) or `query` (append a URL query parameter) |
+| `key`   | string | Header name or query parameter name                              |
+| `value` | string | The secret value (token, API key, etc.)                          |
+
+When the agent calls `http_request` with `"auth": "github"`, the tool looks up the profile and injects the credentials. The LLM never sees the actual token values.
+
+### Security
+
+- **Deny-by-default**: No `allowed_domains` = no requests allowed
+- **SSRF protection**: Private/internal IPs (127.0.0.0/8, 10.0.0.0/8, 169.254.0.0/16, etc.) are blocked at connect time using DNS rebinding–resistant validation
+- **Redirect validation**: Redirects to private IPs or non-allowed domains are blocked
+- **Secret isolation**: Auth tokens live in `.security.yml` only; the LLM passes profile names, never credentials
+
+### Configuration Example
+
+```json
+{
+  "tools": {
+    "http_request": {
+      "enabled": true,
+      "allowed_domains": [
+        "api.github.com",
+        "*.slack.com",
+        "httpbin.org"
+      ],
+      "max_response_bytes": 1048576,
+      "timeout_seconds": 30
+    }
+  }
+}
+```
+
+### Environment Variables
+
+```bash
+HALFMOON_TOOLS_HTTP_REQUEST_ENABLED=true
+HALFMOON_TOOLS_HTTP_REQUEST_ALLOWED_DOMAINS=api.github.com,*.slack.com
+HALFMOON_TOOLS_HTTP_REQUEST_MAX_RESPONSE_BYTES=1048576
+HALFMOON_TOOLS_HTTP_REQUEST_TIMEOUT_SECONDS=30
 ```
 
 ## Cron Tool
@@ -499,6 +587,8 @@ All configuration options can be overridden via environment variables with the f
 For example:
 
 - `HALFMOON_TOOLS_WEB_BRAVE_ENABLED=true`
+- `HALFMOON_TOOLS_HTTP_REQUEST_ENABLED=true`
+- `HALFMOON_TOOLS_HTTP_REQUEST_ALLOWED_DOMAINS=api.github.com,*.slack.com`
 - `HALFMOON_TOOLS_EXEC_ENABLED=false`
 - `HALFMOON_TOOLS_EXEC_ENABLE_DENY_PATTERNS=false`
 - `HALFMOON_TOOLS_CRON_EXEC_TIMEOUT_MINUTES=10`

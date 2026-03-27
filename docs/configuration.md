@@ -396,6 +396,41 @@ The `restrict_to_workspace` setting applies consistently across all execution pa
 
 All paths share the same workspace restriction — there's no way to bypass the security boundary through subagents or scheduled tasks.
 
+### HTTP Request Security
+
+The `http_request` tool allows the agent to call external APIs. It is **disabled by default** and uses a **deny-by-default** domain allowlist — the agent can only reach domains you explicitly permit.
+
+| Config Key | Type | Default | Description |
+|------------|------|---------|-------------|
+| `tools.http_request.enabled` | bool | `false` | Enable the HTTP request tool |
+| `tools.http_request.allowed_domains` | string[] | `[]` | Domains the agent may call (empty = deny all) |
+| `tools.http_request.max_response_bytes` | int | `1048576` | Max response body size (1MB default) |
+| `tools.http_request.timeout_seconds` | int | `30` | Request timeout |
+
+**Domain matching:**
+- Exact: `"api.github.com"` — only that host
+- Wildcard: `"*.slack.com"` — any subdomain (not `slack.com` itself)
+- Redirects are validated against the same allowlist
+
+**Authentication profiles** are stored in `.security.yml` so the LLM never sees tokens:
+
+```yaml
+# .security.yml
+web:
+  http_request:
+    auth_profiles:
+      github:
+        type: header              # "header" or "query"
+        key: "Authorization"
+        value: "Bearer ghp_xxx"
+```
+
+The agent references a profile by name (e.g. `"auth": "github"`); the tool injects the credentials at request time.
+
+**SSRF protection:** Private/internal IPs (RFC 1918, loopback, link-local, cloud metadata at 169.254.x.x) are blocked at connect time. This shares the same DNS rebinding–resistant dialer used by `web_fetch`.
+
+For full configuration details, see [Tools Configuration - HTTP Request](tools_configuration.md#http-request-tool).
+
 ### Heartbeat (Periodic Tasks)
 
 Halfmoon can perform periodic tasks automatically. Create a `HEARTBEAT.md` file in your workspace:

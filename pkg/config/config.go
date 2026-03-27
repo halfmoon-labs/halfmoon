@@ -1204,6 +1204,36 @@ type ExecConfig struct {
 	TimeoutSeconds      int      `                                 env:"HALFMOON_TOOLS_EXEC_TIMEOUT_SECONDS"       json:"timeout_seconds"` // 0 means use default (60s)
 }
 
+// HTTPRequestConfig stores settings for the http_request tool.
+type HTTPRequestConfig struct {
+	ToolConfig `envPrefix:"HALFMOON_TOOLS_HTTP_REQUEST_"`
+
+	AllowedDomains   []string `json:"allowed_domains,omitempty" env:"HALFMOON_TOOLS_HTTP_REQUEST_ALLOWED_DOMAINS"`
+	MaxResponseBytes int64    `json:"max_response_bytes"        env:"HALFMOON_TOOLS_HTTP_REQUEST_MAX_RESPONSE_BYTES"`
+	TimeoutSeconds   int      `json:"timeout_seconds"           env:"HALFMOON_TOOLS_HTTP_REQUEST_TIMEOUT_SECONDS"`
+
+	// authProfiles is populated from .security.yml via applySecurityConfig.
+	// Maps profile name -> HTTPAuthProfile. Never serialized to JSON.
+	authProfiles map[string]HTTPAuthProfile
+}
+
+// HTTPAuthProfile defines an authentication method for HTTP requests.
+type HTTPAuthProfile struct {
+	Type  string // "header" or "query"
+	Key   string
+	Value string
+}
+
+// AuthProfiles returns the loaded auth profiles.
+func (c *HTTPRequestConfig) AuthProfiles() map[string]HTTPAuthProfile {
+	return c.authProfiles
+}
+
+// SetAuthProfiles sets auth profiles from security config.
+func (c *HTTPRequestConfig) SetAuthProfiles(profiles map[string]HTTPAuthProfile) {
+	c.authProfiles = profiles
+}
+
 type SkillsToolsConfig struct {
 	ToolConfig            `                       envPrefix:"HALFMOON_TOOLS_SKILLS_"`
 	Registries            SkillsRegistriesConfig `                                   json:"registries"`
@@ -1243,6 +1273,7 @@ type ToolsConfig struct {
 	AppendFile      ToolConfig         `json:"append_file"                                              envPrefix:"HALFMOON_TOOLS_APPEND_FILE_"`
 	EditFile        ToolConfig         `json:"edit_file"                                                envPrefix:"HALFMOON_TOOLS_EDIT_FILE_"`
 	FindSkills      ToolConfig         `json:"find_skills"                                              envPrefix:"HALFMOON_TOOLS_FIND_SKILLS_"`
+	HTTPRequest     HTTPRequestConfig  `json:"http_request"                                             envPrefix:"HALFMOON_TOOLS_HTTP_REQUEST_"`
 	I2C             ToolConfig         `json:"i2c"                                                      envPrefix:"HALFMOON_TOOLS_I2C_"`
 	InstallSkill    ToolConfig         `json:"install_skill"                                            envPrefix:"HALFMOON_TOOLS_INSTALL_SKILL_"`
 	ListDir         ToolConfig         `json:"list_dir"                                                 envPrefix:"HALFMOON_TOOLS_LIST_DIR_"`
@@ -1516,6 +1547,18 @@ func applySecurityConfig(cfg *Config, sec *SecurityConfig) error {
 
 		if sec.Web.BaiduSearch != nil && sec.Web.BaiduSearch.APIKey != "" {
 			cfg.Tools.Web.BaiduSearch.apiKey = sec.Web.BaiduSearch.APIKey
+		}
+
+		if sec.Web.HTTPRequest != nil && len(sec.Web.HTTPRequest.AuthProfiles) > 0 {
+			profiles := make(map[string]HTTPAuthProfile, len(sec.Web.HTTPRequest.AuthProfiles))
+			for name, p := range sec.Web.HTTPRequest.AuthProfiles {
+				profiles[name] = HTTPAuthProfile{
+					Type:  p.Type,
+					Key:   p.Key,
+					Value: p.Value,
+				}
+			}
+			cfg.Tools.HTTPRequest.SetAuthProfiles(profiles)
 		}
 	}
 
@@ -2217,6 +2260,8 @@ func (t *ToolsConfig) IsToolEnabled(name string) bool {
 		return t.EditFile.Enabled
 	case "find_skills":
 		return t.FindSkills.Enabled
+	case "http_request":
+		return t.HTTPRequest.Enabled
 	case "i2c":
 		return t.I2C.Enabled
 	case "install_skill":
