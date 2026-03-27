@@ -281,6 +281,16 @@ func registerSharedTools(
 			}
 		}
 
+		if cfg.Tools.IsToolEnabled("http_request") {
+			httpReqTool, err := tools.NewHTTPRequestTool(cfg)
+			if err != nil {
+				logger.ErrorCF("agent", "Failed to initialize http_request tool; continuing without it",
+					map[string]any{"error": err.Error()})
+			} else {
+				agent.Tools.Register(httpReqTool)
+			}
+		}
+
 		// Hardware tools (I2C, SPI) - Linux only, returns error on other platforms
 		if cfg.Tools.IsToolEnabled("i2c") {
 			agent.Tools.Register(tools.NewI2CTool())

@@ -162,7 +162,8 @@ type WebToolsSecurity struct {
 	Tavily      *TavilySecurity      `yaml:"tavily,omitempty"`
 	Perplexity  *PerplexitySecurity  `yaml:"perplexity,omitempty"`
 	GLMSearch   *GLMSearchSecurity   `yaml:"glm_search,omitempty"`
-	BaiduSearch *BaiduSearchSecurity `yaml:"baidu_search,omitempty"`
+	BaiduSearch  *BaiduSearchSecurity  `yaml:"baidu_search,omitempty"`
+	HTTPRequest  *HTTPRequestSecurity  `yaml:"http_request,omitempty"`
 }
 
 type BraveSecurity struct {
@@ -183,6 +184,16 @@ type GLMSearchSecurity struct {
 
 type BaiduSearchSecurity struct {
 	APIKey string `yaml:"api_key,omitempty" env:"HALFMOON_TOOLS_WEB_BAIDU_API_KEY"`
+}
+
+type HTTPRequestSecurity struct {
+	AuthProfiles map[string]HTTPRequestAuthProfileSecurity `yaml:"auth_profiles,omitempty"`
+}
+
+type HTTPRequestAuthProfileSecurity struct {
+	Type  string `yaml:"type"`  // "header" or "query"
+	Key   string `yaml:"key"`
+	Value string `yaml:"value"`
 }
 
 type SkillsSecurity struct {

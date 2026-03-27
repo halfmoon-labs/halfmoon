@@ -484,6 +484,11 @@ func DefaultConfig() *Config {
 			FindSkills: ToolConfig{
 				Enabled: true,
 			},
+			HTTPRequest: HTTPRequestConfig{
+				ToolConfig:       ToolConfig{Enabled: false}, // Deny-by-default; requires allowed_domains
+				MaxResponseBytes: 1 << 20,                    // 1MB
+				TimeoutSeconds:   30,
+			},
 			I2C: ToolConfig{
 				Enabled: false, // Hardware tool - Linux only
 			},

@@ -363,6 +363,10 @@ Halfmoon can search the web to provide up-to-date information. Configure in `too
 | [SearXNG](https://github.com/searxng/searxng) | Not needed | Self-hosted | Free metasearch engine |
 | [GLM Search](https://open.bigmodel.cn/) | Required | Varies | Zhipu web search |
 
+### 🌐 HTTP Request
+
+Halfmoon includes a built-in HTTP request tool for calling external APIs from skills. It supports all HTTP methods, domain-level access control, and auth profile injection (tokens stay in `.security.yml`, never exposed to the LLM). See [Tools Configuration - HTTP Request](docs/tools_configuration.md#http-request-tool) for details.
+
 ### ⚙️ Other Tools
 
 Halfmoon includes built-in tools for file operations, code execution, scheduling, and more. See [Tools Configuration](docs/tools_configuration.md) for details.

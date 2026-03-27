@@ -43,6 +43,7 @@ pkg/channels/           → Chat platforms. 15+ channels, all funnel through Bas
 pkg/tools/              → Tool registry. Interface: Name/Description/Parameters/Execute.
   base.go               → Tool interface + ToolResult (ForLLM, ForUser, IsError)
   registry.go           → Map-based lookup, clone support for sub-agents
+  http_request.go       → HTTP request tool. Domain allowlist, auth profiles, SSRF protection.
 pkg/bus/                → Message bus. Decouples channels from agent.
 pkg/config/             → Config loading. JSON config + .security.yml + env vars + file:// refs
 pkg/cron/               → In-process cron scheduler. Single goroutine + timer.
