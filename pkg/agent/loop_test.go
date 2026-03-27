@@ -1132,11 +1132,12 @@ func TestProcessMessage_SwitchModelRoutesSubsequentRequestsToSelectedProvider(t 
 	if remoteCalls != 1 {
 		t.Fatalf("remote calls after switch = %d, want 1", remoteCalls)
 	}
-	if remoteModel != "deepseek-v3.2" {
+	// openrouter is a proxy — model name passes through as-is (no prefix stripping)
+	if remoteModel != "deepseek/deepseek-v3.2" {
 		t.Fatalf(
 			"remote model after switch = %q, want %q",
 			remoteModel,
-			"deepseek-v3.2",
+			"deepseek/deepseek-v3.2",
 		)
 	}
 }

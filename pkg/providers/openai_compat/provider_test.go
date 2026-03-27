@@ -575,24 +575,30 @@ func TestProviderChat_AcceptsNumericOptionTypes(t *testing.T) {
 	}
 }
 
-func TestNormalizeModel_UsesAPIBase(t *testing.T) {
-	if got := normalizeModel("deepseek/deepseek-chat", "https://api.deepseek.com/v1"); got != "deepseek-chat" {
+func TestNormalizeModel_UsesProtocol(t *testing.T) {
+	// Direct providers: prefix is stripped
+	if got := normalizeModel("deepseek/deepseek-chat", "deepseek"); got != "deepseek-chat" {
 		t.Fatalf("normalizeModel(deepseek) = %q, want %q", got, "deepseek-chat")
 	}
-	if got := normalizeModel("openrouter/auto", "https://openrouter.ai/api/v1"); got != "openrouter/auto" {
-		t.Fatalf("normalizeModel(openrouter) = %q, want %q", got, "openrouter/auto")
-	}
-	if got := normalizeModel("vivgrid/managed", "https://api.vivgrid.com/v1"); got != "managed" {
+	if got := normalizeModel("vivgrid/managed", "vivgrid"); got != "managed" {
 		t.Fatalf("normalizeModel(vivgrid) = %q, want %q", got, "managed")
 	}
-	if got := normalizeModel("vivgrid/auto", "https://api.vivgrid.com/v1"); got != "auto" {
+	if got := normalizeModel("vivgrid/auto", "vivgrid"); got != "auto" {
 		t.Fatalf("normalizeModel(vivgrid auto) = %q, want %q", got, "auto")
 	}
-	if got := normalizeModel(
-		"novita/deepseek/deepseek-v3.2",
-		"https://api.novita.ai/openai",
-	); got != "deepseek/deepseek-v3.2" {
+	if got := normalizeModel("novita/deepseek/deepseek-v3.2", "novita"); got != "deepseek/deepseek-v3.2" {
 		t.Fatalf("normalizeModel(novita) = %q, want %q", got, "deepseek/deepseek-v3.2")
+	}
+
+	// Proxy providers: model name passed through as-is
+	if got := normalizeModel("openrouter/auto", "openrouter"); got != "openrouter/auto" {
+		t.Fatalf("normalizeModel(openrouter proxy) = %q, want %q", got, "openrouter/auto")
+	}
+	if got := normalizeModel("moonshot/kimi-k2.5", "litellm"); got != "moonshot/kimi-k2.5" {
+		t.Fatalf("normalizeModel(litellm proxy) = %q, want %q", got, "moonshot/kimi-k2.5")
+	}
+	if got := normalizeModel("anthropic/claude-sonnet-4-6", "litellm"); got != "anthropic/claude-sonnet-4-6" {
+		t.Fatalf("normalizeModel(litellm anthropic) = %q, want %q", got, "anthropic/claude-sonnet-4-6")
 	}
 }
 
