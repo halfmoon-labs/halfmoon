@@ -162,8 +162,8 @@ type WebToolsSecurity struct {
 	Tavily      *TavilySecurity      `yaml:"tavily,omitempty"`
 	Perplexity  *PerplexitySecurity  `yaml:"perplexity,omitempty"`
 	GLMSearch   *GLMSearchSecurity   `yaml:"glm_search,omitempty"`
-	BaiduSearch  *BaiduSearchSecurity  `yaml:"baidu_search,omitempty"`
-	HTTPRequest  *HTTPRequestSecurity  `yaml:"http_request,omitempty"`
+	BaiduSearch *BaiduSearchSecurity `yaml:"baidu_search,omitempty"`
+	HTTPRequest *HTTPRequestSecurity `yaml:"http_request,omitempty"`
 }
 
 type BraveSecurity struct {

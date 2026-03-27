@@ -11,9 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/halfmoon-labs/halfmoon/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/halfmoon-labs/halfmoon/pkg/config"
 )
 
 // testServerHost extracts just the hostname (without port) from a test server URL.
@@ -23,7 +24,9 @@ func testServerHost(serverURL string) string {
 }
 
 // newTestHTTPRequestTool creates an HTTPRequestTool for testing without full config loading.
-func newTestHTTPRequestTool(t *testing.T, domains []string, profiles map[string]config.HTTPAuthProfile) *HTTPRequestTool {
+func newTestHTTPRequestTool(
+	t *testing.T, domains []string, profiles map[string]config.HTTPAuthProfile,
+) *HTTPRequestTool {
 	t.Helper()
 
 	cfg := config.DefaultConfig()

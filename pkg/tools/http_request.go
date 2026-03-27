@@ -144,7 +144,9 @@ func (t *HTTPRequestTool) Execute(ctx context.Context, args map[string]any) *Too
 	}
 	method = strings.ToUpper(method)
 	if !allowedHTTPMethods[method] {
-		return ErrorResult(fmt.Sprintf("unsupported HTTP method: %s (allowed: GET, POST, PUT, PATCH, DELETE, HEAD)", method))
+		return ErrorResult(fmt.Sprintf(
+			"unsupported HTTP method: %s (allowed: GET, POST, PUT, PATCH, DELETE, HEAD)", method,
+		))
 	}
 
 	urlStr, _ := args["url"].(string)
