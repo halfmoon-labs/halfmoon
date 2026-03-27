@@ -97,8 +97,8 @@ func NewContextBuilder(workspace, agentID string) *ContextBuilder {
 	}
 }
 
-func (cb *ContextBuilder) getIdentity() string {
-	workspacePath, _ := filepath.Abs(filepath.Join(cb.workspace))
+func (cb *ContextBuilder) getIdentity(def AgentContextDefinition) string {
+	workspacePath, _ := filepath.Abs(cb.workspace)
 	toolDiscovery := cb.getDiscoveryRule()
 	version := config.FormatVersion()
 
@@ -106,7 +106,6 @@ func (cb *ContextBuilder) getIdentity() string {
 	// These define who the agent is — never hardcoded.
 	agentName := "halfmoon"
 	agentDescription := ""
-	def := loadAgentDefinition(cb.workspace, cb.agentID)
 	if def.Agent != nil {
 		if def.Agent.Frontmatter.Name != "" {
 			agentName = def.Agent.Frontmatter.Name
@@ -171,11 +170,14 @@ func (cb *ContextBuilder) getDiscoveryRule() string {
 func (cb *ContextBuilder) BuildSystemPrompt() string {
 	parts := []string{}
 
+	// Load the agent definition once — used by both identity and bootstrap sections.
+	agentDefinition := cb.LoadAgentDefinition()
+
 	// Core identity section
-	parts = append(parts, cb.getIdentity())
+	parts = append(parts, cb.getIdentity(agentDefinition))
 
 	// Bootstrap files
-	bootstrapContent := cb.LoadBootstrapFiles()
+	bootstrapContent := cb.loadBootstrapFilesFrom(agentDefinition)
 	if bootstrapContent != "" {
 		parts = append(parts, bootstrapContent)
 	}
@@ -482,9 +484,12 @@ func skillFilesChangedSince(skillRoots []string, filesAtCache map[string]time.Ti
 }
 
 func (cb *ContextBuilder) LoadBootstrapFiles() string {
+	return cb.loadBootstrapFilesFrom(cb.LoadAgentDefinition())
+}
+
+func (cb *ContextBuilder) loadBootstrapFilesFrom(agentDefinition AgentContextDefinition) string {
 	var sb strings.Builder
 
-	agentDefinition := cb.LoadAgentDefinition()
 	if agentDefinition.Agent != nil {
 		label := string(agentDefinition.Source)
 		if label == "" {
