@@ -752,6 +752,46 @@ func newChatCompletionTestServer(
 	}))
 }
 
+func newStrictChatCompletionTestServer(
+	t *testing.T,
+	label string,
+	expectedModel string,
+	response string,
+	calls *int,
+) *httptest.Server {
+	t.Helper()
+
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/chat/completions" {
+			t.Fatalf("%s server path = %q, want /chat/completions", label, r.URL.Path)
+		}
+		*calls = *calls + 1
+		defer r.Body.Close()
+
+		var req struct {
+			Model string `json:"model"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("decode %s request: %v", label, err)
+		}
+		if req.Model != expectedModel {
+			t.Fatalf("%s server model = %q, want %q", label, req.Model, expectedModel)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{
+			"choices": []map[string]any{
+				{
+					"message":       map[string]any{"content": response},
+					"finish_reason": "stop",
+				},
+			},
+		}); err != nil {
+			t.Fatalf("encode %s response: %v", label, err)
+		}
+	}))
+}
+
 func (h testHelper) executeAndGetResponse(tb testing.TB, ctx context.Context, msg bus.InboundMessage) string {
 	// Use a short timeout to avoid hanging
 	timeoutCtx, cancel := context.WithTimeout(ctx, responseTimeout)
