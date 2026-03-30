@@ -7,22 +7,22 @@ import (
 const meterName = "halfmoon"
 
 type instruments struct {
-	turnsTotal        metric.Int64Counter
-	turnsDuration     metric.Float64Histogram
-	turnsIterations   metric.Int64Histogram
-	llmRequests       metric.Int64Counter
-	llmDuration       metric.Float64Histogram
-	llmTokensInput    metric.Int64Counter
-	llmTokensOutput   metric.Int64Counter
-	llmRetries        metric.Int64Counter
-	toolsExecTotal    metric.Int64Counter
-	toolsDuration     metric.Float64Histogram
-	toolsSkipped      metric.Int64Counter
-	subturnsSpawned   metric.Int64Counter
-	subturnsOrphaned  metric.Int64Counter
-	errorsTotal       metric.Int64Counter
-	contextCompress   metric.Int64Counter
-	interruptsTotal   metric.Int64Counter
+	turnsTotal       metric.Int64Counter
+	turnsDuration    metric.Float64Histogram
+	turnsIterations  metric.Int64Histogram
+	llmRequests      metric.Int64Counter
+	llmDuration      metric.Float64Histogram
+	llmTokensInput   metric.Int64Counter
+	llmTokensOutput  metric.Int64Counter
+	llmRetries       metric.Int64Counter
+	toolsExecTotal   metric.Int64Counter
+	toolsDuration    metric.Float64Histogram
+	toolsSkipped     metric.Int64Counter
+	subturnsSpawned  metric.Int64Counter
+	subturnsOrphaned metric.Int64Counter
+	errorsTotal      metric.Int64Counter
+	contextCompress  metric.Int64Counter
+	interruptsTotal  metric.Int64Counter
 }
 
 func newInstruments(mp metric.MeterProvider) (*instruments, error) {

@@ -927,9 +927,9 @@ type HeartbeatConfig struct {
 }
 
 type ObservabilityConfig struct {
-	Enabled        bool             `json:"enabled"          env:"HALFMOON_OBSERVABILITY_ENABLED"`
-	Backend        string           `json:"backend"          env:"HALFMOON_OBSERVABILITY_BACKEND"`
-	ServiceName    string           `json:"service_name"     env:"HALFMOON_OBSERVABILITY_SERVICE_NAME"`
+	Enabled        bool             `json:"enabled"         env:"HALFMOON_OBSERVABILITY_ENABLED"`
+	Backend        string           `json:"backend"         env:"HALFMOON_OBSERVABILITY_BACKEND"`
+	ServiceName    string           `json:"service_name"    env:"HALFMOON_OBSERVABILITY_SERVICE_NAME"`
 	ExcludedEvents []string         `json:"excluded_events"`
 	OTLP           OTLPExportConfig `json:"otlp"`
 }

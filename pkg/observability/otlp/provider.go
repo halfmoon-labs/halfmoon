@@ -89,7 +89,10 @@ func newTracerProvider(
 		if cfg.Insecure {
 			opts = append(opts, otlptracegrpc.WithInsecure())
 		} else {
-			opts = append(opts, otlptracegrpc.WithTLSCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})))
+			opts = append(
+				opts,
+				otlptracegrpc.WithTLSCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})),
+			)
 		}
 		exporter, err = otlptracegrpc.New(ctx, opts...)
 	case "http":
@@ -138,7 +141,10 @@ func newMeterProvider(
 		if cfg.Insecure {
 			opts = append(opts, otlpmetricgrpc.WithInsecure())
 		} else {
-			opts = append(opts, otlpmetricgrpc.WithTLSCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})))
+			opts = append(
+				opts,
+				otlpmetricgrpc.WithTLSCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})),
+			)
 		}
 		exporter, err = otlpmetricgrpc.New(ctx, opts...)
 	case "http":
