@@ -565,5 +565,16 @@
     "port": 18790,
     "hot_reload": false,
     "log_level": "fatal"
+  },
+  "observability": {
+    "enabled": true,
+    "backend": "otlp",
+    "service_name": "halfmoon",
+    "excluded_events": [],
+    "otlp": {
+      "endpoint": "localhost:4317",
+      "protocol": "grpc",
+      "insecure": true
+    }
   }
 }

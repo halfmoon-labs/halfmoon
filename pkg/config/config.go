@@ -94,7 +94,8 @@ type Config struct {
 	Tools     ToolsConfig     `json:"tools"`
 	Heartbeat HeartbeatConfig `json:"heartbeat"`
 	Devices   DevicesConfig   `json:"devices"`
-	Voice     VoiceConfig     `json:"voice"`
+	Voice          VoiceConfig          `json:"voice"`
+	Observability  ObservabilityConfig  `json:"observability"`
 	// BuildInfo contains build-time version information
 	BuildInfo BuildInfo `json:"build_info,omitempty"`
 
@@ -923,6 +924,24 @@ type HeartbeatConfig struct {
 	Enabled  bool   `json:"enabled"  env:"HALFMOON_HEARTBEAT_ENABLED"`
 	Interval int    `json:"interval" env:"HALFMOON_HEARTBEAT_INTERVAL"` // minutes, min 5
 	Model    string `json:"model"    env:"HALFMOON_HEARTBEAT_MODEL"`    // optional model override
+}
+
+type ObservabilityConfig struct {
+	Enabled        bool              `json:"enabled"          env:"HALFMOON_OBSERVABILITY_ENABLED"`
+	Backend        string            `json:"backend"          env:"HALFMOON_OBSERVABILITY_BACKEND"`
+	ServiceName    string            `json:"service_name"     env:"HALFMOON_OBSERVABILITY_SERVICE_NAME"`
+	ExcludedEvents []string          `json:"excluded_events"`
+	OTLP           OTLPExportConfig  `json:"otlp"`
+}
+
+type OTLPExportConfig struct {
+	Endpoint         string            `json:"endpoint"           env:"HALFMOON_OBSERVABILITY_OTLP_ENDPOINT"`
+	Protocol         string            `json:"protocol"           env:"HALFMOON_OBSERVABILITY_OTLP_PROTOCOL"`
+	Headers          map[string]string `json:"headers"`
+	Insecure         bool              `json:"insecure"           env:"HALFMOON_OBSERVABILITY_OTLP_INSECURE"`
+	TimeoutMs        int               `json:"timeout_ms"`
+	ExportIntervalMs int               `json:"export_interval_ms"`
+	BatchSize        int               `json:"batch_size"`
 }
 
 type DevicesConfig struct {

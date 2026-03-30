@@ -37,6 +37,7 @@ import (
 	"github.com/halfmoon-labs/halfmoon/pkg/heartbeat"
 	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 	"github.com/halfmoon-labs/halfmoon/pkg/media"
+	"github.com/halfmoon-labs/halfmoon/pkg/observability"
 	"github.com/halfmoon-labs/halfmoon/pkg/providers"
 	"github.com/halfmoon-labs/halfmoon/pkg/state"
 	"github.com/halfmoon-labs/halfmoon/pkg/tools"
@@ -133,6 +134,15 @@ func Run(debug bool, homePath, configPath string, allowEmptyStartup bool) error 
 			"skills_total":     skillsInfo["total"],
 			"skills_available": skillsInfo["available"],
 		})
+
+	if cfg.Observability.Enabled {
+		obsExporter, obsErr := setupObservability(cfg, agentLoop)
+		if obsErr != nil {
+			logger.ErrorCF("observability", "Failed to initialize", map[string]any{"error": obsErr.Error()})
+		} else {
+			defer obsExporter.Close(context.Background()) //nolint:errcheck
+		}
+	}
 
 	runningServices, err := setupAndStartServices(cfg, agentLoop, msgBus)
 	if err != nil {
@@ -653,6 +663,24 @@ func setupCronTool(
 	}
 
 	return cronService, nil
+}
+
+func setupObservability(cfg *config.Config, agentLoop *agent.AgentLoop) (*observability.Exporter, error) {
+	backend, err := observability.NewBackend(cfg.Observability, cfg.BuildInfo.Version)
+	if err != nil {
+		return nil, fmt.Errorf("create backend: %w", err)
+	}
+
+	exporter := observability.NewExporter(backend, cfg.Observability)
+	if err := agentLoop.MountHook(agent.NamedHook("observability", exporter)); err != nil {
+		return nil, fmt.Errorf("mount exporter: %w", err)
+	}
+
+	logger.InfoCF("observability", "Initialized", map[string]any{
+		"backend":  backend.Name(),
+		"endpoint": cfg.Observability.OTLP.Endpoint,
+	})
+	return exporter, nil
 }
 
 func createHeartbeatHandler(agentLoop *agent.AgentLoop) func(prompt, channel, chatID string) *tools.ToolResult {
