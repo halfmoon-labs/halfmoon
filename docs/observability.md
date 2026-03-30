@@ -19,7 +19,7 @@ Add to your `config.json`:
 }
 ```
 
-Start a local Jaeger instance to receive traces:
+Start a local grafana otel instance to receive traces:
 
 ```bash
 docker run -d --name grafana-otel \
