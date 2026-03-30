@@ -688,21 +688,21 @@ func (al *AgentLoop) publishResponseIfNeeded(ctx context.Context, channel, chatI
 		return
 	}
 
-	alreadySent := false
+	alreadySentToSameChat := false
 	defaultAgent := al.GetRegistry().GetDefaultAgent()
 	if defaultAgent != nil {
 		if tool, ok := defaultAgent.Tools.Get("message"); ok {
 			if mt, ok := tool.(*tools.MessageTool); ok {
-				alreadySent = mt.HasSentInRound()
+				alreadySentToSameChat = mt.HasSentTo(channel, chatID)
 			}
 		}
 	}
 
-	if alreadySent {
+	if alreadySentToSameChat {
 		logger.DebugCF(
 			"agent",
-			"Skipped outbound (message tool already sent)",
-			map[string]any{"channel": channel},
+			"Skipped outbound (message tool already sent to same chat)",
+			map[string]any{"channel": channel, "chat_id": chatID},
 		)
 		return
 	}
