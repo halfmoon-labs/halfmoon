@@ -29,7 +29,7 @@ docker run -d --name grafana-otel \
     grafana/otel-lgtm:latest
 ```
 
-Start Halfmoon. Visit `http://localhost:16686` to see traces.
+Start Halfmoon. Visit `http://localhost:3000` (Grafana UI, login: admin/admin) to see traces under Explore → Tempo.
 
 ## Configuration
 
