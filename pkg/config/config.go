@@ -83,19 +83,19 @@ const CurrentVersion = 1
 
 // Config is the current config structure with version support
 type Config struct {
-	Version   int             `json:"version"` // Config schema version for migration
-	Agents    AgentsConfig    `json:"agents"`
-	Bindings  []AgentBinding  `json:"bindings,omitempty"`
-	Session   SessionConfig   `json:"session,omitempty"`
-	Channels  ChannelsConfig  `json:"channels"`
-	ModelList []*ModelConfig  `json:"model_list"` // New model-centric provider configuration
-	Gateway   GatewayConfig   `json:"gateway"`
-	Hooks     HooksConfig     `json:"hooks,omitempty"`
-	Tools     ToolsConfig     `json:"tools"`
-	Heartbeat HeartbeatConfig `json:"heartbeat"`
-	Devices   DevicesConfig   `json:"devices"`
-	Voice          VoiceConfig          `json:"voice"`
-	Observability  ObservabilityConfig  `json:"observability"`
+	Version       int                 `json:"version"` // Config schema version for migration
+	Agents        AgentsConfig        `json:"agents"`
+	Bindings      []AgentBinding      `json:"bindings,omitempty"`
+	Session       SessionConfig       `json:"session,omitempty"`
+	Channels      ChannelsConfig      `json:"channels"`
+	ModelList     []*ModelConfig      `json:"model_list"` // New model-centric provider configuration
+	Gateway       GatewayConfig       `json:"gateway"`
+	Hooks         HooksConfig         `json:"hooks,omitempty"`
+	Tools         ToolsConfig         `json:"tools"`
+	Heartbeat     HeartbeatConfig     `json:"heartbeat"`
+	Devices       DevicesConfig       `json:"devices"`
+	Voice         VoiceConfig         `json:"voice"`
+	Observability ObservabilityConfig `json:"observability"`
 	// BuildInfo contains build-time version information
 	BuildInfo BuildInfo `json:"build_info,omitempty"`
 
@@ -927,11 +927,11 @@ type HeartbeatConfig struct {
 }
 
 type ObservabilityConfig struct {
-	Enabled        bool              `json:"enabled"          env:"HALFMOON_OBSERVABILITY_ENABLED"`
-	Backend        string            `json:"backend"          env:"HALFMOON_OBSERVABILITY_BACKEND"`
-	ServiceName    string            `json:"service_name"     env:"HALFMOON_OBSERVABILITY_SERVICE_NAME"`
-	ExcludedEvents []string          `json:"excluded_events"`
-	OTLP           OTLPExportConfig  `json:"otlp"`
+	Enabled        bool             `json:"enabled"          env:"HALFMOON_OBSERVABILITY_ENABLED"`
+	Backend        string           `json:"backend"          env:"HALFMOON_OBSERVABILITY_BACKEND"`
+	ServiceName    string           `json:"service_name"     env:"HALFMOON_OBSERVABILITY_SERVICE_NAME"`
+	ExcludedEvents []string         `json:"excluded_events"`
+	OTLP           OTLPExportConfig `json:"otlp"`
 }
 
 type OTLPExportConfig struct {

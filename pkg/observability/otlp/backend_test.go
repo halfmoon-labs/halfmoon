@@ -71,10 +71,16 @@ func TestBackend_TurnSpanLifecycle(t *testing.T) {
 	})
 
 	_ = b.HandleEvent(ctx, agent.Event{
-		Kind:    agent.EventKindTurnEnd,
-		Time:    time.Now(),
-		Meta:    meta("turn-1", 1),
-		Payload: agent.TurnEndPayload{Status: agent.TurnEndStatusCompleted, Iterations: 1, Duration: 500 * time.Millisecond, Channel: "telegram", ChatID: "chat-1"},
+		Kind: agent.EventKindTurnEnd,
+		Time: time.Now(),
+		Meta: meta("turn-1", 1),
+		Payload: agent.TurnEndPayload{
+			Status:     agent.TurnEndStatusCompleted,
+			Iterations: 1,
+			Duration:   500 * time.Millisecond,
+			Channel:    "telegram",
+			ChatID:     "chat-1",
+		},
 	})
 
 	spans := exporter.GetSpans()
@@ -111,10 +117,14 @@ func TestBackend_TurnError(t *testing.T) {
 	})
 
 	_ = b.HandleEvent(ctx, agent.Event{
-		Kind:    agent.EventKindTurnEnd,
-		Time:    time.Now(),
-		Meta:    meta("turn-err", 1),
-		Payload: agent.TurnEndPayload{Status: agent.TurnEndStatusError, Duration: 100 * time.Millisecond, Channel: "cli"},
+		Kind: agent.EventKindTurnEnd,
+		Time: time.Now(),
+		Meta: meta("turn-err", 1),
+		Payload: agent.TurnEndPayload{
+			Status:   agent.TurnEndStatusError,
+			Duration: 100 * time.Millisecond,
+			Channel:  "cli",
+		},
 	})
 
 	spans := exporter.GetSpans()
@@ -130,10 +140,52 @@ func TestBackend_LLMCallChildSpan(t *testing.T) {
 	b, exporter, reader := testBackend(t)
 	ctx := context.Background()
 
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnStart, Time: time.Now(), Meta: meta("turn-llm", 0), Payload: agent.TurnStartPayload{Channel: "cli"}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindLLMRequest, Time: time.Now(), Meta: meta("turn-llm", 1), Payload: agent.LLMRequestPayload{Model: "gpt-4o", MessagesCount: 3, ToolsCount: 2}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindLLMResponse, Time: time.Now(), Meta: meta("turn-llm", 1), Payload: agent.LLMResponsePayload{Model: "gpt-4o", ContentLen: 100, InputTokens: 500, OutputTokens: 100, Duration: 200 * time.Millisecond}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnEnd, Time: time.Now(), Meta: meta("turn-llm", 1), Payload: agent.TurnEndPayload{Status: agent.TurnEndStatusCompleted, Duration: 300 * time.Millisecond, Channel: "cli"}})
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindTurnStart,
+			Time:    time.Now(),
+			Meta:    meta("turn-llm", 0),
+			Payload: agent.TurnStartPayload{Channel: "cli"},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindLLMRequest,
+			Time:    time.Now(),
+			Meta:    meta("turn-llm", 1),
+			Payload: agent.LLMRequestPayload{Model: "gpt-4o", MessagesCount: 3, ToolsCount: 2},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind: agent.EventKindLLMResponse,
+			Time: time.Now(),
+			Meta: meta("turn-llm", 1),
+			Payload: agent.LLMResponsePayload{
+				Model:        "gpt-4o",
+				ContentLen:   100,
+				InputTokens:  500,
+				OutputTokens: 100,
+				Duration:     200 * time.Millisecond,
+			},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind: agent.EventKindTurnEnd,
+			Time: time.Now(),
+			Meta: meta("turn-llm", 1),
+			Payload: agent.TurnEndPayload{
+				Status:   agent.TurnEndStatusCompleted,
+				Duration: 300 * time.Millisecond,
+				Channel:  "cli",
+			},
+		},
+	)
 
 	spans := exporter.GetSpans()
 	if len(spans) != 2 {
@@ -168,10 +220,46 @@ func TestBackend_ToolExecChildSpan(t *testing.T) {
 	b, exporter, reader := testBackend(t)
 	ctx := context.Background()
 
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnStart, Time: time.Now(), Meta: meta("turn-tool", 0), Payload: agent.TurnStartPayload{Channel: "cli"}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindToolExecStart, Time: time.Now(), Meta: meta("turn-tool", 1), Payload: agent.ToolExecStartPayload{Tool: "web_search", Arguments: map[string]any{"query": "test"}}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindToolExecEnd, Time: time.Now(), Meta: meta("turn-tool", 1), Payload: agent.ToolExecEndPayload{Tool: "web_search", Duration: 150 * time.Millisecond, ForLLMLen: 500}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnEnd, Time: time.Now(), Meta: meta("turn-tool", 1), Payload: agent.TurnEndPayload{Status: agent.TurnEndStatusCompleted, Duration: 200 * time.Millisecond, Channel: "cli"}})
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindTurnStart,
+			Time:    time.Now(),
+			Meta:    meta("turn-tool", 0),
+			Payload: agent.TurnStartPayload{Channel: "cli"},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindToolExecStart,
+			Time:    time.Now(),
+			Meta:    meta("turn-tool", 1),
+			Payload: agent.ToolExecStartPayload{Tool: "web_search", Arguments: map[string]any{"query": "test"}},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindToolExecEnd,
+			Time:    time.Now(),
+			Meta:    meta("turn-tool", 1),
+			Payload: agent.ToolExecEndPayload{Tool: "web_search", Duration: 150 * time.Millisecond, ForLLMLen: 500},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind: agent.EventKindTurnEnd,
+			Time: time.Now(),
+			Meta: meta("turn-tool", 1),
+			Payload: agent.TurnEndPayload{
+				Status:   agent.TurnEndStatusCompleted,
+				Duration: 200 * time.Millisecond,
+				Channel:  "cli",
+			},
+		},
+	)
 
 	spans := exporter.GetSpans()
 	if len(spans) != 2 {
@@ -201,9 +289,37 @@ func TestBackend_ErrorSetsSpanStatus(t *testing.T) {
 	b, exporter, reader := testBackend(t)
 	ctx := context.Background()
 
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnStart, Time: time.Now(), Meta: meta("turn-err2", 0), Payload: agent.TurnStartPayload{Channel: "cli"}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindError, Time: time.Now(), Meta: meta("turn-err2", 1), Payload: agent.ErrorPayload{Stage: "tool_exec", Message: "permission denied"}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnEnd, Time: time.Now(), Meta: meta("turn-err2", 1), Payload: agent.TurnEndPayload{Status: agent.TurnEndStatusError, Duration: 50 * time.Millisecond, Channel: "cli"}})
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindTurnStart,
+			Time:    time.Now(),
+			Meta:    meta("turn-err2", 0),
+			Payload: agent.TurnStartPayload{Channel: "cli"},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindError,
+			Time:    time.Now(),
+			Meta:    meta("turn-err2", 1),
+			Payload: agent.ErrorPayload{Stage: "tool_exec", Message: "permission denied"},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind: agent.EventKindTurnEnd,
+			Time: time.Now(),
+			Meta: meta("turn-err2", 1),
+			Payload: agent.TurnEndPayload{
+				Status:   agent.TurnEndStatusError,
+				Duration: 50 * time.Millisecond,
+				Channel:  "cli",
+			},
+		},
+	)
 
 	spans := exporter.GetSpans()
 	if len(spans) != 1 {
@@ -226,8 +342,28 @@ func TestBackend_GracefulShutdown(t *testing.T) {
 	b, exporter, _ := testBackend(t)
 	ctx := context.Background()
 
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnStart, Time: time.Now(), Meta: meta("turn-shutdown", 0), Payload: agent.TurnStartPayload{Channel: "cli"}})
-	_ = b.HandleEvent(ctx, agent.Event{Kind: agent.EventKindTurnEnd, Time: time.Now(), Meta: meta("turn-shutdown", 1), Payload: agent.TurnEndPayload{Status: agent.TurnEndStatusCompleted, Duration: 100 * time.Millisecond, Channel: "cli"}})
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind:    agent.EventKindTurnStart,
+			Time:    time.Now(),
+			Meta:    meta("turn-shutdown", 0),
+			Payload: agent.TurnStartPayload{Channel: "cli"},
+		},
+	)
+	_ = b.HandleEvent(
+		ctx,
+		agent.Event{
+			Kind: agent.EventKindTurnEnd,
+			Time: time.Now(),
+			Meta: meta("turn-shutdown", 1),
+			Payload: agent.TurnEndPayload{
+				Status:   agent.TurnEndStatusCompleted,
+				Duration: 100 * time.Millisecond,
+				Channel:  "cli",
+			},
+		},
+	)
 
 	// With syncer exporter, spans are exported immediately on End().
 	// Verify they exist before shutdown.

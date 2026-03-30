@@ -5,10 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/halfmoon-labs/halfmoon/pkg/logger"
 )
 
 const staleSpanTimeout = 10 * time.Minute
@@ -44,8 +45,13 @@ func newSpanManager(tracer trace.Tracer) *spanManager {
 	return sm
 }
 
-func (sm *spanManager) startSpan(key spanKey, name string, parentCtx context.Context, attrs []attribute.KeyValue) context.Context {
-	ctx, span := sm.tracer.Start(parentCtx, name,
+func (sm *spanManager) startSpan(
+	key spanKey,
+	name string,
+	parentCtx context.Context,
+	attrs []attribute.KeyValue,
+) context.Context {
+	ctx, span := sm.tracer.Start(parentCtx, name, //nolint:spancheck // span.End is called in endSpan() or cleanupStale()
 		trace.WithAttributes(attrs...),
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)

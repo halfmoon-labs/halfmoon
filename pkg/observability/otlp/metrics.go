@@ -1,6 +1,8 @@
 package otlp
 
-import "go.opentelemetry.io/otel/metric"
+import (
+	"go.opentelemetry.io/otel/metric"
+)
 
 const meterName = "halfmoon"
 
