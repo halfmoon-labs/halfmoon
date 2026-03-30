@@ -51,7 +51,9 @@ func (sm *spanManager) startSpan(
 	parentCtx context.Context,
 	attrs []attribute.KeyValue,
 ) context.Context {
-	ctx, span := sm.tracer.Start(parentCtx, name, //nolint:spancheck // span.End is called in endSpan() or cleanupStale()
+	ctx, span := sm.tracer.Start(
+		parentCtx,
+		name,
 		trace.WithAttributes(attrs...),
 		trace.WithSpanKind(trace.SpanKindInternal),
 	)

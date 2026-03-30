@@ -144,6 +144,9 @@ linters:
       - linters:
           - nolintlint
         path: 'pkg/tools/(i2c\.go|spi\.go)$'
+      - linters:
+          - spancheck
+        path: 'pkg/observability/otlp/spans\.go$'
 
 issues:
   max-issues-per-linter: 0
