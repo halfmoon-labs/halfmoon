@@ -14,15 +14,26 @@ make test                     # Run Go tests (excludes web/) + web tests
 go test ./pkg/agent/...       # Test single package
 go test -run TestName ./pkg/  # Run specific test
 
-# Lint & Format
-make lint                     # golangci-lint run
-make fmt                      # golangci-lint fmt
+# Lint & Format (requires golangci-lint v2 — config uses version: "2")
+make lint                     # golangci-lint run (all linters)
+make fmt                      # golangci-lint fmt (auto-format: gci, gofmt, gofumpt, golines)
 make fix                      # Auto-fix lint issues
 make vet                      # go vet
 
 # Full check before PR
 make check                    # deps + fmt + vet + test
 ```
+
+## Validation Before Committing
+
+Run these in order before considering work complete:
+
+1. **Build**: `go build ./...` — must compile with zero errors
+2. **Test**: `go test ./pkg/... -count=1` — all tests must pass
+3. **Lint**: `make lint` — zero issues. CI runs golangci-lint v2.10.1 with gci (import ordering), golines (max 120 chars), and spancheck (span leak detection) among others. Fix issues with `make fmt` first, then address remaining lint errors manually.
+4. **Vet**: `make vet` — zero issues
+
+If `make lint` fails with `"Can't read config"`, your local golangci-lint is v1.x — update to v2: `curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b /usr/local/bin v2.10.1`
 
 ## Architecture
 
@@ -119,7 +130,7 @@ Every LLM provider normalizes to `LLMResponse{Content, ToolCalls, FinishReason, 
 - Tests live next to the code: `foo.go` → `foo_test.go`
 - Use `testify` for assertions where already used
 - Mock interfaces, not implementations
-- Run `make check` before considering work complete
+- Run the full validation sequence (build → test → lint → vet) before considering work complete
 
 ### Logging
 
@@ -137,6 +148,6 @@ Every LLM provider normalizes to `LLMResponse{Content, ToolCalls, FinishReason, 
 - Don't mutate shared tool registries — clone them for sub-agents (`Tools.Clone()`)
 - Don't persist sub-agent session history — they use ephemeral in-memory sessions
 - Don't add external dependencies without checking `go.mod` first. Prefer stdlib
-- Don't skip the `make check` validation cycle before marking work complete
+- Don't skip the validation sequence (build → test → lint → vet) before marking work complete
 - Don't modify the event system contract — 19 event types are consumed by hooks and observers
 - Don't add `console.log` to frontend code except in error/warning paths

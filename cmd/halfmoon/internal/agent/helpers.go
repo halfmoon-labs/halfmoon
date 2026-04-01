@@ -15,6 +15,7 @@ import (
 	"github.com/halfmoon-labs/halfmoon/pkg/agent"
 	"github.com/halfmoon-labs/halfmoon/pkg/bus"
 	"github.com/halfmoon-labs/halfmoon/pkg/logger"
+	"github.com/halfmoon-labs/halfmoon/pkg/observability"
 	"github.com/halfmoon-labs/halfmoon/pkg/providers"
 )
 
@@ -60,6 +61,21 @@ func agentCmd(message, sessionKey, model string, debug bool) error {
 			"skills_total":     startupInfo["skills"].(map[string]any)["total"],
 			"skills_available": startupInfo["skills"].(map[string]any)["available"],
 		})
+
+	// Initialize observability if configured
+	if cfg.Observability.Enabled {
+		obsBackend, obsErr := observability.NewBackend(cfg.Observability, cfg.BuildInfo.Version)
+		if obsErr != nil {
+			logger.ErrorCF("observability", "Failed to initialize backend", map[string]any{"error": obsErr.Error()})
+		} else {
+			obsExporter := observability.NewExporter(obsBackend, cfg.Observability)
+			if mountErr := agentLoop.MountHook(agent.NamedHook("observability", obsExporter)); mountErr != nil {
+				logger.ErrorCF("observability", "Failed to mount exporter", map[string]any{"error": mountErr.Error()})
+			} else {
+				defer obsExporter.Close(context.Background()) //nolint:errcheck
+			}
+		}
+	}
 
 	if message != "" {
 		ctx := context.Background()

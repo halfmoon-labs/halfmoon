@@ -840,6 +840,51 @@ Halfmoon supports cron-style scheduled tasks via the `cron` tool. The agent can 
 
 Scheduled tasks persist across restarts and are stored in `~/.halfmoon/workspace/cron/`.
 
+### Observability
+
+Halfmoon can export agent-loop events as OpenTelemetry traces and metrics to any OTLP-compatible collector (Jaeger, Grafana, Datadog, Honeycomb, etc.).
+
+```json
+{
+  "observability": {
+    "enabled": true,
+    "backend": "otlp",
+    "service_name": "halfmoon",
+    "otlp": {
+      "endpoint": "localhost:4317",
+      "protocol": "grpc",
+      "insecure": true
+    }
+  }
+}
+```
+
+| Config Key | Type | Default | Description |
+|------------|------|---------|-------------|
+| `observability.enabled` | bool | `false` | Enable observability export |
+| `observability.backend` | string | `"otlp"` | Backend type (currently only `"otlp"`) |
+| `observability.service_name` | string | `"halfmoon"` | OTEL service name |
+| `observability.excluded_events` | string[] | `[]` | Event kinds to skip (e.g., `["llm_delta"]`) |
+| `observability.otlp.endpoint` | string | — | OTLP collector address (required when enabled) |
+| `observability.otlp.protocol` | string | `"grpc"` | `"grpc"` or `"http"` |
+| `observability.otlp.headers` | object | `{}` | Custom headers for auth |
+| `observability.otlp.insecure` | bool | `false` | Skip TLS verification |
+| `observability.otlp.timeout_ms` | int | `10000` | Export timeout per batch |
+| `observability.otlp.export_interval_ms` | int | `5000` | Batch flush interval |
+| `observability.otlp.batch_size` | int | `512` | Max spans/metrics per batch |
+
+**Environment variables:**
+
+* `HALFMOON_OBSERVABILITY_ENABLED=true` to enable
+* `HALFMOON_OBSERVABILITY_OTLP_ENDPOINT=localhost:4317` to set endpoint
+* `HALFMOON_OBSERVABILITY_OTLP_PROTOCOL=grpc` to set protocol
+
+Standard OTEL env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`) are also respected as fallbacks.
+
+When disabled (default), no OTEL SDK is initialized and there is zero performance overhead.
+
+For full details on exported traces, metrics, and example setups, see [Observability](observability.md).
+
 ### Advanced Topics
 
 | Topic | Description |
@@ -849,3 +894,4 @@ Scheduled tasks persist across restarts and are stored in `~/.halfmoon/workspace
 | [Steering](steering.md) | Inject messages into a running agent loop between tool calls |
 | [SubTurn](subturn.md) | Subagent coordination, concurrency control, lifecycle |
 | [Context Management](agent-refactor/context.md) | Context boundary detection, proactive budget check, compression |
+| [Observability](observability.md) | OpenTelemetry traces and metrics export |

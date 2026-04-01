@@ -215,6 +215,24 @@ func TestAgentLoop_EmitsMinimalTurnEvents(t *testing.T) {
 	if turnEndPayload.Iterations != 2 {
 		t.Fatalf("expected 2 iterations, got %d", turnEndPayload.Iterations)
 	}
+	if turnEndPayload.Channel != "cli" {
+		t.Fatalf("expected turn end channel cli, got %q", turnEndPayload.Channel)
+	}
+	if turnEndPayload.ChatID != "direct" {
+		t.Fatalf("expected turn end chat_id direct, got %q", turnEndPayload.ChatID)
+	}
+
+	// Verify LLM response payload includes new fields
+	llmRespPayload, ok := events[2].Payload.(LLMResponsePayload)
+	if !ok {
+		t.Fatalf("expected LLMResponsePayload, got %T", events[2].Payload)
+	}
+	if llmRespPayload.Model == "" {
+		t.Fatal("expected LLM response payload to include model")
+	}
+	if llmRespPayload.Duration <= 0 {
+		t.Fatal("expected LLM response payload to include positive duration")
+	}
 }
 
 func TestAgentLoop_EmitsSteeringAndSkippedToolEvents(t *testing.T) {

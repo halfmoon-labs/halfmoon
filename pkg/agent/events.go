@@ -73,6 +73,11 @@ var eventKindNames = [...]string{
 	"error",
 }
 
+// EventKindCount returns the number of defined event kinds.
+func EventKindCount() EventKind {
+	return eventKindCount
+}
+
 // String returns the stable string form of an EventKind.
 func (k EventKind) String() string {
 	if k >= eventKindCount {
@@ -126,6 +131,8 @@ type TurnEndPayload struct {
 	Iterations      int
 	Duration        time.Duration
 	FinalContentLen int
+	Channel         string
+	ChatID          string
 }
 
 // LLMRequestPayload describes an outbound LLM request.
@@ -139,9 +146,14 @@ type LLMRequestPayload struct {
 
 // LLMResponsePayload describes an inbound LLM response.
 type LLMResponsePayload struct {
+	Model        string
 	ContentLen   int
 	ToolCalls    int
 	HasReasoning bool
+	InputTokens  int
+	OutputTokens int
+	TotalTokens  int
+	Duration     time.Duration
 }
 
 // LLMDeltaPayload describes a streamed LLM delta.

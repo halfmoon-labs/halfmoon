@@ -902,6 +902,8 @@ func (al *AgentLoop) logEvent(evt Event) {
 		fields["iterations_total"] = payload.Iterations
 		fields["duration_ms"] = payload.Duration.Milliseconds()
 		fields["final_len"] = payload.FinalContentLen
+		fields["channel"] = payload.Channel
+		fields["chat_id"] = payload.ChatID
 	case LLMRequestPayload:
 		fields["model"] = payload.Model
 		fields["messages"] = payload.MessagesCount
@@ -911,9 +913,14 @@ func (al *AgentLoop) logEvent(evt Event) {
 		fields["content_delta_len"] = payload.ContentDeltaLen
 		fields["reasoning_delta_len"] = payload.ReasoningDeltaLen
 	case LLMResponsePayload:
+		fields["model"] = payload.Model
 		fields["content_len"] = payload.ContentLen
 		fields["tool_calls"] = payload.ToolCalls
 		fields["has_reasoning"] = payload.HasReasoning
+		fields["input_tokens"] = payload.InputTokens
+		fields["output_tokens"] = payload.OutputTokens
+		fields["total_tokens"] = payload.TotalTokens
+		fields["llm_duration_ms"] = payload.Duration.Milliseconds()
 	case LLMRetryPayload:
 		fields["attempt"] = payload.Attempt
 		fields["max_retries"] = payload.MaxRetries
@@ -1692,6 +1699,8 @@ func (al *AgentLoop) runTurn(ctx context.Context, ts *turnState) (turnResult, er
 				Iterations:      ts.currentIteration(),
 				Duration:        time.Since(ts.startedAt),
 				FinalContentLen: ts.finalContentLen(),
+				Channel:         ts.channel,
+				ChatID:          ts.chatID,
 			},
 		)
 	}()
@@ -2018,6 +2027,7 @@ turnLoop:
 
 		var response *providers.LLMResponse
 		var err error
+		llmCallStart := time.Now()
 		maxRetries := 2
 		for retry := 0; retry <= maxRetries; retry++ {
 			response, err = callLLM(callMessages, providerToolDefs)
@@ -2194,14 +2204,22 @@ turnLoop:
 			ts.channel,
 			al.targetReasoningChannelID(ts.channel),
 		)
+		llmResponsePayload := LLMResponsePayload{
+			Model:        llmModel,
+			ContentLen:   len(response.Content),
+			ToolCalls:    len(response.ToolCalls),
+			HasReasoning: response.Reasoning != "" || response.ReasoningContent != "",
+			Duration:     time.Since(llmCallStart),
+		}
+		if response.Usage != nil {
+			llmResponsePayload.InputTokens = response.Usage.PromptTokens
+			llmResponsePayload.OutputTokens = response.Usage.CompletionTokens
+			llmResponsePayload.TotalTokens = response.Usage.TotalTokens
+		}
 		al.emitEvent(
 			EventKindLLMResponse,
 			ts.eventMeta("runTurn", "turn.llm.response"),
-			LLMResponsePayload{
-				ContentLen:   len(response.Content),
-				ToolCalls:    len(response.ToolCalls),
-				HasReasoning: response.Reasoning != "" || response.ReasoningContent != "",
-			},
+			llmResponsePayload,
 		)
 
 		logger.DebugCF("agent", "LLM response",
