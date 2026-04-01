@@ -64,3 +64,4 @@ web/backend/dist/*
 .claude/
 
 docker/data
+observability-implementation.md
