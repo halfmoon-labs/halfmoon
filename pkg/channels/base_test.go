@@ -263,3 +263,100 @@ func TestIsAllowedSender(t *testing.T) {
 		})
 	}
 }
+
+func TestIsAllowedSender_DenyList(t *testing.T) {
+	tests := []struct {
+		name      string
+		allowList []string
+		denyList  []string
+		sender    bus.SenderInfo
+		want      bool
+	}{
+		{
+			name:      "deny_from blocks even with empty allow_from",
+			allowList: nil,
+			denyList:  []string{"123456@s.whatsapp.net"},
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "123456@s.whatsapp.net",
+				CanonicalID: "whatsapp:123456@s.whatsapp.net",
+			},
+			want: false,
+		},
+		{
+			name:      "deny_from blocks even when allow_from includes sender",
+			allowList: []string{"123456@s.whatsapp.net"},
+			denyList:  []string{"123456@s.whatsapp.net"},
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "123456@s.whatsapp.net",
+				CanonicalID: "whatsapp:123456@s.whatsapp.net",
+			},
+			want: false,
+		},
+		{
+			name:      "non-denied sender allowed with empty allow_from",
+			allowList: nil,
+			denyList:  []string{"999@s.whatsapp.net"},
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "123456@s.whatsapp.net",
+				CanonicalID: "whatsapp:123456@s.whatsapp.net",
+			},
+			want: true,
+		},
+		{
+			name:      "deny_from with canonical format",
+			allowList: nil,
+			denyList:  []string{"whatsapp:123456@s.whatsapp.net"},
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "123456@s.whatsapp.net",
+				CanonicalID: "whatsapp:123456@s.whatsapp.net",
+			},
+			want: false,
+		},
+		{
+			name:      "empty deny_from allows all",
+			allowList: nil,
+			denyList:  nil,
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "123456@s.whatsapp.net",
+				CanonicalID: "whatsapp:123456@s.whatsapp.net",
+			},
+			want: true,
+		},
+		{
+			name:      "deny_from and allow_from together — non-denied allowed sender passes",
+			allowList: []string{"123456@s.whatsapp.net", "789@s.whatsapp.net"},
+			denyList:  []string{"789@s.whatsapp.net"},
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "123456@s.whatsapp.net",
+				CanonicalID: "whatsapp:123456@s.whatsapp.net",
+			},
+			want: true,
+		},
+		{
+			name:      "deny_from and allow_from together — denied sender blocked",
+			allowList: []string{"123456@s.whatsapp.net", "789@s.whatsapp.net"},
+			denyList:  []string{"789@s.whatsapp.net"},
+			sender: bus.SenderInfo{
+				Platform:    "whatsapp",
+				PlatformID:  "789@s.whatsapp.net",
+				CanonicalID: "whatsapp:789@s.whatsapp.net",
+			},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ch := NewBaseChannel("test", nil, nil, tt.allowList, WithDenyList(tt.denyList))
+			if got := ch.IsAllowedSender(tt.sender); got != tt.want {
+				t.Fatalf("IsAllowedSender(%+v) = %v, want %v", tt.sender, got, tt.want)
+			}
+		})
+	}
+}

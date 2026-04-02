@@ -38,7 +38,9 @@ func NewPicoClientChannel(
 		return nil, fmt.Errorf("pico_client url is required")
 	}
 
-	base := channels.NewBaseChannel("pico_client", cfg, messageBus, cfg.AllowFrom)
+	base := channels.NewBaseChannel("pico_client", cfg, messageBus, cfg.AllowFrom,
+		channels.WithDenyList(cfg.DenyFrom),
+	)
 
 	return &PicoClientChannel{
 		BaseChannel: base,

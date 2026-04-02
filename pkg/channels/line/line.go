@@ -70,6 +70,7 @@ func NewLINEChannel(cfg config.LINEConfig, messageBus *bus.MessageBus) (*LINECha
 		channels.WithMaxMessageLength(5000),
 		channels.WithGroupTrigger(cfg.GroupTrigger),
 		channels.WithReasoningChannelID(cfg.ReasoningChannelID),
+		channels.WithDenyList(cfg.DenyFrom),
 	)
 
 	return &LINEChannel{

@@ -403,6 +403,7 @@ type WhatsAppConfig struct {
 	UseNative          bool                `json:"use_native"           env:"HALFMOON_CHANNELS_WHATSAPP_USE_NATIVE"`
 	SessionStorePath   string              `json:"session_store_path"   env:"HALFMOON_CHANNELS_WHATSAPP_SESSION_STORE_PATH"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"HALFMOON_CHANNELS_WHATSAPP_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"            env:"HALFMOON_CHANNELS_WHATSAPP_DENY_FROM"`
 	ReasoningChannelID string              `json:"reasoning_channel_id" env:"HALFMOON_CHANNELS_WHATSAPP_REASONING_CHANNEL_ID"`
 }
 
@@ -412,6 +413,7 @@ type TelegramConfig struct {
 	BaseURL            string              `json:"base_url"                env:"HALFMOON_CHANNELS_TELEGRAM_BASE_URL"`
 	Proxy              string              `json:"proxy"                   env:"HALFMOON_CHANNELS_TELEGRAM_PROXY"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_TELEGRAM_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_TELEGRAM_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
@@ -439,6 +441,7 @@ type FeishuConfig struct {
 	encryptKey          string
 	verificationToken   string
 	AllowFrom           FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_FEISHU_ALLOW_FROM"`
+	DenyFrom            FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_FEISHU_DENY_FROM"`
 	GroupTrigger        GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Placeholder         PlaceholderConfig   `json:"placeholder,omitempty"`
 	ReasoningChannelID  string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_FEISHU_REASONING_CHANNEL_ID"`
@@ -485,6 +488,7 @@ type DiscordConfig struct {
 	token              string
 	Proxy              string              `json:"proxy"                   env:"HALFMOON_CHANNELS_DISCORD_PROXY"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_DISCORD_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_DISCORD_DENY_FROM"`
 	MentionOnly        bool                `json:"mention_only"            env:"HALFMOON_CHANNELS_DISCORD_MENTION_ONLY"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
@@ -509,6 +513,7 @@ type MaixCamConfig struct {
 	Host               string              `json:"host"                 env:"HALFMOON_CHANNELS_MAIXCAM_HOST"`
 	Port               int                 `json:"port"                 env:"HALFMOON_CHANNELS_MAIXCAM_PORT"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"HALFMOON_CHANNELS_MAIXCAM_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"            env:"HALFMOON_CHANNELS_MAIXCAM_DENY_FROM"`
 	ReasoningChannelID string              `json:"reasoning_channel_id" env:"HALFMOON_CHANNELS_MAIXCAM_REASONING_CHANNEL_ID"`
 }
 
@@ -517,6 +522,7 @@ type QQConfig struct {
 	AppID                string `json:"app_id"                   env:"HALFMOON_CHANNELS_QQ_APP_ID"`
 	appSecret            string
 	AllowFrom            FlexibleStringSlice `json:"allow_from"               env:"HALFMOON_CHANNELS_QQ_ALLOW_FROM"`
+	DenyFrom             FlexibleStringSlice `json:"deny_from"                env:"HALFMOON_CHANNELS_QQ_DENY_FROM"`
 	GroupTrigger         GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	MaxMessageLength     int                 `json:"max_message_length"       env:"HALFMOON_CHANNELS_QQ_MAX_MESSAGE_LENGTH"`
 	MaxBase64FileSizeMiB int64               `json:"max_base64_file_size_mib" env:"HALFMOON_CHANNELS_QQ_MAX_BASE64_FILE_SIZE_MIB"`
@@ -541,6 +547,7 @@ type DingTalkConfig struct {
 	ClientID           string `json:"client_id"               env:"HALFMOON_CHANNELS_DINGTALK_CLIENT_ID"`
 	clientSecret       string
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_DINGTALK_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_DINGTALK_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_DINGTALK_REASONING_CHANNEL_ID"`
 	secDirty           bool
@@ -562,6 +569,7 @@ type SlackConfig struct {
 	botToken           string
 	appToken           string
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_SLACK_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_SLACK_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
@@ -600,6 +608,7 @@ type MatrixConfig struct {
 	JoinOnInvite       bool                `json:"join_on_invite"           env:"HALFMOON_CHANNELS_MATRIX_JOIN_ON_INVITE"`
 	MessageFormat      string              `json:"message_format,omitempty" env:"HALFMOON_CHANNELS_MATRIX_MESSAGE_FORMAT"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"               env:"HALFMOON_CHANNELS_MATRIX_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"                env:"HALFMOON_CHANNELS_MATRIX_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
 	ReasoningChannelID string              `json:"reasoning_channel_id"     env:"HALFMOON_CHANNELS_MATRIX_REASONING_CHANNEL_ID"`
@@ -625,6 +634,7 @@ type LINEConfig struct {
 	WebhookPort        int                 `json:"webhook_port"            env:"HALFMOON_CHANNELS_LINE_WEBHOOK_PORT"`
 	WebhookPath        string              `json:"webhook_path"            env:"HALFMOON_CHANNELS_LINE_WEBHOOK_PATH"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_LINE_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_LINE_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
@@ -661,6 +671,7 @@ type OneBotConfig struct {
 	ReconnectInterval  int                 `json:"reconnect_interval"      env:"HALFMOON_CHANNELS_ONEBOT_RECONNECT_INTERVAL"`
 	GroupTriggerPrefix []string            `json:"group_trigger_prefix"    env:"HALFMOON_CHANNELS_ONEBOT_GROUP_TRIGGER_PREFIX"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_ONEBOT_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_ONEBOT_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	Placeholder        PlaceholderConfig   `json:"placeholder,omitempty"`
@@ -688,6 +699,7 @@ type WeComConfig struct {
 	WebhookPort        int                 `json:"webhook_port"            env:"HALFMOON_CHANNELS_WECOM_WEBHOOK_PORT"`
 	WebhookPath        string              `json:"webhook_path"            env:"HALFMOON_CHANNELS_WECOM_WEBHOOK_PATH"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_WECOM_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_WECOM_DENY_FROM"`
 	ReplyTimeout       int                 `json:"reply_timeout"           env:"HALFMOON_CHANNELS_WECOM_REPLY_TIMEOUT"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_WECOM_REASONING_CHANNEL_ID"`
@@ -727,6 +739,7 @@ type WeComAppConfig struct {
 	WebhookPort        int                 `json:"webhook_port"            env:"HALFMOON_CHANNELS_WECOM_APP_WEBHOOK_PORT"`
 	WebhookPath        string              `json:"webhook_path"            env:"HALFMOON_CHANNELS_WECOM_APP_WEBHOOK_PATH"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_WECOM_APP_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_WECOM_APP_DENY_FROM"`
 	ReplyTimeout       int                 `json:"reply_timeout"           env:"HALFMOON_CHANNELS_WECOM_APP_REPLY_TIMEOUT"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_WECOM_APP_REASONING_CHANNEL_ID"`
@@ -774,6 +787,7 @@ type WeComAIBotConfig struct {
 	encodingAESKey     string
 	WebhookPath        string              `json:"webhook_path,omitempty"       env:"HALFMOON_CHANNELS_WECOM_AIBOT_WEBHOOK_PATH"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"                   env:"HALFMOON_CHANNELS_WECOM_AIBOT_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"                    env:"HALFMOON_CHANNELS_WECOM_AIBOT_DENY_FROM"`
 	ReplyTimeout       int                 `json:"reply_timeout"                env:"HALFMOON_CHANNELS_WECOM_AIBOT_REPLY_TIMEOUT"`
 	MaxSteps           int                 `json:"max_steps"                    env:"HALFMOON_CHANNELS_WECOM_AIBOT_MAX_STEPS"`       // Maximum streaming steps
 	WelcomeMessage     string              `json:"welcome_message"              env:"HALFMOON_CHANNELS_WECOM_AIBOT_WELCOME_MESSAGE"` // Sent on enter_chat event; empty = no welcome
@@ -821,6 +835,7 @@ type WeixinConfig struct {
 	CDNBaseURL         string              `json:"cdn_base_url"         env:"HALFMOON_CHANNELS_WEIXIN_CDN_BASE_URL"`
 	Proxy              string              `json:"proxy"                env:"HALFMOON_CHANNELS_WEIXIN_PROXY"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"HALFMOON_CHANNELS_WEIXIN_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"            env:"HALFMOON_CHANNELS_WEIXIN_DENY_FROM"`
 	ReasoningChannelID string              `json:"reasoning_channel_id" env:"HALFMOON_CHANNELS_WEIXIN_REASONING_CHANNEL_ID"`
 	secDirty           bool
 }
@@ -845,6 +860,7 @@ type PicoConfig struct {
 	WriteTimeout    int                 `json:"write_timeout,omitempty"`
 	MaxConnections  int                 `json:"max_connections,omitempty"`
 	AllowFrom       FlexibleStringSlice `json:"allow_from"                  env:"HALFMOON_CHANNELS_PICO_ALLOW_FROM"`
+	DenyFrom        FlexibleStringSlice `json:"deny_from"                   env:"HALFMOON_CHANNELS_PICO_DENY_FROM"`
 	Placeholder     PlaceholderConfig   `json:"placeholder,omitempty"`
 	secDirty        bool
 }
@@ -868,6 +884,7 @@ type PicoClientConfig struct {
 	PingInterval int                 `json:"ping_interval,omitempty"`
 	ReadTimeout  int                 `json:"read_timeout,omitempty"`
 	AllowFrom    FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_PICO_CLIENT_ALLOW_FROM"`
+	DenyFrom     FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_PICO_CLIENT_DENY_FROM"`
 }
 
 type IRCConfig struct {
@@ -884,6 +901,7 @@ type IRCConfig struct {
 	Channels           FlexibleStringSlice `json:"channels"                env:"HALFMOON_CHANNELS_IRC_CHANNELS"`
 	RequestCaps        FlexibleStringSlice `json:"request_caps,omitempty"  env:"HALFMOON_CHANNELS_IRC_REQUEST_CAPS"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"              env:"HALFMOON_CHANNELS_IRC_ALLOW_FROM"`
+	DenyFrom           FlexibleStringSlice `json:"deny_from"               env:"HALFMOON_CHANNELS_IRC_DENY_FROM"`
 	GroupTrigger       GroupTriggerConfig  `json:"group_trigger,omitempty"`
 	Typing             TypingConfig        `json:"typing,omitempty"`
 	ReasoningChannelID string              `json:"reasoning_channel_id"    env:"HALFMOON_CHANNELS_IRC_REASONING_CHANNEL_ID"`

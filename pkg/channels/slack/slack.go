@@ -52,6 +52,7 @@ func NewSlackChannel(cfg config.SlackConfig, messageBus *bus.MessageBus) (*Slack
 		channels.WithMaxMessageLength(40000),
 		channels.WithGroupTrigger(cfg.GroupTrigger),
 		channels.WithReasoningChannelID(cfg.ReasoningChannelID),
+		channels.WithDenyList(cfg.DenyFrom),
 	)
 
 	return &SlackChannel{

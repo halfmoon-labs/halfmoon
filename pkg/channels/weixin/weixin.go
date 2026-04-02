@@ -54,6 +54,7 @@ func NewWeixinChannel(cfg config.WeixinConfig, messageBus *bus.MessageBus) (*Wei
 		cfg.AllowFrom,
 		channels.WithMaxMessageLength(4000),
 		channels.WithReasoningChannelID(cfg.ReasoningChannelID),
+		channels.WithDenyList(cfg.DenyFrom),
 	)
 
 	return &WeixinChannel{

@@ -75,6 +75,12 @@ func WithReasoningChannelID(id string) BaseChannelOption {
 	return func(c *BaseChannel) { c.reasoningChannelID = id }
 }
 
+// WithDenyList sets a deny-list of sender IDs that are always rejected,
+// even if the allow-list would otherwise permit them. Deny takes priority.
+func WithDenyList(denyList []string) BaseChannelOption {
+	return func(c *BaseChannel) { c.denyList = denyList }
+}
+
 // MessageLengthProvider is an opt-in interface that channels implement
 // to advertise their maximum message length. The Manager uses this via
 // type assertion to decide whether to split outbound messages.
@@ -88,6 +94,7 @@ type BaseChannel struct {
 	running             atomic.Bool
 	name                string
 	allowList           []string
+	denyList            []string
 	maxMessageLength    int
 	groupTrigger        config.GroupTriggerConfig
 	mediaStore          media.MediaStore
@@ -212,10 +219,19 @@ func (c *BaseChannel) IsAllowed(senderID string) bool {
 	return false
 }
 
-// IsAllowedSender checks whether a structured SenderInfo is permitted by the allow-list.
-// It delegates to identity.MatchAllowed for each entry, providing unified matching
-// across all legacy formats and the new canonical "platform:id" format.
+// IsAllowedSender checks whether a structured SenderInfo is permitted.
+// Deny-list is checked first — a match rejects the sender regardless of the allow-list.
+// Then the allow-list is checked — an empty allow-list permits all senders.
+// Matching delegates to identity.MatchAllowed for unified format support.
 func (c *BaseChannel) IsAllowedSender(sender bus.SenderInfo) bool {
+	// Deny-list takes priority: reject if sender matches any deny entry.
+	for _, denied := range c.denyList {
+		if identity.MatchAllowed(sender, denied) {
+			return false
+		}
+	}
+
+	// Empty allow-list permits all (that weren't denied above).
 	if len(c.allowList) == 0 {
 		return true
 	}
