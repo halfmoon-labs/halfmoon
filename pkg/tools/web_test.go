@@ -1466,3 +1466,40 @@ func TestPerplexityBaseURL(t *testing.T) {
 		}
 	})
 }
+
+func TestPerplexityModel(t *testing.T) {
+	t.Run("default_when_empty", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.model != "sonar" {
+			t.Fatalf("model = %q, want %q", p.model, "sonar")
+		}
+	})
+
+	t.Run("custom_model", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityModel:   "sonar-pro",
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.model != "sonar-pro" {
+			t.Fatalf("model = %q, want %q", p.model, "sonar-pro")
+		}
+	})
+}

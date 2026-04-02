@@ -115,6 +115,7 @@ Web 工具用于网页搜索和抓取。
 | `api_key`     | string   | -      | Perplexity API 密钥                            |
 | `api_keys`    | string[] | -      | 多个 API 密钥轮换（优先于 `api_key`）          |
 | `base_url`    | string   | -      | 自定义 API 基础 URL（用于 OpenRouter 或 LiteLLM 等代理） |
+| `model`       | string   | sonar  | 使用的 Perplexity 模型（如 `sonar`、`sonar-pro`） |
 | `max_results` | int      | 5      | 最大结果数                                     |
 
 ### Brave

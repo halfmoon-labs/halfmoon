@@ -370,6 +370,7 @@
           "pplx-xxx"
         ],
         "base_url": "",
+        "model": "",
         "max_results": 5
       },
       "searxng": {

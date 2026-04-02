@@ -79,6 +79,7 @@ Configurações gerais para busca e processamento de conteúdo de páginas web.
 | `api_key`     | string   | -      | Chave API do Perplexity                                          |
 | `api_keys`    | string[] | -      | Várias chaves API do Perplexity para rotação (prioridade sobre `api_key`) |
 | `base_url`    | string   | -      | URL base da API personalizada (para proxies como OpenRouter ou LiteLLM) |
+| `model`       | string   | sonar  | Modelo Perplexity a utilizar (ex: `sonar`, `sonar-pro`)          |
 | `max_results` | int      | 5      | Número máximo de resultados                                      |
 
 ### Brave

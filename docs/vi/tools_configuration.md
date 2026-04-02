@@ -79,6 +79,7 @@ Cài đặt chung để tải và xử lý nội dung trang web.
 | `api_key`      | string   | -        | Khóa API Perplexity                                              |
 | `api_keys`     | string[] | -        | Nhiều khóa API Perplexity để xoay vòng (ưu tiên hơn `api_key`)  |
 | `base_url`     | string   | -        | URL cơ sở API tùy chỉnh (cho proxy như OpenRouter hoặc LiteLLM) |
+| `model`        | string   | sonar    | Mô hình Perplexity sử dụng (ví dụ: `sonar`, `sonar-pro`)       |
 | `max_results`  | int      | 5        | Số kết quả tối đa                                                |
 
 ### Brave
