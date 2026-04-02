@@ -78,7 +78,7 @@ Paramètres généraux pour la récupération et le traitement du contenu des pa
 | `enabled`     | bool     | false      | Activer la recherche Perplexity                              |
 | `api_key`     | string   | -          | Clé API Perplexity                                           |
 | `api_keys`    | string[] | -          | Plusieurs clés API Perplexity pour la rotation (`api_key` prioritaire) |
-| `base_url`    | string   | -          | URL de base API personnalisée (pour les proxies comme OpenRouter ou LiteLLM) |
+| `base_url`    | string   | -          | URL de base API personnalisée, ex : `https://litellm.example.com/v1` (`/chat/completions` est ajouté automatiquement) |
 | `model`       | string   | sonar      | Modèle Perplexity à utiliser (ex : `sonar`, `sonar-pro`)    |
 | `max_results` | int      | 5          | Nombre maximum de résultats                                  |
 

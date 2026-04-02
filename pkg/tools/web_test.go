@@ -1430,6 +1430,8 @@ func TestWebTool_GLMSearch_Priority(t *testing.T) {
 }
 
 func TestPerplexityBaseURL(t *testing.T) {
+	const wantDefault = "https://api.perplexity.ai/chat/completions"
+
 	t.Run("default_when_empty", func(t *testing.T) {
 		tool, err := NewWebSearchTool(WebSearchToolOptions{
 			PerplexityEnabled: true,
@@ -1442,17 +1444,16 @@ func TestPerplexityBaseURL(t *testing.T) {
 		if !ok {
 			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
 		}
-		if p.baseURL != "https://api.perplexity.ai/chat/completions" {
-			t.Fatalf("baseURL = %q, want default Perplexity URL", p.baseURL)
+		if p.baseURL != wantDefault {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, wantDefault)
 		}
 	})
 
-	t.Run("custom_base_url", func(t *testing.T) {
-		customURL := "https://openrouter.ai/api/v1/chat/completions"
+	t.Run("appends_chat_completions_to_base", func(t *testing.T) {
 		tool, err := NewWebSearchTool(WebSearchToolOptions{
 			PerplexityEnabled: true,
 			PerplexityAPIKeys: []string{"k"},
-			PerplexityBaseURL: customURL,
+			PerplexityBaseURL: "https://litellm.example.com/v1",
 		})
 		if err != nil {
 			t.Fatalf("NewWebSearchTool() error: %v", err)
@@ -1461,8 +1462,47 @@ func TestPerplexityBaseURL(t *testing.T) {
 		if !ok {
 			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
 		}
-		if p.baseURL != customURL {
-			t.Fatalf("baseURL = %q, want %q", p.baseURL, customURL)
+		want := "https://litellm.example.com/v1/chat/completions"
+		if p.baseURL != want {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, want)
+		}
+	})
+
+	t.Run("trailing_slash_handled", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityBaseURL: "https://litellm.example.com/v1/",
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		want := "https://litellm.example.com/v1/chat/completions"
+		if p.baseURL != want {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, want)
+		}
+	})
+
+	t.Run("preserves_full_url_with_chat_completions", func(t *testing.T) {
+		fullURL := "https://openrouter.ai/api/v1/chat/completions"
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityBaseURL: fullURL,
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.baseURL != fullURL {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, fullURL)
 		}
 	})
 }

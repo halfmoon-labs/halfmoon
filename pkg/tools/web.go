@@ -742,7 +742,11 @@ func NewWebSearchTool(opts WebSearchToolOptions) (*WebSearchTool, error) {
 		}
 		baseURL := opts.PerplexityBaseURL
 		if baseURL == "" {
-			baseURL = "https://api.perplexity.ai/chat/completions"
+			baseURL = "https://api.perplexity.ai"
+		}
+		baseURL = strings.TrimRight(baseURL, "/")
+		if !strings.HasSuffix(baseURL, "/chat/completions") {
+			baseURL += "/chat/completions"
 		}
 		model := opts.PerplexityModel
 		if model == "" {

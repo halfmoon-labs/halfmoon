@@ -78,7 +78,7 @@ Web ツールはウェブ検索とフェッチに使用されます。
 | `enabled`     | bool     | false      | Perplexity 検索を有効にする                          |
 | `api_key`     | string   | -          | Perplexity API キー                                  |
 | `api_keys`    | string[] | -          | 複数の Perplexity API キー（ローテーション用、`api_key` より優先） |
-| `base_url`    | string   | -          | カスタム API ベース URL（OpenRouter や LiteLLM などのプロキシ用） |
+| `base_url`    | string   | -          | カスタム API ベース URL、例: `https://litellm.example.com/v1`（`/chat/completions` は自動追加） |
 | `model`       | string   | sonar      | 使用する Perplexity モデル（例: `sonar`、`sonar-pro`） |
 | `max_results` | int      | 5          | 最大結果数                                           |
 
