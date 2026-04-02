@@ -369,6 +369,7 @@
         "api_keys": [
           "pplx-xxx"
         ],
+        "base_url": "",
         "max_results": 5
       },
       "searxng": {

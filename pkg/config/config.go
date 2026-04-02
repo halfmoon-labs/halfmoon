@@ -1111,7 +1111,8 @@ type PerplexityConfig struct {
 	Enabled    bool `json:"enabled"     env:"HALFMOON_TOOLS_WEB_PERPLEXITY_ENABLED"`
 	apiKeys    []string
 	secDirty   bool
-	MaxResults int `json:"max_results" env:"HALFMOON_TOOLS_WEB_PERPLEXITY_MAX_RESULTS"`
+	BaseURL    string `json:"base_url"    env:"HALFMOON_TOOLS_WEB_PERPLEXITY_BASE_URL"`
+	MaxResults int    `json:"max_results" env:"HALFMOON_TOOLS_WEB_PERPLEXITY_MAX_RESULTS"`
 }
 
 // APIKey returns the Perplexity API key

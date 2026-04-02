@@ -245,6 +245,7 @@ func registerSharedTools(
 					cfg.Tools.Web.Perplexity.APIKey(),
 					cfg.Tools.Web.Perplexity.APIKeys(),
 				),
+				PerplexityBaseURL:     cfg.Tools.Web.Perplexity.BaseURL,
 				PerplexityMaxResults:  cfg.Tools.Web.Perplexity.MaxResults,
 				PerplexityEnabled:     cfg.Tools.Web.Perplexity.Enabled,
 				SearXNGBaseURL:        cfg.Tools.Web.SearXNG.BaseURL,

@@ -377,12 +377,13 @@ func stripTags(content string) string {
 
 type PerplexitySearchProvider struct {
 	keyPool *APIKeyPool
+	baseURL string
 	proxy   string
 	client  *http.Client
 }
 
 func (p *PerplexitySearchProvider) Search(ctx context.Context, query string, count int) (string, error) {
-	searchURL := "https://api.perplexity.ai/chat/completions"
+	searchURL := p.baseURL
 
 	var lastErr error
 	iter := p.keyPool.NewIterator()
@@ -710,6 +711,7 @@ type WebSearchToolOptions struct {
 	DuckDuckGoMaxResults  int
 	DuckDuckGoEnabled     bool
 	PerplexityAPIKeys     []string
+	PerplexityBaseURL     string
 	PerplexityMaxResults  int
 	PerplexityEnabled     bool
 	SearXNGBaseURL        string
@@ -736,8 +738,13 @@ func NewWebSearchTool(opts WebSearchToolOptions) (*WebSearchTool, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to create HTTP client for Perplexity: %w", err)
 		}
+		baseURL := opts.PerplexityBaseURL
+		if baseURL == "" {
+			baseURL = "https://api.perplexity.ai/chat/completions"
+		}
 		provider = &PerplexitySearchProvider{
 			keyPool: NewAPIKeyPool(opts.PerplexityAPIKeys),
+			baseURL: baseURL,
 			proxy:   opts.Proxy,
 			client:  client,
 		}
