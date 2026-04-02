@@ -158,10 +158,9 @@ func (c *WhatsAppChannel) StartTyping(_ context.Context, chatID string) (func(),
 
 func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
 	c.mu.Lock()
-	conn := c.conn
-	c.mu.Unlock()
+	defer c.mu.Unlock()
 
-	if conn == nil {
+	if c.conn == nil {
 		return
 	}
 
@@ -174,9 +173,14 @@ func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
 		return
 	}
 
-	_ = conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
-	_ = conn.WriteMessage(websocket.TextMessage, payload)
-	_ = conn.SetWriteDeadline(time.Time{})
+	_ = c.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+	if err := c.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
+		logger.DebugCF("whatsapp", "typing indicator send failed", map[string]any{
+			"action": action,
+			"error":  err.Error(),
+		})
+	}
+	_ = c.conn.SetWriteDeadline(time.Time{})
 }
 
 func (c *WhatsAppChannel) listen() {
