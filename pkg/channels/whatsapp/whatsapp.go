@@ -144,6 +144,41 @@ func (c *WhatsAppChannel) Send(ctx context.Context, msg bus.OutboundMessage) err
 	return nil
 }
 
+// StartTyping implements channels.TypingCapable.
+// It sends a composing indicator to the bridge and returns a stop function
+// that sends a paused indicator. The bridge is responsible for translating
+// these into the appropriate WhatsApp presence updates.
+func (c *WhatsAppChannel) StartTyping(_ context.Context, chatID string) (func(), error) {
+	c.sendTypingAction(chatID, "composing")
+
+	return func() {
+		c.sendTypingAction(chatID, "paused")
+	}, nil
+}
+
+func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
+	c.mu.Lock()
+	conn := c.conn
+	c.mu.Unlock()
+
+	if conn == nil {
+		return
+	}
+
+	payload, err := json.Marshal(map[string]string{
+		"type":   "typing",
+		"to":     chatID,
+		"action": action,
+	})
+	if err != nil {
+		return
+	}
+
+	_ = conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+	_ = conn.WriteMessage(websocket.TextMessage, payload)
+	_ = conn.SetWriteDeadline(time.Time{})
+}
+
 func (c *WhatsAppChannel) listen() {
 	for {
 		select {
