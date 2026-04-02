@@ -1428,3 +1428,118 @@ func TestWebTool_GLMSearch_Priority(t *testing.T) {
 		t.Errorf("Expected GLMSearchProvider when only GLM enabled, got %T", tool2.provider)
 	}
 }
+
+func TestPerplexityBaseURL(t *testing.T) {
+	const wantDefault = "https://api.perplexity.ai/chat/completions"
+
+	t.Run("default_when_empty", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.baseURL != wantDefault {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, wantDefault)
+		}
+	})
+
+	t.Run("appends_chat_completions_to_base", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityBaseURL: "https://litellm.example.com/v1",
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		want := "https://litellm.example.com/v1/chat/completions"
+		if p.baseURL != want {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, want)
+		}
+	})
+
+	t.Run("trailing_slash_handled", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityBaseURL: "https://litellm.example.com/v1/",
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		want := "https://litellm.example.com/v1/chat/completions"
+		if p.baseURL != want {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, want)
+		}
+	})
+
+	t.Run("preserves_full_url_with_chat_completions", func(t *testing.T) {
+		fullURL := "https://openrouter.ai/api/v1/chat/completions"
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityBaseURL: fullURL,
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.baseURL != fullURL {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, fullURL)
+		}
+	})
+}
+
+func TestPerplexityModel(t *testing.T) {
+	t.Run("default_when_empty", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.model != "sonar" {
+			t.Fatalf("model = %q, want %q", p.model, "sonar")
+		}
+	})
+
+	t.Run("custom_model", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityModel:   "sonar-pro",
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.model != "sonar-pro" {
+			t.Fatalf("model = %q, want %q", p.model, "sonar-pro")
+		}
+	})
+}

@@ -101,6 +101,8 @@ Baidu Search uses the [Qianfan AI Search API](https://cloud.baidu.com/doc/qianfa
 | `enabled`     | bool     | false   | Enable Perplexity search                       |
 | `api_key`     | string   | -       | Perplexity API key                             |
 | `api_keys`    | string[] | -       | Multiple API keys for rotation (takes priority over `api_key`) |
+| `base_url`    | string   | -       | Custom API base URL, e.g. `https://litellm.example.com/v1` (`/chat/completions` is appended automatically) |
+| `model`       | string   | sonar   | Perplexity model to use (e.g. `sonar`, `sonar-pro`) |
 | `max_results` | int      | 5       | Maximum number of results                      |
 
 ### Tavily
