@@ -159,7 +159,7 @@ halfmoon gateway
 Halfmoon can connect to WhatsApp in two ways:
 
 - **Native (recommended):** In-process using [whatsmeow](https://github.com/tulir/whatsmeow). No separate bridge. Set `"use_native": true` and leave `bridge_url` empty. On first run, scan the QR code with WhatsApp (Linked Devices). Session is stored under your workspace (e.g. `workspace/whatsapp/`). The native channel is **optional** to keep the default binary small; build with `-tags whatsapp_native` (e.g. `make build-whatsapp-native` or `go build -tags whatsapp_native ./cmd/...`).
-- **Bridge:** Connect to an external WebSocket bridge. Set `bridge_url` (e.g. `ws://localhost:3001`) and keep `use_native` false.
+- **Bridge:** Connect to an external WebSocket bridge. Set `bridge_url` (e.g. `ws://localhost:3001`) and keep `use_native` false. The bridge communicates over a simple JSON-over-WebSocket protocol (see below).
 
 **Configure (native)**
 
@@ -177,6 +177,28 @@ Halfmoon can connect to WhatsApp in two ways:
 ```
 
 If `session_store_path` is empty, the session is stored in `<workspace>/whatsapp/`. Run `halfmoon gateway`; on first run, scan the QR code printed in the terminal with WhatsApp → Linked Devices.
+
+**Bridge WebSocket protocol**
+
+The bridge channel connects to the external WebSocket server at `bridge_url` and exchanges JSON frames. Bridge implementations must handle the following frame types:
+
+*Incoming messages (bridge → halfmoon):*
+```json
+{"type": "message", "id": "msg123", "from": "1234567890@s.whatsapp.net", "chat": "1234567890@s.whatsapp.net", "content": "Hello", "from_name": "Alice"}
+```
+
+*Outgoing messages (halfmoon → bridge):*
+```json
+{"type": "message", "to": "1234567890@s.whatsapp.net", "content": "Hi there!"}
+```
+
+*Typing indicators (halfmoon → bridge):*
+```json
+{"type": "typing", "to": "1234567890@s.whatsapp.net", "action": "composing"}
+{"type": "typing", "to": "1234567890@s.whatsapp.net", "action": "paused"}
+```
+
+The bridge should translate `composing`/`paused` into the appropriate WhatsApp presence updates so the user sees a typing indicator while the agent is processing.
 
 </details>
 
