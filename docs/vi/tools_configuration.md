@@ -78,6 +78,7 @@ Cài đặt chung để tải và xử lý nội dung trang web.
 | `enabled`      | bool     | false    | Bật tìm kiếm Perplexity                                          |
 | `api_key`      | string   | -        | Khóa API Perplexity                                              |
 | `api_keys`     | string[] | -        | Nhiều khóa API Perplexity để xoay vòng (ưu tiên hơn `api_key`)  |
+| `base_url`     | string   | -        | URL cơ sở API tùy chỉnh (cho proxy như OpenRouter hoặc LiteLLM) |
 | `max_results`  | int      | 5        | Số kết quả tối đa                                                |
 
 ### Brave

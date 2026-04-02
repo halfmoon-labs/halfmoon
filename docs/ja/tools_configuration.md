@@ -78,6 +78,7 @@ Web ツールはウェブ検索とフェッチに使用されます。
 | `enabled`     | bool     | false      | Perplexity 検索を有効にする                          |
 | `api_key`     | string   | -          | Perplexity API キー                                  |
 | `api_keys`    | string[] | -          | 複数の Perplexity API キー（ローテーション用、`api_key` より優先） |
+| `base_url`    | string   | -          | カスタム API ベース URL（OpenRouter や LiteLLM などのプロキシ用） |
 | `max_results` | int      | 5          | 最大結果数                                           |
 
 ### Brave

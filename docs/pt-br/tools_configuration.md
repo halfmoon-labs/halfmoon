@@ -78,6 +78,7 @@ Configurações gerais para busca e processamento de conteúdo de páginas web.
 | `enabled`     | bool     | false  | Habilitar pesquisa Perplexity                                    |
 | `api_key`     | string   | -      | Chave API do Perplexity                                          |
 | `api_keys`    | string[] | -      | Várias chaves API do Perplexity para rotação (prioridade sobre `api_key`) |
+| `base_url`    | string   | -      | URL base da API personalizada (para proxies como OpenRouter ou LiteLLM) |
 | `max_results` | int      | 5      | Número máximo de resultados                                      |
 
 ### Brave

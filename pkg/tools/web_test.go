@@ -1428,3 +1428,41 @@ func TestWebTool_GLMSearch_Priority(t *testing.T) {
 		t.Errorf("Expected GLMSearchProvider when only GLM enabled, got %T", tool2.provider)
 	}
 }
+
+func TestPerplexityBaseURL(t *testing.T) {
+	t.Run("default_when_empty", func(t *testing.T) {
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.baseURL != "https://api.perplexity.ai/chat/completions" {
+			t.Fatalf("baseURL = %q, want default Perplexity URL", p.baseURL)
+		}
+	})
+
+	t.Run("custom_base_url", func(t *testing.T) {
+		customURL := "https://openrouter.ai/api/v1/chat/completions"
+		tool, err := NewWebSearchTool(WebSearchToolOptions{
+			PerplexityEnabled: true,
+			PerplexityAPIKeys: []string{"k"},
+			PerplexityBaseURL: customURL,
+		})
+		if err != nil {
+			t.Fatalf("NewWebSearchTool() error: %v", err)
+		}
+		p, ok := tool.provider.(*PerplexitySearchProvider)
+		if !ok {
+			t.Fatalf("provider type = %T, want *PerplexitySearchProvider", tool.provider)
+		}
+		if p.baseURL != customURL {
+			t.Fatalf("baseURL = %q, want %q", p.baseURL, customURL)
+		}
+	})
+}
