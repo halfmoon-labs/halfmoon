@@ -177,8 +177,8 @@ Halfmoon can connect to WhatsApp in two ways:
 }
 ```
 
-- `allow_from` — whitelist of sender IDs. If empty, all senders are allowed.
-- `deny_from` — blocklist of sender IDs. Takes priority over `allow_from`. Use this to block specific contacts while allowing everyone else.
+- `allow_from` — allow-list of sender IDs. If empty, all senders are allowed.
+- `deny_from` — deny-list of sender IDs. Takes priority over `allow_from`. Use this to block specific contacts while allowing everyone else.
 
 Both fields support the same ID formats: raw phone (`1234567890@s.whatsapp.net`), canonical (`whatsapp:1234567890@s.whatsapp.net`), or platform ID only.
 

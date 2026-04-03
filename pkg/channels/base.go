@@ -181,6 +181,13 @@ func (c *BaseChannel) IsRunning() bool {
 }
 
 func (c *BaseChannel) IsAllowed(senderID string) bool {
+	// Deny-list takes priority (same as IsAllowedSender).
+	for _, denied := range c.denyList {
+		if senderID == denied || senderID == strings.TrimPrefix(denied, "@") {
+			return false
+		}
+	}
+
 	if len(c.allowList) == 0 {
 		return true
 	}
