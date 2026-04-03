@@ -5,6 +5,7 @@ BINARY_NAME=halfmoon
 BUILD_DIR=build
 CMD_DIR=cmd/$(BINARY_NAME)
 MAIN_GO=$(CMD_DIR)/main.go
+EXT=
 
 # Version
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -56,9 +57,11 @@ WORKSPACE_DIR?=$(HALFMOON_HOME)/workspace
 WORKSPACE_SKILLS_DIR=$(WORKSPACE_DIR)/skills
 BUILTIN_SKILLS_DIR=$(CURDIR)/skills
 
+LNCMD=ln -sf
+
 # OS detection
-UNAME_S:=$(shell uname -s)
-UNAME_M:=$(shell uname -m)
+UNAME_S?=$(shell uname -s)
+UNAME_M?=$(shell uname -m)
 
 # Platform-specific settings
 ifeq ($(UNAME_S),Linux)
@@ -90,7 +93,20 @@ else ifeq ($(UNAME_S),Darwin)
 	endif
 else
 	PLATFORM=$(UNAME_S)
-	ARCH=$(UNAME_M)
+	ifeq ($(UNAME_M),x86_64)
+		ARCH?=amd64
+	else
+	    ARCH?=$(UNAME_M)
+	endif
+	# Detect Windows (Git Bash / MSYS2)
+    IS_WINDOWS:=$(if $(findstring MINGW,$(UNAME_S)),yes,$(if $(findstring MSYS,$(UNAME_S)),yes,$(if $(findstring CYGWIN,$(UNAME_S)),yes,no)))
+	ifeq ($(IS_WINDOWS),yes)
+	    EXT=.exe
+	    LNCMD=cp
+	else ifeq ($(UNAME_S),windows) # failsafe for force windows build in other OS using UNAME_S=windows
+		EXT=.exe
+	endif
+
 endif
 
 BINARY_PATH=$(BUILD_DIR)/$(BINARY_NAME)-$(PLATFORM)-$(ARCH)
@@ -107,11 +123,11 @@ generate:
 
 ## build: Build the halfmoon binary for current platform
 build: generate
-	@echo "Building $(BINARY_NAME) for $(PLATFORM)/$(ARCH)..."
+	@echo "Building $(BINARY_NAME)$(EXT) for $(PLATFORM)/$(ARCH)..."
 	@mkdir -p $(BUILD_DIR)
-	@$(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BINARY_PATH) ./$(CMD_DIR)
-	@echo "Build complete: $(BINARY_PATH)"
-	@ln -sf $(BINARY_NAME)-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/$(BINARY_NAME)
+	@GOARCH=${ARCH} $(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BINARY_PATH)$(EXT) ./$(CMD_DIR)
+	@echo "Build complete: $(BINARY_PATH)$(EXT)"
+	@$(LNCMD) $(BINARY_NAME)-$(PLATFORM)-$(ARCH)$(EXT) $(BUILD_DIR)/$(BINARY_NAME)$(EXT)
 
 ## build-launcher: Build the halfmoon-launcher (web console) binary
 build-launcher:
@@ -121,9 +137,9 @@ build-launcher:
 		echo "Building frontend..."; \
 		cd web/frontend && pnpm install && pnpm build:backend; \
 	fi
-	@$(WEB_GO) build $(GOFLAGS) -o $(BUILD_DIR)/halfmoon-launcher-$(PLATFORM)-$(ARCH) ./web/backend
-	@ln -sf halfmoon-launcher-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/halfmoon-launcher
-	@echo "Build complete: $(BUILD_DIR)/halfmoon-launcher"
+	@$(WEB_GO) build $(GOFLAGS) -o $(BUILD_DIR)/halfmoon-launcher-$(PLATFORM)-$(ARCH)$(EXT) ./web/backend
+	@$(LNCMD) halfmoon-launcher-$(PLATFORM)-$(ARCH)$(EXT) $(BUILD_DIR)/halfmoon-launcher$(EXT)
+	@echo "Build complete: $(BUILD_DIR)/halfmoon-launcher$(EXT)"
 
 ## build-whatsapp-native: Build with WhatsApp native (whatsmeow) support; larger binary
 build-whatsapp-native: generate
