@@ -165,6 +165,7 @@ func NewWeComAIBotChannel(
 	base := channels.NewBaseChannel("wecom_aibot", cfg, messageBus, cfg.AllowFrom,
 		channels.WithMaxMessageLength(2048),
 		channels.WithReasoningChannelID(cfg.ReasoningChannelID),
+		channels.WithDenyList(cfg.DenyFrom),
 	)
 
 	return &WeComAIBotChannel{

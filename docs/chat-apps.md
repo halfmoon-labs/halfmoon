@@ -170,11 +170,17 @@ Halfmoon can connect to WhatsApp in two ways:
       "enabled": true,
       "use_native": true,
       "session_store_path": "",
-      "allow_from": []
+      "allow_from": [],
+      "deny_from": []
     }
   }
 }
 ```
+
+- `allow_from` — allow-list of sender IDs. If empty, all senders are allowed.
+- `deny_from` — deny-list of sender IDs. Takes priority over `allow_from`. Use this to block specific contacts while allowing everyone else.
+
+Both fields support the same ID formats: raw phone (`1234567890@s.whatsapp.net`), canonical (`whatsapp:1234567890@s.whatsapp.net`), or platform ID only.
 
 If `session_store_path` is empty, the session is stored in `<workspace>/whatsapp/`. Run `halfmoon gateway`; on first run, scan the QR code printed in the terminal with WhatsApp → Linked Devices.
 
