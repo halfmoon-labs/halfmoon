@@ -17,7 +17,7 @@ func TestNewHalfmoonCommand(t *testing.T) {
 
 	require.NotNil(t, cmd)
 
-	short := fmt.Sprintf("%s halfmoon - Personal AI Assistant v%s\n\n", internal.Logo, config.GetVersion())
+	short := fmt.Sprintf("%s halfmoon - Personal AI Assistant %s\n\n", internal.Logo, config.GetVersion())
 
 	assert.Equal(t, "halfmoon", cmd.Use)
 	assert.Equal(t, short, cmd.Short)

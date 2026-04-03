@@ -27,7 +27,7 @@ import (
 )
 
 func NewHalfmoonCommand() *cobra.Command {
-	short := fmt.Sprintf("%s halfmoon - Personal AI Assistant v%s\n\n", internal.Logo, config.GetVersion())
+	short := fmt.Sprintf("%s halfmoon - Personal AI Assistant %s\n\n", internal.Logo, config.GetVersion())
 
 	cmd := &cobra.Command{
 		Use:     "halfmoon",
