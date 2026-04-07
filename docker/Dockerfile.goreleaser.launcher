@@ -9,4 +9,4 @@ COPY $TARGETPLATFORM/halfmoon-launcher /usr/local/bin/halfmoon-launcher
 COPY $TARGETPLATFORM/halfmoon-launcher-tui /usr/local/bin/halfmoon-launcher-tui
 
 ENTRYPOINT ["halfmoon-launcher"]
-CMD ["-public", "-no-browser"]
+CMD ["-console", "-public", "-no-browser"]
