@@ -189,7 +189,7 @@ func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
 		return
 	}
 
-	_ = c.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+	_ = c.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
 	if err := c.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
 		logger.DebugCF("whatsapp", "typing indicator send failed", map[string]any{
 			"action": action,
@@ -201,8 +201,9 @@ func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
 
 // dial attempts a single WebSocket connection to the bridge.
 func (c *WhatsAppChannel) dial() error {
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = handshakeTimeout
+	dialer := &websocket.Dialer{
+		HandshakeTimeout: handshakeTimeout,
+	}
 
 	conn, resp, err := dialer.Dial(c.url, nil)
 	if resp != nil {
@@ -336,13 +337,11 @@ func (c *WhatsAppChannel) reconnectWithBackoff() {
 			case <-c.ctx.Done():
 				return
 			case <-time.After(backoff):
-				if backoff < reconnectMax {
-					next := time.Duration(float64(backoff) * reconnectMultiplier)
-					if next > reconnectMax {
-						next = reconnectMax
-					}
-					backoff = next
+				next := time.Duration(float64(backoff) * reconnectMultiplier)
+				if next > reconnectMax {
+					next = reconnectMax
 				}
+				backoff = next
 			}
 			continue
 		}
