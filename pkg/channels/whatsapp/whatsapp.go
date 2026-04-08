@@ -50,6 +50,7 @@ func NewWhatsAppChannel(cfg config.WhatsAppConfig, bus *bus.MessageBus) (*WhatsA
 		cfg.AllowFrom,
 		channels.WithMaxMessageLength(65536),
 		channels.WithReasoningChannelID(cfg.ReasoningChannelID),
+		channels.WithDenyList(cfg.DenyFrom),
 	)
 
 	return &WhatsAppChannel{
@@ -65,7 +66,13 @@ func (c *WhatsAppChannel) Start(ctx context.Context) error {
 	})
 
 	c.ctx, c.cancel = context.WithCancel(ctx)
+
+	// Reset lifecycle state from any previous Stop() so a restarted channel
+	// behaves correctly.
+	c.reconnectMu.Lock()
 	c.stopping.Store(false)
+	c.reconnecting = false
+	c.reconnectMu.Unlock()
 
 	c.SetRunning(true)
 
@@ -79,7 +86,14 @@ func (c *WhatsAppChannel) Start(ctx context.Context) error {
 		c.startReconnect()
 	} else {
 		logger.InfoC("whatsapp", "WhatsApp channel connected")
+		c.reconnectMu.Lock()
+		if c.stopping.Load() {
+			c.reconnectMu.Unlock()
+			c.closeConn()
+			return nil
+		}
 		c.wg.Add(1)
+		c.reconnectMu.Unlock()
 		go func() {
 			defer c.wg.Done()
 			c.listen()
@@ -347,7 +361,18 @@ func (c *WhatsAppChannel) reconnectWithBackoff() {
 		}
 
 		logger.InfoC("whatsapp", "WhatsApp bridge reconnected")
+
+		// Guard wg.Add with reconnectMu + stopping check so a concurrent
+		// Stop() cannot enter wg.Wait() while we call wg.Add(1).
+		c.reconnectMu.Lock()
+		if c.stopping.Load() {
+			c.reconnectMu.Unlock()
+			c.closeConn()
+			return
+		}
 		c.wg.Add(1)
+		c.reconnectMu.Unlock()
+
 		go func() {
 			defer c.wg.Done()
 			c.listen()
