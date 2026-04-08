@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -17,15 +18,28 @@ import (
 	"github.com/halfmoon-labs/halfmoon/pkg/utils"
 )
 
+const (
+	reconnectInitial    = 5 * time.Second
+	reconnectMax        = 5 * time.Minute
+	reconnectMultiplier = 2.0
+
+	writeTimeout     = 10 * time.Second
+	handshakeTimeout = 10 * time.Second
+)
+
 type WhatsAppChannel struct {
 	*channels.BaseChannel
-	conn      *websocket.Conn
-	config    config.WhatsAppConfig
-	url       string
-	ctx       context.Context
-	cancel    context.CancelFunc
-	mu        sync.Mutex
-	connected bool
+	conn         *websocket.Conn
+	config       config.WhatsAppConfig
+	url          string
+	ctx          context.Context
+	cancel       context.CancelFunc
+	mu           sync.Mutex
+	connected    bool
+	reconnectMu  sync.Mutex
+	reconnecting bool
+	stopping     atomic.Bool
+	wg           sync.WaitGroup
 }
 
 func NewWhatsAppChannel(cfg config.WhatsAppConfig, bus *bus.MessageBus) (*WhatsAppChannel, error) {
@@ -43,7 +57,6 @@ func NewWhatsAppChannel(cfg config.WhatsAppConfig, bus *bus.MessageBus) (*WhatsA
 		BaseChannel: base,
 		config:      cfg,
 		url:         cfg.BridgeURL,
-		connected:   false,
 	}, nil
 }
 
@@ -54,27 +67,38 @@ func (c *WhatsAppChannel) Start(ctx context.Context) error {
 
 	c.ctx, c.cancel = context.WithCancel(ctx)
 
-	dialer := websocket.DefaultDialer
-	dialer.HandshakeTimeout = 10 * time.Second
-
-	conn, resp, err := dialer.Dial(c.url, nil)
-	if resp != nil {
-		resp.Body.Close()
-	}
-	if err != nil {
-		c.cancel()
-		return fmt.Errorf("failed to connect to WhatsApp bridge: %w", err)
-	}
-
-	c.mu.Lock()
-	c.conn = conn
-	c.connected = true
-	c.mu.Unlock()
+	// Reset lifecycle state from any previous Stop() so a restarted channel
+	// behaves correctly.
+	c.reconnectMu.Lock()
+	c.stopping.Store(false)
+	c.reconnecting = false
+	c.reconnectMu.Unlock()
 
 	c.SetRunning(true)
-	logger.InfoC("whatsapp", "WhatsApp channel connected")
 
-	go c.listen()
+	if err := c.dial(); err != nil {
+		// Bridge not available yet — start reconnect in background.
+		// The channel is "running" so incoming messages will be processed
+		// once the connection is established.
+		logger.WarnCF("whatsapp", "Initial connection failed, will retry", map[string]any{
+			"error": err.Error(),
+		})
+		c.startReconnect()
+	} else {
+		logger.InfoC("whatsapp", "WhatsApp channel connected")
+		c.reconnectMu.Lock()
+		if c.stopping.Load() {
+			c.reconnectMu.Unlock()
+			c.closeConn()
+			return nil
+		}
+		c.wg.Add(1)
+		c.reconnectMu.Unlock()
+		go func() {
+			defer c.wg.Done()
+			c.listen()
+		}()
+	}
 
 	return nil
 }
@@ -82,26 +106,32 @@ func (c *WhatsAppChannel) Start(ctx context.Context) error {
 func (c *WhatsAppChannel) Stop(ctx context.Context) error {
 	logger.InfoC("whatsapp", "Stopping WhatsApp channel...")
 
-	// Cancel context first to signal listen goroutine to exit
+	c.reconnectMu.Lock()
+	c.stopping.Store(true)
+	c.reconnectMu.Unlock()
+
 	if c.cancel != nil {
 		c.cancel()
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
+	c.closeConn()
 
-	if c.conn != nil {
-		if err := c.conn.Close(); err != nil {
-			logger.ErrorCF("whatsapp", "Error closing WhatsApp connection", map[string]any{
-				"error": err.Error(),
-			})
-		}
-		c.conn = nil
+	// Wait for background goroutines (listen, reconnect) with context timeout.
+	done := make(chan struct{})
+	go func() {
+		c.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-ctx.Done():
+		logger.WarnCF("whatsapp", "Stop context canceled before goroutines finished", map[string]any{
+			"error": ctx.Err().Error(),
+		})
 	}
 
-	c.connected = false
 	c.SetRunning(false)
-
 	return nil
 }
 
@@ -110,7 +140,6 @@ func (c *WhatsAppChannel) Send(ctx context.Context, msg bus.OutboundMessage) err
 		return channels.ErrNotRunning
 	}
 
-	// Check ctx before acquiring lock
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -135,7 +164,7 @@ func (c *WhatsAppChannel) Send(ctx context.Context, msg bus.OutboundMessage) err
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
 
-	_ = c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+	_ = c.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
 	if err := c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
 		_ = c.conn.SetWriteDeadline(time.Time{})
 		return fmt.Errorf("whatsapp send: %w", channels.ErrTemporary)
@@ -174,7 +203,7 @@ func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
 		return
 	}
 
-	_ = c.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+	_ = c.conn.SetWriteDeadline(time.Now().Add(writeTimeout))
 	if err := c.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
 		logger.DebugCF("whatsapp", "typing indicator send failed", map[string]any{
 			"action": action,
@@ -184,6 +213,46 @@ func (c *WhatsAppChannel) sendTypingAction(chatID, action string) {
 	_ = c.conn.SetWriteDeadline(time.Time{})
 }
 
+// dial attempts a single WebSocket connection to the bridge.
+func (c *WhatsAppChannel) dial() error {
+	dialer := &websocket.Dialer{
+		HandshakeTimeout: handshakeTimeout,
+	}
+
+	conn, resp, err := dialer.Dial(c.url, nil)
+	if resp != nil {
+		resp.Body.Close()
+	}
+	if err != nil {
+		return fmt.Errorf("failed to connect to WhatsApp bridge: %w", err)
+	}
+
+	c.mu.Lock()
+	c.conn = conn
+	c.connected = true
+	c.mu.Unlock()
+
+	return nil
+}
+
+// closeConn closes the WebSocket connection if open.
+func (c *WhatsAppChannel) closeConn() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.conn != nil {
+		if err := c.conn.Close(); err != nil {
+			logger.DebugCF("whatsapp", "Error closing connection", map[string]any{
+				"error": err.Error(),
+			})
+		}
+		c.conn = nil
+	}
+	c.connected = false
+}
+
+// listen reads messages from the WebSocket connection. When the connection
+// drops, it triggers a reconnect and returns.
 func (c *WhatsAppChannel) listen() {
 	for {
 		select {
@@ -195,17 +264,23 @@ func (c *WhatsAppChannel) listen() {
 			c.mu.Unlock()
 
 			if conn == nil {
-				time.Sleep(1 * time.Second)
-				continue
+				return
 			}
 
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				logger.ErrorCF("whatsapp", "WhatsApp read error", map[string]any{
+				select {
+				case <-c.ctx.Done():
+					return
+				default:
+				}
+
+				logger.WarnCF("whatsapp", "WhatsApp bridge connection lost", map[string]any{
 					"error": err.Error(),
 				})
-				time.Sleep(2 * time.Second)
-				continue
+				c.closeConn()
+				c.startReconnect()
+				return
 			}
 
 			var msg map[string]any
@@ -225,6 +300,84 @@ func (c *WhatsAppChannel) listen() {
 				c.handleIncomingMessage(msg)
 			}
 		}
+	}
+}
+
+// startReconnect spawns a reconnect goroutine if one isn't already running.
+func (c *WhatsAppChannel) startReconnect() {
+	c.reconnectMu.Lock()
+	if c.reconnecting || c.stopping.Load() {
+		c.reconnectMu.Unlock()
+		return
+	}
+	c.reconnecting = true
+	c.wg.Add(1)
+	c.reconnectMu.Unlock()
+
+	go func() {
+		defer c.wg.Done()
+		c.reconnectWithBackoff()
+	}()
+}
+
+// reconnectWithBackoff retries connecting to the bridge with exponential
+// backoff (5s initial, 5m cap, 2x multiplier). Runs until connected or
+// the channel is stopped.
+func (c *WhatsAppChannel) reconnectWithBackoff() {
+	defer func() {
+		c.reconnectMu.Lock()
+		c.reconnecting = false
+		c.reconnectMu.Unlock()
+	}()
+
+	backoff := reconnectInitial
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		default:
+		}
+
+		logger.InfoCF("whatsapp", "Reconnecting to WhatsApp bridge", map[string]any{
+			"backoff": backoff.String(),
+		})
+
+		if err := c.dial(); err != nil {
+			logger.WarnCF("whatsapp", "WhatsApp bridge reconnect failed", map[string]any{
+				"error": err.Error(),
+			})
+
+			select {
+			case <-c.ctx.Done():
+				return
+			case <-time.After(backoff):
+				next := time.Duration(float64(backoff) * reconnectMultiplier)
+				if next > reconnectMax {
+					next = reconnectMax
+				}
+				backoff = next
+			}
+			continue
+		}
+
+		logger.InfoC("whatsapp", "WhatsApp bridge reconnected")
+
+		// Guard wg.Add with reconnectMu + stopping check so a concurrent
+		// Stop() cannot enter wg.Wait() while we call wg.Add(1).
+		c.reconnectMu.Lock()
+		if c.stopping.Load() {
+			c.reconnectMu.Unlock()
+			c.closeConn()
+			return
+		}
+		c.wg.Add(1)
+		c.reconnectMu.Unlock()
+
+		go func() {
+			defer c.wg.Done()
+			c.listen()
+		}()
+		return
 	}
 }
 
