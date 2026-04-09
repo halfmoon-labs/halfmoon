@@ -48,20 +48,13 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Copy binary
 COPY --from=builder /src/build/halfmoon /usr/local/bin/halfmoon
 
-# Reuse existing node user (UID/GID 1000) — rename to halfmoon
-RUN deluser node 2>/dev/null; delgroup node 2>/dev/null; \
-    addgroup -g 1000 halfmoon 2>/dev/null; \
-    adduser -D -u 1000 -G halfmoon -h /home/halfmoon halfmoon 2>/dev/null || true
-
-USER halfmoon
-
 # Run onboard to create initial directories and config
 RUN /usr/local/bin/halfmoon onboard
 
 # Copy default workspace
-COPY --chown=halfmoon:halfmoon workspace/ /home/halfmoon/.halfmoon/workspace/
+COPY workspace/ /root/.halfmoon/workspace/
 
-VOLUME /home/halfmoon/.halfmoon/workspace
+VOLUME /root/.halfmoon/workspace
 
 ENTRYPOINT ["halfmoon"]
 CMD ["gateway"]
