@@ -84,7 +84,7 @@ func (p *startupBlockedProvider) GetDefaultModel() string {
 }
 
 // Run starts the gateway runtime using the configuration loaded from configPath.
-func Run(debug bool, homePath, configPath string, allowEmptyStartup bool) error {
+func Run(debug bool, homePath, configPath string, allowEmptyStartup bool) (runErr error) {
 	panicPath := filepath.Join(homePath, logPath, panicFile)
 	panicFunc, err := logger.InitPanic(panicPath)
 	if err != nil {
@@ -96,6 +96,18 @@ func Run(debug bool, homePath, configPath string, allowEmptyStartup bool) error 
 		panic(fmt.Sprintf("error enabling file logging: %v", err))
 	}
 	defer logger.DisableFileLogging()
+
+	defer func() {
+		if runErr != nil {
+			logger.ErrorCF("gateway", "Gateway startup failed", map[string]any{
+				"config_path": configPath,
+				"error":       runErr.Error(),
+				"home_path":   homePath,
+				"allow_empty": allowEmptyStartup,
+				"debug":       debug,
+			})
+		}
+	}()
 
 	cfg, err := config.LoadConfig(configPath)
 	if err != nil {

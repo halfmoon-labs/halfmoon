@@ -384,6 +384,37 @@ func TestSaveConfig_IncludesEmptyLegacyModelField(t *testing.T) {
 	}
 }
 
+func TestSaveConfig_PreservesDisabledTelegramPlaceholder(t *testing.T) {
+	tmpDir := t.TempDir()
+	path := filepath.Join(tmpDir, "config.json")
+
+	cfg := DefaultConfig()
+	cfg.Channels.Telegram.Placeholder.Enabled = false
+
+	if err := SaveConfig(path, cfg); err != nil {
+		t.Fatalf("SaveConfig failed: %v", err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile failed: %v", err)
+	}
+	if !strings.Contains(string(data), `"placeholder": {`) {
+		t.Fatalf("saved config should include telegram placeholder config, got: %s", string(data))
+	}
+	if !strings.Contains(string(data), `"enabled": false`) {
+		t.Fatalf("saved config should persist placeholder.enabled=false, got: %s", string(data))
+	}
+
+	loaded, err := LoadConfig(path)
+	if err != nil {
+		t.Fatalf("LoadConfig failed: %v", err)
+	}
+	if loaded.Channels.Telegram.Placeholder.Enabled {
+		t.Fatal("telegram placeholder should remain disabled after SaveConfig/LoadConfig round-trip")
+	}
+}
+
 // TestConfig_Complete verifies all config fields are set
 func TestConfig_Complete(t *testing.T) {
 	cfg := DefaultConfig()
@@ -418,6 +449,33 @@ func TestDefaultConfig_WebPreferNativeEnabled(t *testing.T) {
 	cfg := DefaultConfig()
 	if !cfg.Tools.Web.PreferNative {
 		t.Fatal("DefaultConfig().Tools.Web.PreferNative should be true")
+	}
+}
+
+func TestDefaultConfig_ToolFeedbackDisabled(t *testing.T) {
+	cfg := DefaultConfig()
+	if cfg.Agents.Defaults.ToolFeedback.Enabled {
+		t.Fatal("DefaultConfig().Agents.Defaults.ToolFeedback.Enabled should be false")
+	}
+}
+
+func TestLoadConfig_ToolFeedbackDefaultsFalseWhenUnset(t *testing.T) {
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.json")
+	if err := os.WriteFile(
+		configPath,
+		[]byte(`{"version":1,"agents":{"defaults":{"workspace":"./workspace"}}}`),
+		0o600,
+	); err != nil {
+		t.Fatalf("WriteFile() error: %v", err)
+	}
+
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error: %v", err)
+	}
+	if cfg.Agents.Defaults.ToolFeedback.Enabled {
+		t.Fatal("agents.defaults.tool_feedback.enabled should remain false when unset in config file")
 	}
 }
 

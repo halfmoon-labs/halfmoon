@@ -36,7 +36,13 @@ func (f *FlexibleStringSlice) UnmarshalJSON(data []byte) error {
 	// Try []interface{} to handle mixed types
 	var raw []any
 	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
+		var s string
+		// fail over to compatible to old format string
+		if err = json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		*f = []string{s}
+		return nil
 	}
 
 	result := make([]string, 0, len(raw))
@@ -387,7 +393,7 @@ type TypingConfig struct {
 
 // PlaceholderConfig controls placeholder message behavior (Phase 10).
 type PlaceholderConfig struct {
-	Enabled bool   `json:"enabled,omitempty"`
+	Enabled bool   `json:"enabled"`
 	Text    string `json:"text,omitempty"`
 }
 

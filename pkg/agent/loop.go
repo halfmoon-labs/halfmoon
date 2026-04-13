@@ -85,6 +85,7 @@ type processOptions struct {
 	DefaultResponse         string              // Response when LLM returns empty
 	EnableSummary           bool                // Whether to trigger summarization
 	SendResponse            bool                // Whether to send response via bus
+	SuppressToolFeedback    bool                // Whether to suppress inline tool feedback messages
 	NoHistory               bool                // If true, don't load session history (for heartbeat)
 	SkipInitialSteeringPoll bool                // If true, skip the steering poll at loop start (used by Continue)
 }
@@ -467,10 +468,17 @@ func (al *AgentLoop) Run(ctx context.Context) error {
 		return err
 	}
 
-	for al.running.Load() {
+	idleTicker := time.NewTicker(100 * time.Millisecond)
+	defer idleTicker.Stop()
+
+	for {
 		select {
 		case <-ctx.Done():
 			return nil
+		case <-idleTicker.C:
+			if !al.running.Load() {
+				return nil
+			}
 		case msg, ok := <-al.bus.InboundChan():
 			if !ok {
 				return nil
@@ -534,7 +542,7 @@ func (al *AgentLoop) Run(ctx context.Context) error {
 				if target == nil {
 					cancelDrain()
 					if finalResponse != "" {
-						al.publishResponseIfNeeded(ctx, msg.Channel, msg.ChatID, finalResponse)
+						al.PublishResponseIfNeeded(ctx, msg.Channel, msg.ChatID, finalResponse)
 					}
 					return
 				}
@@ -594,15 +602,11 @@ func (al *AgentLoop) Run(ctx context.Context) error {
 				}
 
 				if finalResponse != "" {
-					al.publishResponseIfNeeded(ctx, target.Channel, target.ChatID, finalResponse)
+					al.PublishResponseIfNeeded(ctx, target.Channel, target.ChatID, finalResponse)
 				}
 			}()
-		default:
-			time.Sleep(time.Microsecond * 200)
 		}
 	}
-
-	return nil
 }
 
 // drainBusToSteering consumes inbound messages and redirects messages from the
@@ -680,26 +684,26 @@ func (al *AgentLoop) Stop() {
 	al.running.Store(false)
 }
 
-func (al *AgentLoop) publishResponseIfNeeded(ctx context.Context, channel, chatID, response string) {
+func (al *AgentLoop) PublishResponseIfNeeded(ctx context.Context, channel, chatID, response string) {
 	if response == "" {
 		return
 	}
 
-	alreadySent := false
+	alreadySentToSameChat := false
 	defaultAgent := al.GetRegistry().GetDefaultAgent()
 	if defaultAgent != nil {
 		if tool, ok := defaultAgent.Tools.Get("message"); ok {
 			if mt, ok := tool.(*tools.MessageTool); ok {
-				alreadySent = mt.HasSentInRound()
+				alreadySentToSameChat = mt.HasSentTo(channel, chatID)
 			}
 		}
 	}
 
-	if alreadySent {
+	if alreadySentToSameChat {
 		logger.DebugCF(
 			"agent",
-			"Skipped outbound (message tool already sent)",
-			map[string]any{"channel": channel},
+			"Skipped outbound (message tool already sent to same chat)",
+			map[string]any{"channel": channel, "chat_id": chatID},
 		)
 		return
 	}
@@ -1342,14 +1346,15 @@ func (al *AgentLoop) ProcessHeartbeat(
 	}
 
 	return al.runAgentLoop(ctx, agent, processOptions{
-		SessionKey:      "heartbeat",
-		Channel:         channel,
-		ChatID:          chatID,
-		UserMessage:     content,
-		DefaultResponse: defaultResponse,
-		EnableSummary:   false,
-		SendResponse:    false,
-		NoHistory:       true, // Don't load session history for heartbeat
+		SessionKey:           "heartbeat",
+		Channel:              channel,
+		ChatID:               chatID,
+		UserMessage:          content,
+		DefaultResponse:      defaultResponse,
+		EnableSummary:        false,
+		SendResponse:         false,
+		SuppressToolFeedback: true,
+		NoHistory:            true, // Don't load session history for heartbeat
 	})
 }
 
@@ -2050,6 +2055,7 @@ turnLoop:
 
 			isContextError := !isTimeoutError && (strings.Contains(errMsg, "context_length_exceeded") ||
 				strings.Contains(errMsg, "context window") ||
+				strings.Contains(errMsg, "context_window") ||
 				strings.Contains(errMsg, "maximum context length") ||
 				strings.Contains(errMsg, "token limit") ||
 				strings.Contains(errMsg, "too many tokens") ||
@@ -2413,7 +2419,9 @@ turnLoop:
 			)
 
 			// Send tool feedback to chat channel if enabled (from HEAD)
-			if al.cfg.Agents.Defaults.IsToolFeedbackEnabled() && ts.channel != "" {
+			if al.cfg.Agents.Defaults.IsToolFeedbackEnabled() &&
+				ts.channel != "" &&
+				!ts.opts.SuppressToolFeedback {
 				feedbackPreview := utils.Truncate(
 					string(argsJSON),
 					al.cfg.Agents.Defaults.GetToolFeedbackMaxArgsLength(),

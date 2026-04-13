@@ -65,7 +65,7 @@ export const DM_SCOPE_OPTIONS = [
 export const EMPTY_FORM: CoreConfigForm = {
   workspace: "",
   restrictToWorkspace: true,
-  toolFeedbackEnabled: true,
+  toolFeedbackEnabled: false,
   toolFeedbackMaxArgsLength: "300",
   execEnabled: true,
   allowRemote: true,

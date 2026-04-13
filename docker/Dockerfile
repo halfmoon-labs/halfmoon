@@ -26,18 +26,9 @@ RUN apk add --no-cache ca-certificates tzdata curl
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -q --spider http://localhost:18790/health || exit 1
 
-# Copy binary
+# Copy binary and first-run entrypoint (same as release image).
 COPY --from=builder /src/build/halfmoon /usr/local/bin/halfmoon
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Create non-root user and group
-RUN addgroup -g 1000 halfmoon && \
-    adduser -D -u 1000 -G halfmoon halfmoon
-
-# Switch to non-root user
-USER halfmoon
-
-# Run onboard to create initial directories and config
-RUN /usr/local/bin/halfmoon onboard
-
-ENTRYPOINT ["halfmoon"]
-CMD ["gateway"]
+ENTRYPOINT ["/entrypoint.sh"]
