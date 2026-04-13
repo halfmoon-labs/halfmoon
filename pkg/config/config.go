@@ -1472,6 +1472,18 @@ func LoadConfig(path string) (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Load existing security config and merge with migrated one to prevent data loss
+		existingSec, secErr := loadSecurityConfig(securityPath(path))
+		if secErr != nil {
+			logger.WarnF("failed to load existing security config during migration", map[string]any{"error": secErr})
+		}
+		if existingSec != nil && cfg.security != nil {
+			cfg.security = mergeSecurityConfig(existingSec, cfg.security)
+			// Re-apply the merged security config to update all channels and models
+			if err = applySecurityConfig(cfg, cfg.security); err != nil {
+				logger.WarnF("failed to re-apply merged security config during migration", map[string]any{"error": err})
+			}
+		}
 		defer func(cfg *Config) {
 			_ = SaveConfig(path, cfg)
 		}(cfg)
@@ -1481,17 +1493,29 @@ func LoadConfig(path string) (*Config, error) {
 		if err != nil {
 			return nil, err
 		}
-		// Load security configuration
-		securityPath := securityPath(path)
-		sec, err := loadSecurityConfig(securityPath)
+
+		// Legacy config (no version field)
+		tmpCfg, e := loadConfigV0(data)
+		if e != nil {
+			return nil, e
+		}
+
+		tmpCfgMigrated, e := tmpCfg.Migrate()
+		if e != nil {
+			logger.ErrorF("config migrate fail", map[string]any{"from": versionInfo.Version, "to": CurrentVersion})
+			return nil, e
+		}
+
+		// Load security configuration from .security.yml
+		secPath := securityPath(path)
+		sec, err := loadSecurityConfig(secPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load security config: %w", err)
 		}
 
-		// Apply security references from .security.yml BEFORE resolveAPIKeys
-		// This resolves ref: references to actual values
-		if err := applySecurityConfig(cfg, sec); err != nil {
-			return nil, fmt.Errorf("failed to apply security config: %w", err)
+		// Merge security configs: config.json takes precedence over .security.yml
+		if err := applySecurityConfigWithPrecedence(cfg, tmpCfgMigrated, sec); err != nil {
+			return nil, fmt.Errorf("failed to merge security config: %w", err)
 		}
 	default:
 		return nil, fmt.Errorf("unsupported config version: %d", versionInfo.Version)
@@ -1763,6 +1787,28 @@ func applySecurityConfig(cfg *Config, sec *SecurityConfig) error {
 	cfg.security = sec
 
 	return nil
+}
+
+// applySecurityConfigWithPrecedence merges security config from tmpCfg (migrated from configV0) and sec (SecurityConfig),
+// with tmpCfg taking precedence. It then applies the merged security config to cfg.
+func applySecurityConfigWithPrecedence(cfg *Config, tmpCfg *Config, sec *SecurityConfig) error {
+	// Get security config from tmpCfg (already extracted during migration)
+	var tmpSec *SecurityConfig
+	if tmpCfg != nil {
+		tmpSec = tmpCfg.security
+	}
+
+	// If tmpCfg has no security config, just apply sec directly
+	if tmpSec == nil {
+		return applySecurityConfig(cfg, sec)
+	}
+
+	// Merge sec and tmpSec, with tmpSec (from config.json) taking precedence
+	// mergeSecurityConfig(existing, newer) - newer takes precedence
+	mergedSec := mergeSecurityConfig(sec, tmpSec)
+
+	// Apply the merged security config to cfg
+	return applySecurityConfig(cfg, mergedSec)
 }
 
 func toNameIndex(list []*ModelConfig) []string {

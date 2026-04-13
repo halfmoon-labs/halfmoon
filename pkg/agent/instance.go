@@ -48,6 +48,13 @@ type AgentInstance struct {
 	// LightCandidates holds the resolved provider candidates for the light model.
 	// Pre-computed at agent creation to avoid repeated model_list lookups at runtime.
 	LightCandidates []providers.FallbackCandidate
+	// LightProvider is the concrete provider instance for the configured light model.
+	// It is only used when routing selects the light tier for a turn.
+	LightProvider providers.LLMProvider
+	// CandidateProviders maps "provider/model" keys to per-candidate LLMProvider
+	// instances. This allows each fallback model to use its own api_base and api_key
+	// from model_list, instead of inheriting the primary model's provider config.
+	CandidateProviders map[string]providers.LLMProvider
 }
 
 // NewAgentInstance creates an agent instance from config.
@@ -165,18 +172,36 @@ func NewAgentInstance(
 	// Resolve fallback candidates
 	candidates := resolveModelCandidates(cfg, defaults.Provider, model, fallbacks)
 
+	candidateProviders := make(map[string]providers.LLMProvider)
+	populateCandidateProvidersFromNames(cfg, workspace, fallbacks, candidateProviders)
+
 	// Model routing setup: pre-resolve light model candidates at creation time
 	// to avoid repeated model_list lookups on every incoming message.
 	var router *routing.Router
 	var lightCandidates []providers.FallbackCandidate
+	var lightProvider providers.LLMProvider
 	if rc := defaults.Routing; rc != nil && rc.Enabled && rc.LightModel != "" {
 		resolved := resolveModelCandidates(cfg, defaults.Provider, rc.LightModel, nil)
 		if len(resolved) > 0 {
-			router = routing.New(routing.RouterConfig{
-				LightModel: rc.LightModel,
-				Threshold:  rc.Threshold,
-			})
-			lightCandidates = resolved
+			lightModelCfg, err := resolvedModelConfig(cfg, rc.LightModel, workspace)
+			if err != nil {
+				logger.WarnCF("agent", "Routing light model config invalid; routing disabled",
+					map[string]any{"light_model": rc.LightModel, "agent_id": agentID, "error": err.Error()})
+			} else {
+				lp, _, err := providers.CreateProviderFromConfig(lightModelCfg)
+				if err != nil {
+					logger.WarnCF("agent", "Routing light model provider init failed; routing disabled",
+						map[string]any{"light_model": rc.LightModel, "agent_id": agentID, "error": err.Error()})
+				} else {
+					router = routing.New(routing.RouterConfig{
+						LightModel: rc.LightModel,
+						Threshold:  rc.Threshold,
+					})
+					lightCandidates = resolved
+					lightProvider = lp
+					populateCandidateProvidersFromNames(cfg, workspace, []string{rc.LightModel}, candidateProviders)
+				}
+			}
 		} else {
 			logger.WarnCF("agent", "Routing light model not found; routing disabled",
 				map[string]any{"light_model": rc.LightModel, "agent_id": agentID})
@@ -205,6 +230,44 @@ func NewAgentInstance(
 		Candidates:                candidates,
 		Router:                    router,
 		LightCandidates:           lightCandidates,
+		LightProvider:             lightProvider,
+		CandidateProviders:        candidateProviders,
+	}
+}
+
+// populateCandidateProvidersFromNames resolves each model name (alias or
+// "provider/model") via resolvedModelConfig and creates a dedicated LLMProvider
+// for it. This reuses the canonical config resolution path (GetModelConfig) so
+// alias handling and load-balancing stay consistent with the rest of the codebase.
+func populateCandidateProvidersFromNames(
+	cfg *config.Config,
+	workspace string,
+	names []string,
+	out map[string]providers.LLMProvider,
+) {
+	if cfg == nil || len(names) == 0 {
+		return
+	}
+	for _, name := range names {
+		mc, err := resolvedModelConfig(cfg, strings.TrimSpace(name), workspace)
+		if err != nil {
+			logger.WarnCF("agent",
+				"fallback provider: no model_list entry found; will inherit primary provider credentials",
+				map[string]any{"name": name, "error": err.Error()})
+			continue
+		}
+		protocol, modelID := providers.ExtractProtocol(strings.TrimSpace(mc.Model))
+		key := providers.ModelKey(providers.NormalizeProvider(protocol), modelID)
+		if _, exists := out[key]; exists {
+			continue
+		}
+		p, _, err := providers.CreateProviderFromConfig(mc)
+		if err != nil {
+			logger.WarnCF("agent", "fallback provider: failed to create provider",
+				map[string]any{"model": mc.Model, "error": err.Error()})
+			continue
+		}
+		out[key] = p
 	}
 }
 
