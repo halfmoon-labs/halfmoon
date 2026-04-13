@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/sipeed/picoclaw/pkg/config"
 )
 
 func TestRun_StartupFailuresReturnErrorAndEmitStructuredLog(t *testing.T) {
@@ -33,21 +31,8 @@ func TestRun_StartupFailuresReturnErrorAndEmitStructuredLog(t *testing.T) {
 			wantErr:    "error loading config:",
 			wantLogSub: "error loading config:",
 		},
-		{
-			name: "invalid config returns pre-check error",
-			prepare: func(t *testing.T, dir string) string {
-				t.Helper()
-				cfg := config.DefaultConfig()
-				cfg.Gateway.Port = 0
-				cfgPath := filepath.Join(dir, "config.json")
-				if err := config.SaveConfig(cfgPath, cfg); err != nil {
-					t.Fatalf("SaveConfig() error = %v", err)
-				}
-				return cfgPath
-			},
-			wantErr:    "config pre-check failed: invalid gateway port: 0",
-			wantLogSub: "config pre-check failed: invalid gateway port: 0",
-		},
+		// NOTE: pre-check test case removed — preCheckConfig is from upstream commit 7a1f2ab
+		// which was not cherry-picked into halfmoon.
 	}
 
 	for _, tt := range tests {
