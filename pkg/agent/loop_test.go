@@ -1262,16 +1262,20 @@ func TestProcessMessage_ModelRoutingUsesLightProvider(t *testing.T) {
 				ModelName: "gemini-main",
 				Model:     "gemini/gemini-2.5-flash",
 				APIBase:   heavyServer.URL,
-				APIKeys:   config.SimpleSecureStrings("heavy-key"),
 			},
 			{
 				ModelName: "qwen-light",
 				Model:     "ollama/qwen2.5:0.5b",
 				APIBase:   lightServer.URL,
-				APIKeys:   config.SimpleSecureStrings("light-key"),
 			},
 		},
 	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"gemini-main": {APIKeys: []string{"heavy-key"}},
+			"qwen-light":  {APIKeys: []string{"light-key"}},
+		},
+	})
 
 	msgBus := bus.NewMessageBus()
 	provider, _, err := providers.CreateProvider(cfg)
@@ -1345,18 +1349,22 @@ func TestProcessMessage_FallbackUsesPerCandidateProvider(t *testing.T) {
 				ModelName: "mistral-primary",
 				Model:     "openrouter/mistralai/mistral-small-3.1",
 				APIBase:   primaryServer.URL,
-				APIKeys:   config.SimpleSecureStrings("primary-key"),
 				Workspace: workspace,
 			},
 			{
 				ModelName: "gemma-fallback",
 				Model:     "gemini/gemma-3-27b-it",
 				APIBase:   fallbackServer.URL,
-				APIKeys:   config.SimpleSecureStrings("fallback-key"),
 				Workspace: workspace,
 			},
 		},
 	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"mistral-primary": {APIKeys: []string{"primary-key"}},
+			"gemma-fallback":  {APIKeys: []string{"fallback-key"}},
+		},
+	})
 
 	provider, _, err := providers.CreateProvider(cfg)
 	if err != nil {
@@ -1430,11 +1438,15 @@ func TestProcessMessage_FallbackUsesActiveProviderWhenCandidateNotRegistered(t *
 				ModelName: "primary-model",
 				Model:     "openrouter/primary-model",
 				APIBase:   primaryServer.URL,
-				APIKeys:   config.SimpleSecureStrings("primary-key"),
 				Workspace: workspace,
 			},
 		},
 	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"primary-model": {APIKeys: []string{"primary-key"}},
+		},
+	})
 
 	provider, _, err := providers.CreateProvider(cfg)
 	if err != nil {

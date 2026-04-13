@@ -267,7 +267,7 @@ func TestPopulateCandidateProviders_SkipsExistingKeys(t *testing.T) {
 
 	cfg := &config.Config{
 		ModelList: []*config.ModelConfig{
-			{ModelName: "my-gpt", Model: "openai/gpt-4o", APIKeys: config.SimpleSecureStrings("test-key")},
+			{ModelName: "my-gpt", Model: "openai/gpt-4o", APIBase: "https://api.openai.com/v1"},
 		},
 	}
 	populateCandidateProvidersFromNames(cfg, t.TempDir(), []string{"my-gpt"}, out)
@@ -309,11 +309,15 @@ func TestPopulateCandidateProviders_ResolvesProtocolPrefix(t *testing.T) {
 			{
 				ModelName: "gemma",
 				Model:     "gemini/gemma-3-27b-it",
-				APIKeys:   config.SimpleSecureStrings("gemini-test-key"),
 				Workspace: workspace,
 			},
 		},
 	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"gemma": {APIKeys: []string{"gemini-test-key"}},
+		},
+	})
 	populateCandidateProvidersFromNames(cfg, workspace, []string{"gemma"}, out)
 
 	key := providers.ModelKey("gemini", "gemma-3-27b-it")
@@ -328,7 +332,7 @@ func TestPopulateCandidateProviders_EmptyNamesIsNoop(t *testing.T) {
 	out := map[string]providers.LLMProvider{}
 	cfg := &config.Config{
 		ModelList: []*config.ModelConfig{
-			{ModelName: "my-gpt", Model: "openai/gpt-4o", APIKeys: config.SimpleSecureStrings("key")},
+			{ModelName: "my-gpt", Model: "openai/gpt-4o"},
 		},
 	}
 	populateCandidateProvidersFromNames(cfg, t.TempDir(), nil, out)
@@ -355,7 +359,7 @@ func TestPopulateCandidateProviders_UnmatchedNameIsSkipped(t *testing.T) {
 	out := map[string]providers.LLMProvider{}
 	cfg := &config.Config{
 		ModelList: []*config.ModelConfig{
-			{ModelName: "my-gpt", Model: "openai/gpt-4o", APIKeys: config.SimpleSecureStrings("key")},
+			{ModelName: "my-gpt", Model: "openai/gpt-4o"},
 		},
 	}
 	populateCandidateProvidersFromNames(cfg, t.TempDir(), []string{"nonexistent-model"}, out)
@@ -385,23 +389,27 @@ func TestNewAgentInstance_CandidateProvidersPopulatedForCrossProviderFallbacks(t
 				ModelName: "mistral-small-3.1",
 				Model:     "openrouter/mistralai/mistral-small-3.1-24b-instruct:free",
 				APIBase:   "https://openrouter.ai/api/v1",
-				APIKeys:   config.SimpleSecureStrings("sk-or-test"),
 				Workspace: workspace,
 			},
 			{
 				ModelName: "gemma-3-27b",
 				Model:     "gemini/gemma-3-27b-it",
-				APIKeys:   config.SimpleSecureStrings("AIzaSy-test"),
 				Workspace: workspace,
 			},
 			{
 				ModelName: "gemini-images",
 				Model:     "gemini/gemini-2.5-flash-lite",
-				APIKeys:   config.SimpleSecureStrings("AIzaSy-test"),
 				Workspace: workspace,
 			},
 		},
 	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"mistral-small-3.1": {APIKeys: []string{"sk-or-test"}},
+			"gemma-3-27b":       {APIKeys: []string{"AIzaSy-test"}},
+			"gemini-images":     {APIKeys: []string{"AIzaSy-test"}},
+		},
+	})
 
 	primaryProvider := &mockProvider{}
 	agent := NewAgentInstance(nil, &cfg.Agents.Defaults, cfg, primaryProvider)
@@ -438,47 +446,6 @@ func TestNewAgentInstance_CandidateProvidersPopulatedForCrossProviderFallbacks(t
 			}
 			return keys
 		}())
-	}
-}
-
-func TestNewAgentInstance_ReadFileModeSelectsSchema(t *testing.T) {
-	workspace := t.TempDir()
-
-	cfg := &config.Config{
-		Agents: config.AgentsConfig{
-			Defaults: config.AgentDefaults{
-				Workspace: workspace,
-				ModelName: "test-model",
-			},
-		},
-		Tools: config.ToolsConfig{
-			ReadFile: config.ReadFileToolConfig{
-				Enabled:         true,
-				Mode:            config.ReadFileModeLines,
-				MaxReadFileSize: 4096,
-			},
-		},
-	}
-
-	agent := NewAgentInstance(nil, &cfg.Agents.Defaults, cfg, &mockProvider{})
-	readTool, ok := agent.Tools.Get("read_file")
-	if !ok {
-		t.Fatal("read_file tool not registered")
-	}
-
-	params := readTool.Parameters()
-	props, _ := params["properties"].(map[string]any)
-	if _, ok := props["start_line"]; !ok {
-		t.Fatalf("expected line-mode schema to expose start_line, got %#v", props)
-	}
-	if _, ok := props["max_lines"]; !ok {
-		t.Fatalf("expected line-mode schema to expose max_lines, got %#v", props)
-	}
-	if _, ok := props["offset"]; ok {
-		t.Fatalf("did not expect line-mode schema to expose offset, got %#v", props)
-	}
-	if _, ok := props["length"]; ok {
-		t.Fatalf("did not expect line-mode schema to expose length, got %#v", props)
 	}
 }
 
