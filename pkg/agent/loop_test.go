@@ -752,6 +752,46 @@ func newChatCompletionTestServer(
 	}))
 }
 
+func newStrictChatCompletionTestServer(
+	t *testing.T,
+	label string,
+	expectedModel string,
+	response string,
+	calls *int,
+) *httptest.Server {
+	t.Helper()
+
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/chat/completions" {
+			t.Fatalf("%s server path = %q, want /chat/completions", label, r.URL.Path)
+		}
+		*calls = *calls + 1
+		defer r.Body.Close()
+
+		var req struct {
+			Model string `json:"model"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("decode %s request: %v", label, err)
+		}
+		if req.Model != expectedModel {
+			t.Fatalf("%s server model = %q, want %q", label, req.Model, expectedModel)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(map[string]any{
+			"choices": []map[string]any{
+				{
+					"message":       map[string]any{"content": response},
+					"finish_reason": "stop",
+				},
+			},
+		}); err != nil {
+			t.Fatalf("encode %s response: %v", label, err)
+		}
+	}))
+}
+
 func (h testHelper) executeAndGetResponse(tb testing.TB, ctx context.Context, msg bus.InboundMessage) string {
 	// Use a short timeout to avoid hanging
 	timeoutCtx, cancel := context.WithTimeout(ctx, responseTimeout)
@@ -1173,6 +1213,262 @@ func TestProcessMessage_SwitchModelRoutesSubsequentRequestsToSelectedProvider(t 
 			remoteModel,
 			"deepseek/deepseek-v3.2",
 		)
+	}
+}
+
+func TestProcessMessage_ModelRoutingUsesLightProvider(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent-test-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	heavyCalls := 0
+	heavyServer := newStrictChatCompletionTestServer(
+		t,
+		"heavy",
+		"gemini-2.5-flash",
+		"heavy reply",
+		&heavyCalls,
+	)
+	defer heavyServer.Close()
+
+	lightCalls := 0
+	lightServer := newStrictChatCompletionTestServer(
+		t,
+		"light",
+		"qwen2.5:0.5b",
+		"light reply",
+		&lightCalls,
+	)
+	defer lightServer.Close()
+
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         tmpDir,
+				ModelName:         "gemini-main",
+				MaxTokens:         4096,
+				MaxToolIterations: 10,
+				Routing: &config.RoutingConfig{
+					Enabled:    true,
+					LightModel: "qwen-light",
+					Threshold:  0.99,
+				},
+			},
+		},
+		ModelList: []*config.ModelConfig{
+			{
+				ModelName: "gemini-main",
+				Model:     "gemini/gemini-2.5-flash",
+				APIBase:   heavyServer.URL,
+			},
+			{
+				ModelName: "qwen-light",
+				Model:     "ollama/qwen2.5:0.5b",
+				APIBase:   lightServer.URL,
+			},
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"gemini-main": {APIKeys: []string{"heavy-key"}},
+			"qwen-light":  {APIKeys: []string{"light-key"}},
+		},
+	})
+
+	msgBus := bus.NewMessageBus()
+	provider, _, err := providers.CreateProvider(cfg)
+	if err != nil {
+		t.Fatalf("CreateProvider() error = %v", err)
+	}
+	al := NewAgentLoop(cfg, msgBus, provider)
+	helper := testHelper{al: al}
+
+	resp := helper.executeAndGetResponse(t, context.Background(), bus.InboundMessage{
+		Channel:  "telegram",
+		SenderID: "user1",
+		ChatID:   "chat1",
+		Content:  "hi",
+		Peer: bus.Peer{
+			Kind: "direct",
+			ID:   "user1",
+		},
+	})
+	if resp != "light reply" {
+		t.Fatalf("response = %q, want %q", resp, "light reply")
+	}
+	if heavyCalls != 0 {
+		t.Fatalf("heavy calls = %d, want 0", heavyCalls)
+	}
+	if lightCalls != 1 {
+		t.Fatalf("light calls = %d, want 1", lightCalls)
+	}
+}
+
+// TestProcessMessage_FallbackUsesPerCandidateProvider is the loop-level test for
+// bug #2140. It verifies that when the primary model returns a rate-limit error
+// the fallback closure routes the retry to the fallback model's own provider
+// (its own api_base), not back to the primary provider's endpoint.
+func TestProcessMessage_FallbackUsesPerCandidateProvider(t *testing.T) {
+	workspace := t.TempDir()
+
+	primaryCalls := 0
+	primaryServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		primaryCalls++
+		// Return 429 so FallbackChain classifies this as retriable and moves on.
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"error": map[string]any{
+				"message": "rate limit exceeded",
+				"type":    "rate_limit_error",
+			},
+		})
+	}))
+	defer primaryServer.Close()
+
+	fallbackCalls := 0
+	fallbackServer := newStrictChatCompletionTestServer(
+		t, "fallback", "gemma-3-27b-it", "fallback reply", &fallbackCalls,
+	)
+	defer fallbackServer.Close()
+
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         workspace,
+				ModelName:         "mistral-primary",
+				ModelFallbacks:    []string{"gemma-fallback"},
+				MaxTokens:         4096,
+				MaxToolIterations: 3,
+			},
+		},
+		ModelList: []*config.ModelConfig{
+			{
+				ModelName: "mistral-primary",
+				Model:     "openrouter/mistralai/mistral-small-3.1",
+				APIBase:   primaryServer.URL,
+				Workspace: workspace,
+			},
+			{
+				ModelName: "gemma-fallback",
+				Model:     "gemini/gemma-3-27b-it",
+				APIBase:   fallbackServer.URL,
+				Workspace: workspace,
+			},
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"mistral-primary": {APIKeys: []string{"primary-key"}},
+			"gemma-fallback":  {APIKeys: []string{"fallback-key"}},
+		},
+	})
+
+	provider, _, err := providers.CreateProvider(cfg)
+	if err != nil {
+		t.Fatalf("CreateProvider() error = %v", err)
+	}
+	msgBus := bus.NewMessageBus()
+	al := NewAgentLoop(cfg, msgBus, provider)
+	helper := testHelper{al: al}
+
+	resp := helper.executeAndGetResponse(t, context.Background(), bus.InboundMessage{
+		Channel:  "telegram",
+		SenderID: "user1",
+		ChatID:   "chat1",
+		Content:  "hi",
+		Peer:     bus.Peer{Kind: "direct", ID: "user1"},
+	})
+
+	if resp != "fallback reply" {
+		t.Fatalf("response = %q, want %q (fallback provider)", resp, "fallback reply")
+	}
+	if primaryCalls == 0 {
+		t.Fatal("primary server was never called; expected at least one attempt")
+	}
+	if fallbackCalls != 1 {
+		t.Fatalf("fallback server calls = %d, want 1", fallbackCalls)
+	}
+}
+
+// TestProcessMessage_FallbackUsesActiveProviderWhenCandidateNotRegistered verifies
+// that when a candidate has no model_list entry it is absent from CandidateProviders
+// and the fallback closure falls back to activeProvider instead of panicking.
+func TestProcessMessage_FallbackUsesActiveProviderWhenCandidateNotRegistered(t *testing.T) {
+	workspace := t.TempDir()
+
+	// Primary server: returns 429 on first call, succeeds on second.
+	// Both the primary and the unregistered fallback share this server
+	// (same api_base) so activeProvider routes both calls here.
+	callCount := 0
+	primaryServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		w.Header().Set("Content-Type", "application/json")
+		if callCount == 1 {
+			w.WriteHeader(http.StatusTooManyRequests)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"error": map[string]any{"message": "rate limit", "type": "rate_limit_error"},
+			})
+			return
+		}
+		// Second call (fallback via activeProvider) succeeds.
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"choices": []map[string]any{
+				{"message": map[string]any{"content": "active provider reply"}, "finish_reason": "stop"},
+			},
+		})
+	}))
+	defer primaryServer.Close()
+
+	cfg := &config.Config{
+		Agents: config.AgentsConfig{
+			Defaults: config.AgentDefaults{
+				Workspace:         workspace,
+				ModelName:         "primary-model",
+				MaxTokens:         4096,
+				MaxToolIterations: 3,
+				// No model_list entry for this alias — absent from CandidateProviders.
+				ModelFallbacks: []string{"openrouter/fallback-model"},
+			},
+		},
+		ModelList: []*config.ModelConfig{
+			{
+				ModelName: "primary-model",
+				Model:     "openrouter/primary-model",
+				APIBase:   primaryServer.URL,
+				Workspace: workspace,
+			},
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{
+		ModelList: map[string]config.ModelSecurityEntry{
+			"primary-model": {APIKeys: []string{"primary-key"}},
+		},
+	})
+
+	provider, _, err := providers.CreateProvider(cfg)
+	if err != nil {
+		t.Fatalf("CreateProvider() error = %v", err)
+	}
+	msgBus := bus.NewMessageBus()
+	al := NewAgentLoop(cfg, msgBus, provider)
+
+	helper := testHelper{al: al}
+	resp := helper.executeAndGetResponse(t, context.Background(), bus.InboundMessage{
+		Channel:  "telegram",
+		SenderID: "user1",
+		ChatID:   "chat1",
+		Content:  "hi",
+		Peer:     bus.Peer{Kind: "direct", ID: "user1"},
+	})
+
+	if resp != "active provider reply" {
+		t.Fatalf("response = %q, want %q", resp, "active provider reply")
+	}
+	if callCount < 2 {
+		t.Fatalf("primary server calls = %d, want >= 2 (one 429 + one success via activeProvider)", callCount)
 	}
 }
 
